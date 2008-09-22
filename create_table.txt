@@ -1,0 +1,13 @@
+If you have mysql installed and mysqld running you can:
+
+Make new database (if needed) with command:
+  mysqladmin create <databasename>
+
+You can also use any existing database adding table 'ais':
+  mysql <databasename>  < create_table.sql
+  
+Or if you have specified username and password for your database:
+  mysql -u <username> -p <databasename>  < create_table.sql
+  
+ 
+

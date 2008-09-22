@@ -1,0 +1,8 @@
+mysql_host localhost
+mysql_db yourmysqldatabase
+mysql_user yourmysqlusername 
+mysql_password xxxx
+#mysql_keepsmall yes
+#mysql_oldlimit 800
+#serial_port /dev/ttyS0
+#skip_type 3

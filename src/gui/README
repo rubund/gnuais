@@ -1,0 +1,15 @@
+This is a graphical user environment in development. Far from finished yet.
+
+You can pipe NMEA sentences to a named pipe in /tmp/gnuaispipe.
+
+If you want your own map, you will need to make an image file called map.png, and a calibrate file called map.cbr.  The calibrate file contains:
+
+top-left-longitude
+top-left-latitude
+bottom-right-longitude
+bottom-right-latitude
+
+
+See examples (map.cbr) in this folder if you are unsure.
+
+

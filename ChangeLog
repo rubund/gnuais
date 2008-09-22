@@ -1,0 +1,22 @@
+0.0.7:	GNURadio can decode positions south of equator + minor other fixes
+
+0.0.6:
+	Added GUI which is in development. A lot of work to do yet.. There
+	have also been made some minor fixes. For example the configure script
+	now checks for alsa and gtk.
+
+0.0.5:
+	Some fixes
+
+0.0.4:
+	Added NMEA-sentences for outputting to third-party map software (Thanks to Sakari Nylund). 
+	There have also been made some bug-fixes, and different details here and
+	there, have been changed.
+
+0.0.3:
+	Translated all code from C++ to C. Using Alsa instead of OSS. Using
+	only one thread now. It seemed to be unnecessary to have one
+	extra thread for sound input.
+
+0.0.2:
+	MySQL-functionality and config file (/etc/gnuais.conf)

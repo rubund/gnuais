@@ -1,0 +1,20 @@
+
+
+If you want to save to a mysql database you will have to make a file called gnuais.conf
+in your /etc-folder.
+An example can be found in this folder (gnuais.conf-example).
+You will also have to create a table in the database:
+
+
+Make new database (if needed) with command:
+  mysqladmin create <databasename>
+
+You can also use any existing database adding table 'ais':
+  mysql <databasename>  < create_table.sql
+  
+Or if you have specified username and password for your database:
+  mysql -u <username> -p <databasename>  < create_table.sql
+  
+ 
+
+The file create_table.sql can be found in this folder.
