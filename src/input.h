@@ -7,8 +7,8 @@
 
 
 
-int input_initialize(snd_pcm_t *handle, short **, int*);
-void input_read(snd_pcm_t *handle, short *buffer, int count);
-void input_cleanup(snd_pcm_t *handle);
+int input_initialize(snd_pcm_t * handle, short **, int *);
+void input_read(snd_pcm_t * handle, short *buffer, int count);
+void input_cleanup(snd_pcm_t * handle);
 
 #endif
