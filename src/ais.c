@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
 	protodec_initialize(&demod_state, &mysql_data);
 
-	if ((err = snd_pcm_open(&handle, "hw:2,0", SND_PCM_STREAM_CAPTURE, 0)) < 0) {
+	if ((err = snd_pcm_open(&handle, "default", SND_PCM_STREAM_CAPTURE, 0)) < 0) {
 		fprintf(stderr, "Error opening sound device\n");
 		return -1;
 	}
