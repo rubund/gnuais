@@ -63,7 +63,7 @@ extern char *mysql_host;
 extern char *mysql_db;
 extern char *mysql_user;
 extern char *mysql_password;
-extern char *mysql_keepsmall;
+extern int mysql_keepsmall;
 extern char *mysql_oldlimit;
 
 struct uplink_config_t {

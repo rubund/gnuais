@@ -79,6 +79,23 @@ int do_int(int *dest, int argc, char **argv)
 	return 0;
 }
 
+int do_toggle(int *dest, int argc, char **argv)
+{
+	if (argc < 2)
+		return -1;
+		
+	if (
+		strcasecmp(argv[1], "true") == 0
+		|| strcasecmp(argv[1], "on") == 0
+		|| strcasecmp(argv[1], "1") == 0
+		|| strcasecmp(argv[1], "enable") == 0
+		|| strcasecmp(argv[1], "enabled") == 0
+		)
+			return 1;
+	
+	return 0;
+}
+
  /* ***************************************************************** */
 
 /*

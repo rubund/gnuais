@@ -63,7 +63,7 @@ char *mysql_host, *new_mysql_host;
 char *mysql_db, *new_mysql_db;
 char *mysql_user, *new_mysql_user;
 char *mysql_password, *new_mysql_password;
-char *mysql_keepsmall, *new_mysql_keepsmall;
+int mysql_keepsmall, new_mysql_keepsmall;
 char *mysql_oldlimit, *new_mysql_oldlimit;
 
 char *serial_port, *new_serial_port;
@@ -98,7 +98,7 @@ static struct cfgcmd cfg_cmds[] = {
 	{ "mysql_db",		_CFUNC_ do_string,	&new_mysql_db		},
 	{ "mysql_user",		_CFUNC_ do_string,	&new_mysql_user		},
 	{ "mysql_password",	_CFUNC_ do_string,	&new_mysql_password	},
-	{ "mysql_keepsmall",	_CFUNC_ do_string,	&new_mysql_keepsmall	},
+	{ "mysql_keepsmall",	_CFUNC_ do_toggle,	&new_mysql_keepsmall	},
 	{ "mysql_oldlimit",	_CFUNC_ do_string,	&new_mysql_oldlimit	},
 	
 	{ "sounddevice",	_CFUNC_ do_string,	&new_sound_device	},

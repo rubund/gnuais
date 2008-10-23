@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 #ifdef HAVE_MYSQL
 	if (mysql_db) {
 		hlog(LOG_DEBUG, "Saving to MySQL database \"%s\"", mysql_db);
-		if (strcmp(mysql_keepsmall, "yes") == 0 || strcmp(mysql_keepsmall, "YES") == 0)
+		if (mysql_keepsmall)
 			hlog(LOG_DEBUG, "Updating database rows only.");
 		else
 			hlog(LOG_DEBUG, "Inserting data to database.");

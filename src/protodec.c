@@ -18,12 +18,7 @@ void protodec_initialize(struct demod_state_t *d)
 
 #ifdef HAVE_MYSQL
 
-	if ((mysql_keepsmall) && (strcmp(mysql_keepsmall, "yes") == 0
-	    || strcmp(mysql_keepsmall, "YES") == 0)) {
-		d->keepsmall = 1;
-	} else {
-		d->keepsmall = 0;
-	}
+	d->keepsmall = mysql_keepsmall;
 
 	if (mysql_oldlimit) {
 		d->oldlimit = atoi(mysql_oldlimit);
@@ -49,6 +44,7 @@ void protodec_initialize(struct demod_state_t *d)
 
 	}
 #endif
+
 	if (serial_port) {
 		DBG(printf("Serial device is %s ,", serial_port));
 		
@@ -89,7 +85,6 @@ void protodec_initialize(struct demod_state_t *d)
 		d->my_fd = -1;
 	d->seqnr = 0;
 	d->serbuffer[0] = 0;
-
 }
 
 
@@ -323,7 +318,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		}
 		break;
 	case 2:
-		if (d->skip_type[1] == 0) {
+		if (d->skip_type[2] == 0) {
 			longitude = protodec_henten(61, 28, d->rbuffer);
 			if (((longitude >> 27) & 1) == 1)
 				longitude |= 0xF0000000;
@@ -367,7 +362,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		}
 		break;
 	case 3:
-		if (d->skip_type[1] == 0) {
+		if (d->skip_type[3] == 0) {
 			longitude = protodec_henten(61, 28, d->rbuffer);
 			if (((longitude >> 27) & 1) == 1)
 				longitude |= 0xF0000000;
