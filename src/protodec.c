@@ -276,82 +276,79 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	d->seqnr++;
 	if (d->seqnr > 9)
 		d->seqnr = 0;
-
-
-	printf("(%d):  ", cntr);
+	
+	if (type < 0 || type > MAX_AIS_PACKET_TYPE)
+		return; // unsupported packet type
+		
+	if (skip_type[type])
+		return; // ignored by configuration
+	
+	printf("(cntr %d type %d): ", cntr, type);
 	switch (type) {
 	case 1:
-		if (skip_type[1] == 0) {
-			longitude = protodec_henten(61, 28, d->rbuffer);
-			if (((longitude >> 27) & 1) == 1)
-				longitude |= 0xF0000000;
-			latitude = protodec_henten(38 + 22 + 29, 27, d->rbuffer);
-			if (((latitude >> 26) & 1) == 1)
-				latitude |= 0xf8000000;
-			coarse = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
-			sog = protodec_henten(50, 10, d->rbuffer);
-			rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
-			underway = protodec_henten(38, 2, d->rbuffer);
-			heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
-			printf("%d:  %09d %10f %10f %5f %5f %5i %5d %5d",
-			       type, mmsi, (float) latitude / 600000,
-			       (float) longitude / 600000,
-			       (float) coarse / 10, (float) sog / 10,
-			       rateofturn, underway, heading);
-			printf("  ( !%s )\r\n", nmea);
+		longitude = protodec_henten(61, 28, d->rbuffer);
+		if (((longitude >> 27) & 1) == 1)
+			longitude |= 0xF0000000;
+		latitude = protodec_henten(38 + 22 + 29, 27, d->rbuffer);
+		if (((latitude >> 26) & 1) == 1)
+			latitude |= 0xf8000000;
+		coarse = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
+		sog = protodec_henten(50, 10, d->rbuffer);
+		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
+		underway = protodec_henten(38, 2, d->rbuffer);
+		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
+		printf("%09d %10f %10f %5f %5f %5i %5d %5d",
+			mmsi, (float) latitude / 600000,
+			(float) longitude / 600000,
+			(float) coarse / 10, (float) sog / 10,
+			rateofturn, underway, heading);
+		printf("  ( !%s )", nmea);
 #ifdef HAVE_MYSQL
-			snprintf(sqlquery, MAX_SQL_LEN,
+		snprintf(sqlquery, MAX_SQL_LEN,
 				"insert into ais_position (time,mmsi,latitude,longitude,heading,coarse,speed) values (%d,%d,%.7f,%.7f,%.5f,%f,%f)",
 				(int) tid, (int) mmsi,
 				(float) latitude / 600000,
 				(float) longitude / 600000,
 				(float) heading, (float) coarse / 10,
 				(float) sog / 10);
-
-			snprintf(sqlquery2, MAX_SQL_LEN,
+		
+		snprintf(sqlquery2, MAX_SQL_LEN,
 				"update ais_position set time=%d, latitude=%.7f,longitude=%.7f,heading=%f,coarse=%.5f,speed=%f where mmsi=%d",
 				(int) tid, (float) latitude / 600000,
 				(float) longitude / 600000,
 				(float) heading, (float) coarse / 10,
 				(float) sog / 10, (int) mmsi);
 #endif
-		}
 		break;
+		
 	case 2:
-		if (skip_type[2] == 0) {
-			longitude = protodec_henten(61, 28, d->rbuffer);
-			if (((longitude >> 27) & 1) == 1)
-				longitude |= 0xF0000000;
-			latitude =
-			    protodec_henten(38 + 22 + 29, 27, d->rbuffer);
-			if (((latitude >> 26) & 1) == 1)
-				latitude |= 0xf8000000;
-			coarse =
-			    protodec_henten(38 + 22 + 28 + 28, 12,
-					    d->rbuffer);
-			sog = protodec_henten(50, 10, d->rbuffer);
-			rateofturn =
-			    protodec_henten(38 + 2, 8, d->rbuffer);
-			underway = protodec_henten(38, 2, d->rbuffer);
-			heading =
-			    protodec_henten(38 + 22 + 28 + 28 + 12, 9,
-					    d->rbuffer);
-			printf("%d:  %09d %10f %10f %5f %5f %5i %5d %5d",
-			       type, mmsi, (float) latitude / 600000,
-			       (float) longitude / 600000,
-			       (float) coarse / 10, (float) sog / 10,
-			       rateofturn, underway, heading);
-			printf("  ( !%s )\r\n", nmea);
+		longitude = protodec_henten(61, 28, d->rbuffer);
+		if (((longitude >> 27) & 1) == 1)
+			longitude |= 0xF0000000;
+		latitude = protodec_henten(38 + 22 + 29, 27, d->rbuffer);
+		if (((latitude >> 26) & 1) == 1)
+			latitude |= 0xf8000000;
+		coarse = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
+		sog = protodec_henten(50, 10, d->rbuffer);
+		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
+		underway = protodec_henten(38, 2, d->rbuffer);
+		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
+		printf("%09d %10f %10f %5f %5f %5i %5d %5d",
+			mmsi, (float) latitude / 600000,
+			(float) longitude / 600000,
+			(float) coarse / 10, (float) sog / 10,
+			rateofturn, underway, heading);
+		printf("  ( !%s )", nmea);
 #ifdef HAVE_MYSQL
-			snprintf(sqlquery, MAX_SQL_LEN,
+		snprintf(sqlquery, MAX_SQL_LEN,
 				"insert into ais_position (time,mmsi,latitude,longitude,heading,coarse,speed) values (%d,%d,%.7f,%.7f,%.5f,%f,%f)",
 				(int) tid, (int) mmsi,
 				(float) latitude / 600000,
 				(float) longitude / 600000,
 				(float) heading, (float) coarse / 10,
 				(float) sog / 10);
-
-			snprintf(sqlquery2, MAX_SQL_LEN,
+		
+		snprintf(sqlquery2, MAX_SQL_LEN,
 				"update ais_position set time=%d, latitude=%.7f,longitude=%.7f,heading=%f,coarse=%.5f,speed=%f where mmsi=%d",
 				(int) tid, (float) latitude / 600000,
 				(float) longitude / 600000,
@@ -359,147 +356,130 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 				(float) sog / 10, (int) mmsi);
 
 #endif
-		}
 		break;
+		
 	case 3:
-		if (skip_type[3] == 0) {
-			longitude = protodec_henten(61, 28, d->rbuffer);
-			if (((longitude >> 27) & 1) == 1)
-				longitude |= 0xF0000000;
-			latitude =
-			    protodec_henten(38 + 22 + 29, 27, d->rbuffer);
-			if (((latitude >> 26) & 1) == 1)
-				latitude |= 0xf8000000;
-			coarse =
-			    protodec_henten(38 + 22 + 28 + 28, 12,
-					    d->rbuffer);
-			sog = protodec_henten(50, 10, d->rbuffer);
-			rateofturn =
-			    protodec_henten(38 + 2, 8, d->rbuffer);
-			underway = protodec_henten(38, 2, d->rbuffer);
-			heading =
-			    protodec_henten(38 + 22 + 28 + 28 + 12, 9,
-					    d->rbuffer);
-			printf("%d:  %09d %10f %10f %5f %5f %5i %5d %5d",
-			       type, mmsi, (float) latitude / 600000,
-			       (float) longitude / 600000,
-			       (float) coarse / 10, (float) sog / 10,
-			       rateofturn, underway, heading);
-			printf("  ( !%s )\r\n", nmea);
+		longitude = protodec_henten(61, 28, d->rbuffer);
+		if (((longitude >> 27) & 1) == 1)
+			longitude |= 0xF0000000;
+		latitude = protodec_henten(38 + 22 + 29, 27, d->rbuffer);
+		if (((latitude >> 26) & 1) == 1)
+			latitude |= 0xf8000000;
+		coarse = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
+		sog = protodec_henten(50, 10, d->rbuffer);
+		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
+		underway = protodec_henten(38, 2, d->rbuffer);
+		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
+		printf("%09d %10f %10f %5f %5f %5i %5d %5d",
+			mmsi, (float) latitude / 600000,
+			(float) longitude / 600000,
+			(float) coarse / 10, (float) sog / 10,
+			rateofturn, underway, heading);
+		printf("  ( !%s )", nmea);
 #ifdef HAVE_MYSQL
-			snprintf(sqlquery, MAX_SQL_LEN,
+		snprintf(sqlquery, MAX_SQL_LEN,
 				"insert into ais_position (time,mmsi,latitude,longitude,heading,coarse,speed) values (%d,%d,%.7f,%.7f,%.5f,%f,%f)",
 				(int) tid, (int) mmsi,
 				(float) latitude / 600000,
 				(float) longitude / 600000,
 				(float) heading, (float) coarse / 10,
 				(float) sog / 10);
-
-			snprintf(sqlquery2, MAX_SQL_LEN,
+		
+		snprintf(sqlquery2, MAX_SQL_LEN,
 				"update ais_position set time=%d, latitude=%.7f,longitude=%.7f,heading=%f,coarse=%.5f,speed=%f where mmsi=%d",
 				(int) tid, (float) latitude / 600000,
 				(float) longitude / 600000,
 				(float) heading, (float) coarse / 10,
 				(float) sog / 10, (int) mmsi);
 #endif
-		}
 		break;
+		
 	case 4:
-		if (skip_type[4] == 0) {
-			year = protodec_henten(40, 12, d->rbuffer);
-			month = protodec_henten(52, 4, d->rbuffer);
-			day = protodec_henten(56, 5, d->rbuffer);
-			hour = protodec_henten(61, 5, d->rbuffer);
-			minute = protodec_henten(66, 6, d->rbuffer);
-			second = protodec_henten(72, 6, d->rbuffer);
-			longitude = protodec_henten(79, 28, d->rbuffer);
-			if (((longitude >> 27) & 1) == 1)
-				longitude |= 0xF0000000;
-			longit = ((float) longitude) / 10000 / 60;
-			latitude = protodec_henten(107, 27, d->rbuffer);
-			if (((latitude >> 26) & 1) == 1)
-				latitude |= 0xf8000000;
-			latit = ((float) latitude) / 10000 / 60;
-			printf("%d:  %09d %d %d %d %d %d %d %f %f", type,
-			       mmsi, year, month, day, hour, minute,
-			       second, latit, longit);
-			printf("  ( !%s )\r\n", nmea);
+		year = protodec_henten(40, 12, d->rbuffer);
+		month = protodec_henten(52, 4, d->rbuffer);
+		day = protodec_henten(56, 5, d->rbuffer);
+		hour = protodec_henten(61, 5, d->rbuffer);
+		minute = protodec_henten(66, 6, d->rbuffer);
+		second = protodec_henten(72, 6, d->rbuffer);
+		longitude = protodec_henten(79, 28, d->rbuffer);
+		if (((longitude >> 27) & 1) == 1)
+			longitude |= 0xF0000000;
+		longit = ((float) longitude) / 10000 / 60;
+		latitude = protodec_henten(107, 27, d->rbuffer);
+		if (((latitude >> 26) & 1) == 1)
+			latitude |= 0xf8000000;
+		latit = ((float) latitude) / 10000 / 60;
+		printf("%09d %d %d %d %d %d %d %f %f",
+			mmsi, year, month, day, hour, minute,
+			second, latit, longit);
+		printf("  ( !%s )", nmea);
 #ifdef HAVE_MYSQL
-			snprintf(sqlquery, MAX_SQL_LEN,
+		snprintf(sqlquery, MAX_SQL_LEN,
 				"insert into ais_basestation (time,mmsi,longitude,latitude) values (%d,%d,%.7f,%.7f)",
 				(int) tid, (int) mmsi,
 				(float) latitude / 600000,
 				(float) longitude / 600000);
-
-			snprintf(sqlquery2, MAX_SQL_LEN,
+		
+		snprintf(sqlquery2, MAX_SQL_LEN,
 				"update ais_basestation set time=%d,latitude=%.7f,longitude=%.7f where mmsi=%d",
 				(int) tid, (float) latitude / 600000,
 				(float) longitude / 600000, (int) mmsi);
-
-
-#endif			 /*MYSQL*/
-		}
+#endif /*MYSQL*/
 		break;
+		
 	case 5:
-		if (skip_type[5] == 0) {
-			hvor = 112;
-			for (k = 0; k < 20; k++) {
-				letter =
-				    protodec_henten(hvor, 6, d->rbuffer);
-				protodec_bokstavtabell(letter, name, k);
-				hvor += 6;
-			}
-			name[20] = 0;
-//      printf("Name: %s\n", name);
-			hvor = 120 + 106 + 68 + 8;
-			for (k = 0; k < 20; k++) {
-				letter =
-				    protodec_henten(hvor, 6, d->rbuffer);
-				protodec_bokstavtabell(letter, destination,
-						       k);
-				hvor += 6;
-			}
-			destination[20] = 0;
-//      printf("Destination: %s\n",destination);
-			A = protodec_henten(240, 9, d->rbuffer);
-			B = protodec_henten(240 + 9, 9, d->rbuffer);
-			C = protodec_henten(240 + 9 + 9, 6, d->rbuffer);
-			D = protodec_henten(240 + 9 + 9 + 6, 6,
-					    d->rbuffer);
-			height = protodec_henten(294, 8, d->rbuffer);
-//      printf("Length: %d\nWidth: %d\nHeight: %f\n",A+B,C+D,(float)height/10);
-			printf("%d:  %09d %s %s %d %d %f", type, mmsi,
-			       name, destination, A + B, C + D,
-			       (float) height / 10);
-			printf("  ( !%s )\r\n", nmea);
+		hvor = 112;
+		for (k = 0; k < 20; k++) {
+			letter = protodec_henten(hvor, 6, d->rbuffer);
+			protodec_bokstavtabell(letter, name, k);
+			hvor += 6;
+		}
+		name[20] = 0;
+		// printf("Name: %s\n", name);
+		hvor = 120 + 106 + 68 + 8;
+		for (k = 0; k < 20; k++) {
+			letter = protodec_henten(hvor, 6, d->rbuffer);
+			protodec_bokstavtabell(letter, destination, k);
+			hvor += 6;
+		}
+		destination[20] = 0;
+		// printf("Destination: %s\n",destination);
+		A = protodec_henten(240, 9, d->rbuffer);
+		B = protodec_henten(240 + 9, 9, d->rbuffer);
+		C = protodec_henten(240 + 9 + 9, 6, d->rbuffer);
+		D = protodec_henten(240 + 9 + 9 + 6, 6, d->rbuffer);
+		height = protodec_henten(294, 8, d->rbuffer);
+		// printf("Length: %d\nWidth: %d\nHeight: %f\n",A+B,C+D,(float)height/10);
+		printf("%09d %s %s %d %d %f", mmsi,
+			name, destination, A + B, C + D,
+			(float) height / 10);
+		printf("  ( !%s )", nmea);
+		
 #ifdef HAVE_MYSQL
-
-			snprintf(sqlquery, MAX_SQL_LEN,
+		snprintf(sqlquery, MAX_SQL_LEN,
 				"insert into ais_vesseldata (time,mmsi,name,destination,height,A,B,C,D) values (%d,%d,\"%s\",\"%s\",%f,%d,%d,%d,%d)",
 				(int) tid, (int) mmsi, name, destination,
 				(float) height / 10, (int) A, (int) B,
 				(int) C, (int) D);
-
-			snprintf(sqlquery2, MAX_SQL_LEN,
+				
+		snprintf(sqlquery2, MAX_SQL_LEN,
 				"update ais_vesseldata set time=%d, name=\"%s\",destination=\"%s\",A=%d,B=%d,C=%d,D=%d,height=%f where mmsi=%d",
 				(int) tid, name, destination, (int) A,
 				(int) B, (int) C, (int) D,
 				(float) height / 10, (int) mmsi);
 
 #endif
-		}
-
 		break;
+		
 	default:
-		return;
 		break;
-
 	}
-//      std::cout << sqlquery.str() << "\n";
+	printf("\n");
+	
 #ifdef HAVE_MYSQL
 	DBG(printf("%s\n", sqlquery));
 	
-	if (d->enable_mysql && skip_type[type] == 0) {
+	if (d->enable_mysql) {
 		if (d->keepsmall) {
 			DBG(printf("Trying to update MySql..."));
 			if (mysql_query(&d->conn, sqlquery2)) {	//try update data
