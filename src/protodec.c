@@ -4,11 +4,12 @@
 #include "protodec.h"
 #include "ais.h"
 
+#include "cfg.h"
 
 
-void protodec_initialize(struct demod_state_t *d, struct mysql_data_t *m)
+
+void protodec_initialize(struct demod_state_t *d)
 {
-
 	d->receivedframes = 0;
 	d->lostframes = 0;
 	d->lostframes2 = 0;
@@ -17,20 +18,20 @@ void protodec_initialize(struct demod_state_t *d, struct mysql_data_t *m)
 
 #ifdef HAVE_MYSQL
 
-	if (strcmp(m->mysql_keepsmall, "yes") == 0
-	    || strcmp(m->mysql_keepsmall, "YES") == 0) {
+	if ((mysql_keepsmall) && (strcmp(mysql_keepsmall, "yes") == 0
+	    || strcmp(mysql_keepsmall, "YES") == 0)) {
 		d->keepsmall = 1;
 	} else {
 		d->keepsmall = 0;
 	}
 
-	if (m->mysql_oldlimit[0] != 0) {
-		d->oldlimit = atoi(m->mysql_oldlimit);
+	if (mysql_oldlimit) {
+		d->oldlimit = atoi(mysql_oldlimit);
 	} else {
 		d->oldlimit = 0;
 	}
 
-	if (m->mysql_dbname[0] != 0)
+	if (mysql_db)
 		d->enable_mysql = 1;
 	else
 		d->enable_mysql = 0;
@@ -41,19 +42,19 @@ void protodec_initialize(struct demod_state_t *d, struct mysql_data_t *m)
 			exit(-1);
 		}
 		//printf("Host: %s\nDB: %s\nuser: %s\npassword: %s\ntable: %s\n",mysql_host,mysql_dbname,mysql_username,mysql_password,mysql_table);
-		if (!mysql_real_connect(&d->conn, m->mysql_host, m->mysql_username, m->mysql_password, m->mysql_dbname, 0, NULL, 0)) {
+		if (!mysql_real_connect(&d->conn, mysql_host, mysql_user, mysql_password, mysql_db, 0, NULL, 0)) {
 			fprintf(stderr, "Error opening mysql connection\n");
 			exit(-1);
 		}
 
 	}
 #endif
-	if (m->serial_port[0] != 0) {
-		DBG(printf("Serial device is %s ,", m->serial_port));
+	if (serial_port) {
+		DBG(printf("Serial device is %s ,", serial_port));
 		
 		//Returns the file descriptor on success or -1 on error.
 		/* File descriptor for the port */
-		d->my_fd = open(m->serial_port, O_RDWR | O_NOCTTY | O_NDELAY);
+		d->my_fd = open(serial_port, O_RDWR | O_NOCTTY | O_NDELAY);
 		if (d->my_fd == -1) {	// Could not open the port.
 			perror("open_port: Unable to open serial port");
 		} else {
@@ -110,9 +111,10 @@ void protodec_reset(struct demod_state_t *d)
 void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 {
 #ifdef HAVE_MYSQL
-	static char sqlquery[2000];
-	static char sqlquery2[2000];
-	static char sqlquery3[100];
+#define MAX_SQL_LEN 2000
+	static char sqlquery[MAX_SQL_LEN];
+	static char sqlquery2[MAX_SQL_LEN];
+	static char sqlquery3[MAX_SQL_LEN];
 	int qrows;
 #endif
 	unsigned char type = protodec_henten(0, 6, d->rbuffer);
@@ -261,7 +263,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		DBG(printf("End of nmea->ascii-loop with sentences:%d sentencenum:%d\n",
 			sentences, sentencenum));
 #ifdef HAVE_MYSQL
-		sprintf(sqlquery,
+		snprintf(sqlquery, MAX_SQL_LEN,
 			"insert into ais_nmea (time, message) values (%d,\"!%s\")",
 			(int) tid, nmea);
 		if (d->enable_mysql) {
@@ -303,7 +305,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			       rateofturn, underway, heading);
 			printf("  ( !%s )\r\n", nmea);
 #ifdef HAVE_MYSQL
-			sprintf(sqlquery,
+			snprintf(sqlquery, MAX_SQL_LEN,
 				"insert into ais_position (time,mmsi,latitude,longitude,heading,coarse,speed) values (%d,%d,%.7f,%.7f,%.5f,%f,%f)",
 				(int) tid, (int) mmsi,
 				(float) latitude / 600000,
@@ -311,7 +313,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 				(float) heading, (float) coarse / 10,
 				(float) sog / 10);
 
-			sprintf(sqlquery2,
+			snprintf(sqlquery2, MAX_SQL_LEN,
 				"update ais_position set time=%d, latitude=%.7f,longitude=%.7f,heading=%f,coarse=%.5f,speed=%f where mmsi=%d",
 				(int) tid, (float) latitude / 600000,
 				(float) longitude / 600000,
@@ -346,7 +348,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			       rateofturn, underway, heading);
 			printf("  ( !%s )\r\n", nmea);
 #ifdef HAVE_MYSQL
-			sprintf(sqlquery,
+			snprintf(sqlquery, MAX_SQL_LEN,
 				"insert into ais_position (time,mmsi,latitude,longitude,heading,coarse,speed) values (%d,%d,%.7f,%.7f,%.5f,%f,%f)",
 				(int) tid, (int) mmsi,
 				(float) latitude / 600000,
@@ -354,7 +356,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 				(float) heading, (float) coarse / 10,
 				(float) sog / 10);
 
-			sprintf(sqlquery2,
+			snprintf(sqlquery2, MAX_SQL_LEN,
 				"update ais_position set time=%d, latitude=%.7f,longitude=%.7f,heading=%f,coarse=%.5f,speed=%f where mmsi=%d",
 				(int) tid, (float) latitude / 600000,
 				(float) longitude / 600000,
@@ -390,7 +392,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			       rateofturn, underway, heading);
 			printf("  ( !%s )\r\n", nmea);
 #ifdef HAVE_MYSQL
-			sprintf(sqlquery,
+			snprintf(sqlquery, MAX_SQL_LEN,
 				"insert into ais_position (time,mmsi,latitude,longitude,heading,coarse,speed) values (%d,%d,%.7f,%.7f,%.5f,%f,%f)",
 				(int) tid, (int) mmsi,
 				(float) latitude / 600000,
@@ -398,7 +400,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 				(float) heading, (float) coarse / 10,
 				(float) sog / 10);
 
-			sprintf(sqlquery2,
+			snprintf(sqlquery2, MAX_SQL_LEN,
 				"update ais_position set time=%d, latitude=%.7f,longitude=%.7f,heading=%f,coarse=%.5f,speed=%f where mmsi=%d",
 				(int) tid, (float) latitude / 600000,
 				(float) longitude / 600000,
@@ -428,13 +430,13 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			       second, latit, longit);
 			printf("  ( !%s )\r\n", nmea);
 #ifdef HAVE_MYSQL
-			sprintf(sqlquery,
+			snprintf(sqlquery, MAX_SQL_LEN,
 				"insert into ais_basestation (time,mmsi,longitude,latitude) values (%d,%d,%.7f,%.7f)",
 				(int) tid, (int) mmsi,
 				(float) latitude / 600000,
 				(float) longitude / 600000);
 
-			sprintf(sqlquery2,
+			snprintf(sqlquery2, MAX_SQL_LEN,
 				"update ais_basestation set time=%d,latitude=%.7f,longitude=%.7f where mmsi=%d",
 				(int) tid, (float) latitude / 600000,
 				(float) longitude / 600000, (int) mmsi);
@@ -477,13 +479,13 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			printf("  ( !%s )\r\n", nmea);
 #ifdef HAVE_MYSQL
 
-			sprintf(sqlquery,
+			snprintf(sqlquery, MAX_SQL_LEN,
 				"insert into ais_vesseldata (time,mmsi,name,destination,height,A,B,C,D) values (%d,%d,\"%s\",\"%s\",%f,%d,%d,%d,%d)",
 				(int) tid, (int) mmsi, name, destination,
 				(float) height / 10, (int) A, (int) B,
 				(int) C, (int) D);
 
-			sprintf(sqlquery2,
+			snprintf(sqlquery2, MAX_SQL_LEN,
 				"update ais_vesseldata set time=%d, name=\"%s\",destination=\"%s\",A=%d,B=%d,C=%d,D=%d,height=%f where mmsi=%d",
 				(int) tid, name, destination, (int) A,
 				(int) B, (int) C, (int) D,
@@ -542,7 +544,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 
 // delete too old entries;
 		if (d->oldlimit > 0) {
-			sprintf(sqlquery3,
+			snprintf(sqlquery3, MAX_SQL_LEN,
 				"delete from ais_position where time<%d",
 				(int) tid - d->oldlimit);
 			DBG(printf("%s     Time now:%d\n", sqlquery3, (int) tid));
@@ -773,3 +775,4 @@ int protodec_calculate_crc(int lengde, struct demod_state_t *d)
 	free(data);
 	return (crc == 0x0f47);
 }
+

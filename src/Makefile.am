@@ -1,15 +1,12 @@
 
-bin_PROGRAMS = gnuais gnuaisfromfile gnuaissavesoundtofile
+bin_PROGRAMS = gnuais gnuaissavesoundtofile
 
-gnuais_SOURCES = ais.c input.c signalin.c protodec.c
+gnuais_SOURCES = ais.c input.c signalin.c protodec.c cfgfile.c hmalloc.c cfg.c hlog.c rwlock.c
 gnuais_LDFLAGS = -pthread -lm -lasound  @mysqleller@
 
-gnuaisfromfile_SOURCES = aisfromfile.c signalin.c protodec.c
-gnuaisfromfile_LDFLAGS = -pthread -lm  @mysqleller@
-
-gnuaissavesoundtofile_SOURCES = savetofile.c input.c 
+gnuaissavesoundtofile_SOURCES = savetofile.c input.c hmalloc.c hlog.c rwlock.c
 gnuaissavesoundtofile_LDFLAGS = -pthread -lm -lasound 
-EXTRA_DIST = input.h signalin.h protodec.h ais.h
+EXTRA_DIST = input.h signalin.h protodec.h ais.h cfgfile.h hmalloc.h cfg.h hlog.h rwlock.h
 
 SUBDIRS = @buildgui@
 DIST_SUBDIRS = gui

@@ -11,8 +11,11 @@
 #include "signalin.h"
 #include "protodec.h"
 
+#include "hmalloc.h"
+#include "hlog.h"
+#include "cfg.h"
 
-void parse_configfile(struct mysql_data_t *, struct demod_state_t *);
+#include "config.h"
 
 int done;
 long int cntr;
@@ -27,157 +30,124 @@ int main(int argc, char *argv[])
 	int err, i;
 	done = 0;
 	snd_pcm_t *handle;
+	FILE *sound_fd = NULL;
 	short *buffer;
 	int buffer_l;
 	float *buff_f, *buff_fs;
 	char *buff_b;
 	char lastbit = 0;
-	struct mysql_data_t mysql_data;
 	struct demod_state_t demod_state;
 
-	parse_configfile(&mysql_data, &demod_state);
+	/* command line */
+	parse_cmdline(argc, argv);
+	
+	/* open syslog, write an initial log message and read configuration */
+	open_log(logname, 0);
+	hlog(LOG_NOTICE, "Starting up...");
+	if (read_config()) {
+		hlog(LOG_CRIT, "Initial configuration failed.");
+		exit(1);
+	}
+	
+	/* fork a daemon */
+	if (fork_a_daemon) {
+		int i = fork();
+		if (i < 0) {
+			hlog(LOG_CRIT, "Fork to background failed: %s", strerror(errno));
+			fprintf(stderr, "Fork to background failed: %s\n", strerror(errno));
+			exit(1);
+		} else if (i == 0) {
+			/* child */
+		} else {
+			/* parent, quitting */
+			hlog(LOG_DEBUG, "Forked daemon process %d, parent quitting", i);
+			exit(0);
+		}
+	}
+	
+	/* write pid file, now that we have our final pid... might fail, which is critical */
+	if (!writepid(pidfile))
+		exit(1);
+	
+	memset(demod_state.skip_type, 0, sizeof(demod_state.skip_type));
 	signal(SIGINT, closedown);
 
-	protodec_initialize(&demod_state, &mysql_data);
+	protodec_initialize(&demod_state);
 
-	if ((err = snd_pcm_open(&handle, "default", SND_PCM_STREAM_CAPTURE, 0)) < 0) {
-		fprintf(stderr, "Error opening sound device\n");
+	if (sound_device) {
+		if ((err = snd_pcm_open(&handle, sound_device, SND_PCM_STREAM_CAPTURE, 0)) < 0) {
+			hlog(LOG_CRIT, "Error opening sound device (%s)", sound_device);
+			return -1;
+		}
+		
+		if (input_initialize(handle, &buffer, &buffer_l) < 0)
+			return -1;
+	} else if (sound_file) {
+		if ((sound_fd = fopen(sound_file, "r")) == NULL) {
+			hlog(LOG_CRIT, "Could not open sound file");
+			return -1;
+		}
+		buffer_l = 1024;
+		int extra = buffer_l % 5;
+		buffer_l -= extra;
+		buffer = (short *) hmalloc((buffer_l) * sizeof(short));
+	} else {
+		hlog(LOG_CRIT, "Neither sound device or sound file configured.");
 		return -1;
 	}
-
-	if (input_initialize(handle, &buffer, &buffer_l) < 0) {
-		return -1;
-	}
-	buff_f = (float *) malloc(sizeof(float) * buffer_l);
-	if (buff_f == NULL) {
-		fprintf(stderr, "Error allocating memory\n");
-		return -1;
-	}
-	buff_fs = (float *) malloc(sizeof(float) * buffer_l / 5);
-	if (buff_fs == NULL) {
-		fprintf(stderr, "Error allocating memory\n");
-		return -1;
-	}
-	buff_b = (char *) malloc(sizeof(char) * buffer_l / 5);
-	if (buff_b == NULL) {
-		fprintf(stderr, "Error allocating memory\n");
-		return -1;
-	}
+	
+	buff_f = (float *) hmalloc(sizeof(float) * buffer_l);
+	buff_fs = (float *) hmalloc(sizeof(float) * buffer_l / 5);
+	buff_b = (char *) hmalloc(sizeof(char) * buffer_l / 5);
+	
 #ifdef HAVE_MYSQL
-	if (mysql_data.mysql_dbname[0] != 0) {
-		printf(" (Saving to MySQL database \"%s\")", mysql_data.mysql_dbname);
-		if (strcmp(mysql_data.mysql_keepsmall, "yes") == 0 || strcmp(mysql_data.mysql_keepsmall, "YES") == 0)
-			printf(", updating data.\n");
+	if (mysql_db) {
+		hlog(LOG_DEBUG, "Saving to MySQL database \"%s\"", mysql_db);
+		if (strcmp(mysql_keepsmall, "yes") == 0 || strcmp(mysql_keepsmall, "YES") == 0)
+			hlog(LOG_DEBUG, "Updating database rows only.");
 		else
-			printf(", inserting data.\n");
+			hlog(LOG_DEBUG, "Inserting data to database.");
 	}
-	if (mysql_data.mysql_oldlimit[0] != 0 && demod_state.enable_mysql)
-		printf("Deleting data older than %ssec\n",
-		       mysql_data.mysql_oldlimit);
+	if (mysql_oldlimit && demod_state.enable_mysql)
+		hlog(LOG_DEBUG, "Deleting data older than %s seconds", mysql_oldlimit);
 #endif
-	if (mysql_data.serial_port[0] != 0) {
-		if (demod_state.my_fd != -1)
-			printf("Sending NMEA out to:  %s\n",
-			       mysql_data.serial_port);
-	}
-	printf("Starts demodulating and decoding AIS...");
 
-	printf("\n\n");
+	if (serial_port) {
+		if (demod_state.my_fd != -1)
+			hlog(LOG_DEBUG, "Sending NMEA out to: %s", serial_port);
+	}
+	hlog(LOG_NOTICE, "Started");
 
 	while (!done) {
-		input_read(handle, buffer, buffer_l);
+		if (sound_fd) {
+			cntr += buffer_l;
+			if (fread(buffer, 2, buffer_l, sound_fd) == 0)
+				done = 1;
+		} else {
+			input_read(handle, buffer, buffer_l);
+		}
+		
 		signal_filter(buffer, buffer_l, buff_f);
 		signal_clockrecovery(buff_f, buffer_l, buff_fs);
 		signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit);
 		protodec_decode(buff_b, buffer_l, &demod_state);
 	}
-
-	printf("Closing down...\n");
-	input_cleanup(handle);
-	free(buffer);
-	free(buff_f);
-	free(buff_fs);
-	free(buff_b);
+	
+	hlog(LOG_NOTICE, "Closing down...");
+	if (sound_fd) {
+		fclose(sound_fd);
+	} else {
+		input_cleanup(handle);
+	}
+	hfree(buffer);
+	hfree(buff_f);
+	hfree(buff_fs);
+	hfree(buff_b);
 	if (demod_state.my_fd != -1)
 		close(demod_state.my_fd);
-	printf("Received correctly: %d\nWrong CRC: %d\nWrong Size: %d\n",
-	       demod_state.receivedframes, demod_state.lostframes,
-	       demod_state.lostframes2);
+	hlog(LOG_INFO,
+		"Received correctly: %d packets, wrong CRC: %d packets, wrong size: %d packets",
+		demod_state.receivedframes, demod_state.lostframes,
+		demod_state.lostframes2);
 }
 
-
-void parse_configfile(struct mysql_data_t *d, struct demod_state_t *s)
-{
-	FILE *in;
-	char buffer[100];
-	d->mysql_dbname[0] = 0;
-	d->mysql_username[0] = 0;
-	d->mysql_password[0] = 0;
-	d->mysql_table[0] = 0;
-	d->mysql_keepsmall[0] = 0;
-	d->mysql_oldlimit[0] = 0;
-	d->serial_port[0] = 0;
-	int tmp;
-	int i;
-	memset(s->skip_type, 0, sizeof(s->skip_type));
-
-	if (in = fopen("/etc/gnuais.conf", "r")) {
-		while (1) {
-			if ((fscanf(in, "%s", buffer)) == EOF)
-				break;
-			if (!strcmp(buffer, "mysql_host")) {
-				if ((fscanf(in, "%s", buffer) == EOF)) {
-					fprintf(stderr, "Error reading config file\n");
-					exit(-1);
-				}
-				strcpy(d->mysql_host, buffer);
-			} else if (!strcmp(buffer, "mysql_db")) {
-				if ((fscanf(in, "%s", buffer) == EOF)) {
-					fprintf(stderr, "Error reading config file\n");
-					exit(-1);
-				}
-				strcpy(d->mysql_dbname, buffer);
-			} else if (!strcmp(buffer, "mysql_user")) {
-				if ((fscanf(in, "%s", buffer) == EOF)) {
-					fprintf(stderr, "Error reading config file\n");
-					exit(-1);
-				}
-				strcpy(d->mysql_username, buffer);
-			} else if (!strcmp(buffer, "mysql_password")) {
-				if ((fscanf(in, "%s", buffer) == EOF)) {
-					fprintf(stderr, "Error reading config file\n");
-					exit(-1);
-				}
-				strcpy(d->mysql_password, buffer);
-			} else if (!strcmp(buffer, "mysql_keepsmall")) {
-				if ((fscanf(in, "%s", buffer) == EOF)) {
-					fprintf(stderr, "Error reading config file\n");
-					exit(-1);
-				}
-				strcpy(d->mysql_keepsmall, buffer);
-			} else if (!strcmp(buffer, "mysql_oldlimit")) {
-				if ((fscanf(in, "%s", buffer) == EOF)) {
-					fprintf(stderr, "Error reading config file\n");
-					exit(-1);
-				}
-				strcpy(d->mysql_oldlimit, buffer);
-			} else if (!strcmp(buffer, "serial_port")) {
-				if ((fscanf(in, "%s", buffer) == EOF)) {
-					fprintf(stderr, "Error reading config file\n");
-					exit(-1);
-				}
-				strcpy(d->serial_port, buffer);
-			} else if (!strcmp(buffer, "skip_type")) {
-				if ((fscanf(in, "%s", buffer) == EOF)) {
-					fprintf(stderr, "Error reading config file\n");
-					exit(-1);
-				}
-				tmp = atoi(buffer);
-				if (tmp > 0 && tmp < 10)
-					s->skip_type[(char) tmp] = 1;
-			}
-		}
-		fclose(in);
-	}
-
-}

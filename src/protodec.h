@@ -63,7 +63,7 @@ struct demod_state_t {
 #endif
 };
 
-void protodec_initialize(struct demod_state_t *d, struct mysql_data_t *);
+void protodec_initialize(struct demod_state_t *d);
 void protodec_reset(struct demod_state_t *d);
 void protodec_getdata(int bufferlengde, struct demod_state_t *d);
 void protodec_decode(char *in, int count, struct demod_state_t *d);

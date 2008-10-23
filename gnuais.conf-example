@@ -1,8 +1,26 @@
-mysql_host localhost
-mysql_db yourmysqldatabase
-mysql_user yourmysqlusername 
-mysql_password xxxx
+
+# Configuration for gnuais
+
+# My callsign or nickname, used when exporting AIS data
+MyCall GNUAIS
+# My email address
+MyEmail gnuais@example.com
+
+# Directory, where logs will be written
+LogDir logs
+
+# ALSA sound device name, either the name of the card (default for the
+# first / default card), or a device name, for example: hw:2,0 for the first
+# input of the third card.
+SoundDevice default
+
+# MySQL database configuration
+#mysql_host localhost
+#mysql_db yourmysqldatabase
+#mysql_user yourmysqlusername 
+#mysql_password xxxx
 #mysql_keepsmall yes
 #mysql_oldlimit 800
+
 #serial_port /dev/ttyS0
 #skip_type 3

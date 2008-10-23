@@ -1,4 +1,20 @@
-0.0.7:	GNURadio can decode positions south of equator + minor other fixes
+x.x.x:
+	Added configurable logging to stderr/syslog/log file.
+	
+	Added a nice configuration file and command line parser.
+	
+	Implemented forking to background (-f).
+	
+	Removed separate gnuaisfromfile.c file, since it was almost
+	completely duplicate with ais.c - the "read from file" functionality
+	is now done using the -l option to gnuais. Reduces maintenance work.
+	
+	Fixed buffer overflow (security) bugs in the SQL query generation.
+	The SQL code crashed on SEGV when run with file input (lots of
+	data coming in and overwriting the query buffers).
+
+0.0.7:
+	gnuais can decode positions south of equator + minor other fixes
 
 0.0.6:
 	Added GUI which is in development. A lot of work to do yet.. There
