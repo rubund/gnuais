@@ -79,10 +79,10 @@ void protodec_initialize(struct demod_state_t *d)
 			/* set the options */
 			tcsetattr(d->my_fd, TCSANOW, &options);
 		}
-	}
-	//needed for NMEA sending
-	else
+	} else {
+		//needed for NMEA sending
 		d->my_fd = -1;
+	}
 	d->seqnr = 0;
 	d->serbuffer[0] = 0;
 }
