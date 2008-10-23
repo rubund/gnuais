@@ -1,6 +1,4 @@
 /*
- *	aprsc
- *
  *	(c) Heikki Hannikainen, OH7LZB <hessu@hes.iki.fi>
  *
  *    This program is free software; you can redistribute it and/or modify
