@@ -1,3 +1,5 @@
+#include <strings.h>
+
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -11,7 +13,7 @@ int input_initialize(snd_pcm_t * handle, short **buffer, int *buffer_l)
 {
 	int err;
 
-	snd_pcm_hw_params_t *hwparams;
+	snd_pcm_hw_params_t *hwparams = NULL;
 
 	snd_pcm_hw_params_alloca(&hwparams);
 
@@ -59,6 +61,7 @@ int input_initialize(snd_pcm_t * handle, short **buffer, int *buffer_l)
 	*buffer_l = (int) size - extra;
 
 	*buffer = (short *) hmalloc((*buffer_l) * sizeof(short));
+	bzero(*buffer, *buffer_l * sizeof(short));
 
 	return 0;
 }
