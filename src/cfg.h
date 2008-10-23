@@ -45,6 +45,9 @@ extern int dump_requests;	/* print requests */
 extern int stats_interval;
 extern int expiry_interval;
 
+#define MAX_AIS_PACKET_TYPE 10
+extern int skip_type[];
+
 extern int verbose;
 
 extern char *mycall;

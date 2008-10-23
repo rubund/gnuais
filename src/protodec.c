@@ -281,7 +281,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	printf("(%d):  ", cntr);
 	switch (type) {
 	case 1:
-		if (d->skip_type[1] == 0) {
+		if (skip_type[1] == 0) {
 			longitude = protodec_henten(61, 28, d->rbuffer);
 			if (((longitude >> 27) & 1) == 1)
 				longitude |= 0xF0000000;
@@ -318,7 +318,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		}
 		break;
 	case 2:
-		if (d->skip_type[2] == 0) {
+		if (skip_type[2] == 0) {
 			longitude = protodec_henten(61, 28, d->rbuffer);
 			if (((longitude >> 27) & 1) == 1)
 				longitude |= 0xF0000000;
@@ -362,7 +362,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		}
 		break;
 	case 3:
-		if (d->skip_type[3] == 0) {
+		if (skip_type[3] == 0) {
 			longitude = protodec_henten(61, 28, d->rbuffer);
 			if (((longitude >> 27) & 1) == 1)
 				longitude |= 0xF0000000;
@@ -405,7 +405,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		}
 		break;
 	case 4:
-		if (d->skip_type[4] == 0) {
+		if (skip_type[4] == 0) {
 			year = protodec_henten(40, 12, d->rbuffer);
 			month = protodec_henten(52, 4, d->rbuffer);
 			day = protodec_henten(56, 5, d->rbuffer);
@@ -441,7 +441,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		}
 		break;
 	case 5:
-		if (d->skip_type[5] == 0) {
+		if (skip_type[5] == 0) {
 			hvor = 112;
 			for (k = 0; k < 20; k++) {
 				letter =
@@ -499,7 +499,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 #ifdef HAVE_MYSQL
 	DBG(printf("%s\n", sqlquery));
 	
-	if (d->enable_mysql && (d->skip_type[type] == 0)) {
+	if (d->enable_mysql && skip_type[type] == 0) {
 		if (d->keepsmall) {
 			DBG(printf("Trying to update MySql..."));
 			if (mysql_query(&d->conn, sqlquery2)) {	//try update data

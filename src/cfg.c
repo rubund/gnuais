@@ -75,10 +75,13 @@ int fork_a_daemon;	/* fork a daemon */
 int stats_interval;
 int expiry_interval;
 
+int skip_type[MAX_AIS_PACKET_TYPE+1];
+
 int verbose;
 
 int do_interval(int *dest, int argc, char **argv);
 int do_uplink(struct uplink_config_t **lq, int argc, char **argv);
+int do_skip_type(int *dest, int argc, char **argv);
 
 /*
  *	Configuration file commands
@@ -105,6 +108,8 @@ static struct cfgcmd cfg_cmds[] = {
 	{ "soundfile",		_CFUNC_ do_string,	&new_sound_file		},
 	{ "serialport",		_CFUNC_ do_string,	&new_serial_port	},
 	{ "serial_port",	_CFUNC_ do_string,	&new_serial_port	},
+	
+	{ "skip_type",		_CFUNC_ do_skip_type,	&skip_type		},
 	
 	{ NULL,			NULL,			NULL			}
 };
@@ -177,6 +182,29 @@ int do_interval(int *dest, int argc, char **argv)
 		return -1;
 		
 	*dest = parse_interval(argv[1]);
+	return 0;
+}
+
+/*
+ *	Parse a the skip_type configuration entry
+ */
+
+int do_skip_type(int *dest, int argc, char **argv)
+{
+	int i;
+	
+	if (argc < 2)
+		return -1;
+	
+	i = atoi(argv[1]);
+	
+	if (i > 0 && i <= MAX_AIS_PACKET_TYPE) {
+		skip_type[i] = 1;
+	} else {
+		hlog(LOG_CRIT, "skip_type value out of range: %d", i);
+		return -1;
+	}
+	
 	return 0;
 }
 

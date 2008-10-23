@@ -69,7 +69,6 @@ int main(int argc, char *argv[])
 	if (!writepid(pidfile))
 		exit(1);
 	
-	memset(demod_state.skip_type, 0, sizeof(demod_state.skip_type));
 	signal(SIGINT, closedown);
 
 	protodec_initialize(&demod_state);

@@ -50,7 +50,6 @@ struct demod_state_t {
 	int receivedframes;
 	int lostframes;
 	int lostframes2;
-	int skip_type[10];
 	int my_fd;
 	unsigned char serbuffer[90];
 	unsigned char seqnr;
