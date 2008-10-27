@@ -38,7 +38,6 @@ struct demod_state_t {
 	unsigned int offset;
 	int nskurr, npreamble, nstartsign, ndata, nstopsign;
 
-	unsigned char crc[16];
 	int antallenner;
 	unsigned char buffer[450];
 	unsigned char rbuffer[450];
