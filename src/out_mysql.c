@@ -15,6 +15,7 @@ struct mysql_state_t *myout_init()
 	struct mysql_state_t *my;
 	
 	my = hmalloc(sizeof(*my));
+	my->inserts = 0;
 	
 	if (!mysql_init(&my->conn)) {
 		hlog(LOG_CRIT, "Could not initialize MySQL library!");
@@ -31,6 +32,42 @@ struct mysql_state_t *myout_init()
 	hlog(LOG_CRIT, "MySQL support not built in.");
 	return NULL;
 #endif
+}
+
+int myout_delete_from(struct mysql_state_t *my, int now, char *table)
+{
+	char q[MAX_SQL_LEN];
+	int qrows;
+	const char *e;
+	
+	snprintf(q, MAX_SQL_LEN,
+		"DELETE FROM %s WHERE time < %d", table, now - mysql_oldlimit);
+	
+	if (mysql_query(&my->conn, q)) {
+		e = mysql_error(&my->conn);
+		hlog(LOG_ERR, "Could not delete old data from %s: %s", table, e);
+		return 0;
+	}
+	
+	qrows = mysql_affected_rows(&my->conn);
+	if (qrows > 0)
+		hlog(LOG_DEBUG, "MySQL: Deleted %d rows from %s.", qrows, table);
+	
+	return qrows;
+}
+
+int myout_delete_old(struct mysql_state_t *my, int now)
+{
+	int rows;
+	
+	if (mysql_oldlimit > 0) {
+		rows = myout_delete_from(my, now, "ais_position");
+		rows += myout_delete_from(my, now, "ais_vesseldata");
+		rows += myout_delete_from(my, now, "ais_basestation");
+		rows += myout_delete_from(my, now, "ais_nmea");
+	}
+	
+	return 0;
 }
 
 int myout_update_or_insert(struct mysql_state_t *my, char *upd, char *ins)
@@ -68,6 +105,12 @@ int myout_ais_position(struct mysql_state_t *my, int tid, int mmsi, float lat, f
 {
 #ifdef HAVE_MYSQL
 	char ins[MAX_SQL_LEN], upd[MAX_SQL_LEN];
+	
+	my->inserts++;
+	if (my->inserts % 10 == 0) {
+		myout_delete_old(my, tid);
+		my->inserts = 0;
+	}
 	
 	snprintf(ins, MAX_SQL_LEN,
 		"INSERT INTO ais_position (time,mmsi,latitude,longitude,heading,course,speed) VALUES (%d,%d,%.7f,%.7f,%.5f,%f,%f)",
