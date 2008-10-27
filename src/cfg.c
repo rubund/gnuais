@@ -61,12 +61,12 @@ char *sound_file, *new_sound_file;
 int new_sound_channels;
 int sound_channels = SOUND_CHANNELS_MONO;
 
-char *mysql_host, *new_mysql_host;
-char *mysql_db, *new_mysql_db;
-char *mysql_user, *new_mysql_user;
-char *mysql_password, *new_mysql_password;
-int mysql_keepsmall, new_mysql_keepsmall;
-char *mysql_oldlimit, *new_mysql_oldlimit;
+char *mysql_host;
+char *mysql_db;
+char *mysql_user;
+char *mysql_password;
+int mysql_keepsmall;
+int mysql_oldlimit;
 
 char *serial_port, *new_serial_port;
 
@@ -100,12 +100,12 @@ static struct cfgcmd cfg_cmds[] = {
 	{ "expiryinterval",	_CFUNC_ do_interval,	&expiry_interval	},
 	{ "uplink",		_CFUNC_ do_uplink,	&new_uplink_config	},
 
-	{ "mysql_host",		_CFUNC_ do_string,	&new_mysql_host		},
-	{ "mysql_db",		_CFUNC_ do_string,	&new_mysql_db		},
-	{ "mysql_user",		_CFUNC_ do_string,	&new_mysql_user		},
-	{ "mysql_password",	_CFUNC_ do_string,	&new_mysql_password	},
-	{ "mysql_keepsmall",	_CFUNC_ do_toggle,	&new_mysql_keepsmall	},
-	{ "mysql_oldlimit",	_CFUNC_ do_string,	&new_mysql_oldlimit	},
+	{ "mysql_host",		_CFUNC_ do_string,	&mysql_host		},
+	{ "mysql_db",		_CFUNC_ do_string,	&mysql_db		},
+	{ "mysql_user",		_CFUNC_ do_string,	&mysql_user		},
+	{ "mysql_password",	_CFUNC_ do_string,	&mysql_password		},
+	{ "mysql_keepsmall",	_CFUNC_ do_toggle,	&mysql_keepsmall	},
+	{ "mysql_oldlimit",	_CFUNC_ do_int,		&mysql_oldlimit		},
 	
 	{ "sounddevice",	_CFUNC_ do_string,	&new_sound_device	},
 	{ "soundfile",		_CFUNC_ do_string,	&new_sound_file		},

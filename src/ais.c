@@ -2,7 +2,6 @@
 #include "config.h"
 #endif
 
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -13,7 +12,7 @@
 #include "hmalloc.h"
 #include "hlog.h"
 #include "cfg.h"
-
+#include "out_mysql.h"
 
 #include "config.h"
 
@@ -38,7 +37,7 @@ int main(int argc, char *argv[])
 	char lastbit = 0;
 	struct demod_state_t demod_state_a, demod_state_b;
 	struct serial_state_t *serial = NULL;
-
+	
 	/* command line */
 	parse_cmdline(argc, argv);
 	
@@ -110,13 +109,17 @@ int main(int argc, char *argv[])
 #ifdef HAVE_MYSQL
 	if (mysql_db) {
 		hlog(LOG_DEBUG, "Saving to MySQL database \"%s\"", mysql_db);
+		if (!(my = myout_init()))
+			return -1;
+			
 		if (mysql_keepsmall)
 			hlog(LOG_DEBUG, "Updating database rows only.");
 		else
 			hlog(LOG_DEBUG, "Inserting data to database.");
+			
+		if (mysql_oldlimit)
+			hlog(LOG_DEBUG, "Deleting data older than %d seconds", mysql_oldlimit);
 	}
-	if (mysql_oldlimit && demod_state_a.enable_mysql)
-		hlog(LOG_DEBUG, "Deleting data older than %s seconds", mysql_oldlimit);
 #endif
 	
 	hlog(LOG_NOTICE, "Started");
