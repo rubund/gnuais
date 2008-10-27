@@ -12,8 +12,6 @@
 #include "protodec.h"
 
 
-void parse_configfile(struct mysql_data_t *, struct demod_state_t *);
-
 int done;
 
 void closedown(int sig)
@@ -40,7 +38,6 @@ int main(int argc, char *argv[])
 	float *buff_f, *buff_fs;
 	char *buff_b;
 	char lastbit = 0;
-	struct mysql_data_t mysql_data;
 	struct demod_state_t demod_state;
 	signal(SIGINT, closedown);
 	printf("Recording sound to: %s\n", argv[1]);

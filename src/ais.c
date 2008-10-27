@@ -10,10 +10,10 @@
 #include "input.h"
 #include "signalin.h"
 #include "protodec.h"
-
 #include "hmalloc.h"
 #include "hlog.h"
 #include "cfg.h"
+
 
 #include "config.h"
 
@@ -36,7 +36,8 @@ int main(int argc, char *argv[])
 	float *buff_f, *buff_fs;
 	char *buff_b;
 	char lastbit = 0;
-	struct demod_state_t demod_state;
+	struct demod_state_t demod_state_a, demod_state_b;
+	struct serial_state_t *serial = NULL;
 
 	/* command line */
 	parse_cmdline(argc, argv);
@@ -70,9 +71,16 @@ int main(int argc, char *argv[])
 		exit(1);
 	
 	signal(SIGINT, closedown);
-
-	protodec_initialize(&demod_state);
-
+	
+	/* initialize serial port for NMEA output */
+	if (serial_port)
+		serial = serial_init();
+	
+	/* initialize the AIS decoders */
+	protodec_initialize(&demod_state_a, serial);
+	if (sound_channels == SOUND_CHANNELS_BOTH)
+		protodec_initialize(&demod_state_b, serial);
+	
 	if (sound_device) {
 		if ((err = snd_pcm_open(&handle, sound_device, SND_PCM_STREAM_CAPTURE, 0)) < 0) {
 			hlog(LOG_CRIT, "Error opening sound device (%s)", sound_device);
@@ -107,16 +115,12 @@ int main(int argc, char *argv[])
 		else
 			hlog(LOG_DEBUG, "Inserting data to database.");
 	}
-	if (mysql_oldlimit && demod_state.enable_mysql)
+	if (mysql_oldlimit && demod_state_a.enable_mysql)
 		hlog(LOG_DEBUG, "Deleting data older than %s seconds", mysql_oldlimit);
 #endif
-
-	if (serial_port) {
-		if (demod_state.my_fd != -1)
-			hlog(LOG_DEBUG, "Sending NMEA out to: %s", serial_port);
-	}
+	
 	hlog(LOG_NOTICE, "Started");
-
+	
 	while (!done) {
 		if (sound_fd) {
 			cntr += buffer_l;
@@ -129,7 +133,7 @@ int main(int argc, char *argv[])
 		signal_filter(buffer, buffer_l, buff_f);
 		signal_clockrecovery(buff_f, buffer_l, buff_fs);
 		signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit);
-		protodec_decode(buff_b, buffer_l, &demod_state);
+		protodec_decode(buff_b, buffer_l, &demod_state_a);
 	}
 	
 	hlog(LOG_NOTICE, "Closing down...");
@@ -138,15 +142,18 @@ int main(int argc, char *argv[])
 	} else {
 		input_cleanup(handle);
 	}
+	
 	hfree(buffer);
 	hfree(buff_f);
 	hfree(buff_fs);
 	hfree(buff_b);
-	if (demod_state.my_fd != -1)
-		close(demod_state.my_fd);
+	
+	if (serial)
+		serial_close(serial);
+		
 	hlog(LOG_INFO,
 		"Received correctly: %d packets, wrong CRC: %d packets, wrong size: %d packets",
-		demod_state.receivedframes, demod_state.lostframes,
-		demod_state.lostframes2);
+		demod_state_a.receivedframes, demod_state_a.lostframes,
+		demod_state_a.lostframes2);
 }
 

@@ -10,13 +10,14 @@
 #include <unistd.h>		/* UNIX standard function definitions */
 #include <fcntl.h>		/* File control definitions */
 #include <errno.h>		/* Error number definitions */
-#include <termios.h>		/* POSIX terminal control definitions */
 
 #ifdef HAVE_MYSQL
 #include <mysql/mysql.h>
 #endif
 #include <string.h>
 #include "ais.h"
+
+#include "serial.h"
 
 #define ST_SKURR 1
 #define ST_PREAMBLE 2
@@ -30,7 +31,6 @@
 //#define DBG(x) x 
 // if you want to see all debug text
 #define DBG(x)
-
 
 struct demod_state_t {
 
@@ -50,9 +50,9 @@ struct demod_state_t {
 	int receivedframes;
 	int lostframes;
 	int lostframes2;
-	int my_fd;
-	unsigned char serbuffer[90];
 	unsigned char seqnr;
+	
+	struct serial_state_t *serial;
 
 #ifdef HAVE_MYSQL
 	int keepsmall;
@@ -62,7 +62,7 @@ struct demod_state_t {
 #endif
 };
 
-void protodec_initialize(struct demod_state_t *d);
+void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial);
 void protodec_reset(struct demod_state_t *d);
 void protodec_getdata(int bufferlengde, struct demod_state_t *d);
 void protodec_decode(char *in, int count, struct demod_state_t *d);

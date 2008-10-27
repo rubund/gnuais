@@ -57,6 +57,12 @@ extern char *sound_device;
 extern char *sound_file;
 extern char *serial_port;
 
+#define SOUND_CHANNELS_MONO 1
+#define SOUND_CHANNELS_BOTH 2
+#define SOUND_CHANNELS_LEFT 3
+#define SOUND_CHANNELS_RIGHT 4
+extern int sound_channels;
+
 extern char *cfgfile;
 extern char *pidfile;
 extern char *logdir;

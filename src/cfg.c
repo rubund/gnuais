@@ -58,6 +58,8 @@ char *new_myemail;
 char *new_sound_device;
 char *sound_device = def_sound_device;
 char *sound_file, *new_sound_file;
+int new_sound_channels;
+int sound_channels = SOUND_CHANNELS_MONO;
 
 char *mysql_host, *new_mysql_host;
 char *mysql_db, *new_mysql_db;
@@ -82,6 +84,7 @@ int verbose;
 int do_interval(int *dest, int argc, char **argv);
 int do_uplink(struct uplink_config_t **lq, int argc, char **argv);
 int do_skip_type(int *dest, int argc, char **argv);
+int do_sound_ch(int *dest, int argc, char **argv);
 
 /*
  *	Configuration file commands
@@ -106,6 +109,7 @@ static struct cfgcmd cfg_cmds[] = {
 	
 	{ "sounddevice",	_CFUNC_ do_string,	&new_sound_device	},
 	{ "soundfile",		_CFUNC_ do_string,	&new_sound_file		},
+	{ "soundchannels",	_CFUNC_ do_sound_ch,	&new_sound_channels	},
 	{ "serialport",		_CFUNC_ do_string,	&new_serial_port	},
 	{ "serial_port",	_CFUNC_ do_string,	&new_serial_port	},
 	
@@ -186,7 +190,7 @@ int do_interval(int *dest, int argc, char **argv)
 }
 
 /*
- *	Parse a the skip_type configuration entry
+ *	Parse the skip_type configuration entry
  */
 
 int do_skip_type(int *dest, int argc, char **argv)
@@ -202,6 +206,33 @@ int do_skip_type(int *dest, int argc, char **argv)
 		skip_type[i] = 1;
 	} else {
 		hlog(LOG_CRIT, "skip_type value out of range: %d", i);
+		return -1;
+	}
+	
+	return 0;
+}
+
+/*
+ *	Parse the soundchannels configuration entry
+ */
+
+int do_sound_ch(int *dest, int argc, char **argv)
+{
+	int i;
+	
+	if (argc < 2)
+		return -1;
+	
+	if (strcasecmp(argv[1], "mono") == 0) {
+		new_sound_channels = SOUND_CHANNELS_MONO;
+	} else if (strcasecmp(argv[1], "both") == 1) {
+		new_sound_channels = SOUND_CHANNELS_BOTH;
+	} else if (strcasecmp(argv[1], "left") == 1) {
+		new_sound_channels = SOUND_CHANNELS_LEFT;
+	} else if (strcasecmp(argv[1], "right") == 1) {
+		new_sound_channels = SOUND_CHANNELS_RIGHT;
+	} else {
+		hlog(LOG_CRIT, "SoundChannels value unknown: %s", argv[1]);
 		return -1;
 	}
 	
@@ -386,6 +417,20 @@ int read_config(void)
 			sound_file = NULL;
 		sound_file = new_sound_file;
 		new_sound_file = NULL;
+	}
+	
+	sound_channels = new_sound_channels;
+	
+	if (new_serial_port) {
+		if (serial_port)
+			hfree(serial_port);
+		serial_port = new_serial_port;
+		new_serial_port = NULL;
+	} else {
+		if (serial_port) {
+			hfree(serial_port);
+			serial_port = NULL;
+		}
 	}
 	
 	/* put in the new uplink config */

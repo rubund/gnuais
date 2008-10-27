@@ -6,10 +6,10 @@
 
 #include "cfg.h"
 
-
-
-void protodec_initialize(struct demod_state_t *d)
+void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial)
 {
+	d->serial = serial;
+	
 	d->receivedframes = 0;
 	d->lostframes = 0;
 	d->lostframes2 = 0;
@@ -41,50 +41,10 @@ void protodec_initialize(struct demod_state_t *d)
 			fprintf(stderr, "Error opening mysql connection\n");
 			exit(-1);
 		}
-
 	}
 #endif
-
-	if (serial_port) {
-		DBG(printf("Serial device is %s ,", serial_port));
-		
-		//Returns the file descriptor on success or -1 on error.
-		/* File descriptor for the port */
-		d->my_fd = open(serial_port, O_RDWR | O_NOCTTY | O_NDELAY);
-		if (d->my_fd == -1) {	// Could not open the port.
-			perror("open_port: Unable to open serial port");
-		} else {
-			DBG(printf("serial opened. My_fd is:%d\n", d->my_fd));
-			fcntl(d->my_fd, F_SETFL, 0);
-
-			struct termios options;
-			/* get the current options */
-			tcgetattr(d->my_fd, &options);
-
-			//set speed 4800
-			cfsetispeed(&options, B4800);
-			cfsetospeed(&options, B4800);
-			/* set raw input, 1 second timeout */
-			options.c_cflag |= (CLOCAL | CREAD);
-			options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-			options.c_oflag &= ~OPOST;
-			options.c_cc[VMIN] = 0;
-			options.c_cc[VTIME] = 10;
-
-			//No parity 8N1
-			options.c_cflag &= ~PARENB;
-			options.c_cflag &= ~CSTOPB;
-			options.c_cflag &= ~CSIZE;
-			options.c_cflag |= CS8;
-			/* set the options */
-			tcsetattr(d->my_fd, TCSANOW, &options);
-		}
-	} else {
-		//needed for NMEA sending
-		d->my_fd = -1;
-	}
+	
 	d->seqnr = 0;
-	d->serbuffer[0] = 0;
 }
 
 
@@ -103,6 +63,8 @@ void protodec_reset(struct demod_state_t *d)
 	d->bufferpos = 0;
 }
 
+#define SERBUFFER_LEN	100
+
 void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 {
 #ifdef HAVE_MYSQL
@@ -112,6 +74,9 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	static char sqlquery3[MAX_SQL_LEN];
 	int qrows;
 #endif
+	unsigned char serbuffer[SERBUFFER_LEN];
+	int serbuffer_l;
+	
 	unsigned char type = protodec_henten(0, 6, d->rbuffer);
 	if (type < 1 || type > 9)
 		return;
@@ -243,18 +208,9 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		}
 		//In final. Add header "!" and trailer <cr><lf>
 		// here it could be sent to /dev/ttySx
-		sprintf(d->serbuffer, "!%s\r\n", nmea);
-		//printf("!%s\r\n",nmea);
-		if (d->my_fd != -1) {
-			int n =
-			    write(d->my_fd, d->serbuffer,
-				  strlen(d->serbuffer));
-			if (n < 0) {
-				fputs("write() of bytes failed!\n",
-				      stderr);
-			}
-			DBG(printf("Write serial out:%d\n", n));
-		}
+		serbuffer_l = snprintf(serbuffer, SERBUFFER_LEN, "!%s\r\n", nmea);
+		if (d->serial)
+			serial_write(d->serial, serbuffer, serbuffer_l);
 		DBG(printf("End of nmea->ascii-loop with sentences:%d sentencenum:%d\n",
 			sentences, sentencenum));
 #ifdef HAVE_MYSQL
@@ -472,6 +428,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		break;
 		
 	default:
+		printf("  ( !%s )", nmea);
 		break;
 	}
 	printf("\n");
