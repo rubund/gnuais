@@ -19,3 +19,4 @@ AC_SUBST([buildgui],[$buildgui])
 AC_PROG_CC
 
 AC_OUTPUT(Makefile src/Makefile src/gui/Makefile)
+

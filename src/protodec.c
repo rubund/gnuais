@@ -9,7 +9,7 @@
 #include "protodec.h"
 #include "ais.h"
 #include "out_mysql.h"
-
+#include "hmalloc.h"
 #include "cfg.h"
 
 void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial)
@@ -45,7 +45,7 @@ void protodec_reset(struct demod_state_t *d)
 
 void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 {
-	unsigned char serbuffer[SERBUFFER_LEN];
+	char serbuffer[SERBUFFER_LEN];
 	int serbuffer_l;
 	
 	unsigned char type = protodec_henten(0, 6, d->rbuffer);
@@ -197,7 +197,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	if (skip_type[type])
 		return; // ignored by configuration
 	
-	printf("(cntr %d type %d): ", cntr, type);
+	printf("(cntr %ld type %d): ", cntr, type);
 	switch (type) {
 	case 1:
 		longitude = protodec_henten(61, 28, d->rbuffer);
@@ -211,7 +211,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
 		underway = protodec_henten(38, 2, d->rbuffer);
 		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
-		printf("%09d %10f %10f %5f %5f %5i %5d %5d",
+		printf("%09ld %10f %10f %5f %5f %5i %5d %5d",
 			mmsi, (float) latitude / 600000,
 			(float) longitude / 600000,
 			(float) coarse / 10, (float) sog / 10,
@@ -240,7 +240,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
 		underway = protodec_henten(38, 2, d->rbuffer);
 		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
-		printf("%09d %10f %10f %5f %5f %5i %5d %5d",
+		printf("%09ld %10f %10f %5f %5f %5i %5d %5d",
 			mmsi, (float) latitude / 600000,
 			(float) longitude / 600000,
 			(float) coarse / 10, (float) sog / 10,
@@ -269,7 +269,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
 		underway = protodec_henten(38, 2, d->rbuffer);
 		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
-		printf("%09d %10f %10f %5f %5f %5i %5d %5d",
+		printf("%09ld %10f %10f %5f %5f %5i %5d %5d",
 			mmsi, (float) latitude / 600000,
 			(float) longitude / 600000,
 			(float) coarse / 10, (float) sog / 10,
@@ -301,7 +301,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		if (((latitude >> 26) & 1) == 1)
 			latitude |= 0xf8000000;
 		latit = ((float) latitude) / 10000 / 60;
-		printf("%09d %d %d %d %d %d %d %f %f",
+		printf("%09ld %ld %ld %ld %ld %ld %ld %f %f",
 			mmsi, year, month, day, hour, minute,
 			second, latit, longit);
 		printf("  ( !%s )", nmea);
@@ -337,7 +337,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		D = protodec_henten(240 + 9 + 9 + 6, 6, d->rbuffer);
 		draught = protodec_henten(294, 8, d->rbuffer);
 		// printf("Length: %d\nWidth: %d\nDraught: %f\n",A+B,C+D,(float)draught/10);
-		printf("%09d %s %s %d %d %f", mmsi,
+		printf("%09ld %s %s %d %d %f", mmsi,
 			name, destination, A + B, C + D,
 			(float) draught / 10);
 		printf("  ( !%s )", nmea);
@@ -363,7 +363,6 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 void protodec_decode(char *in, int count, struct demod_state_t *d)
 {
 	int i = 0;
-	unsigned long n;
 	int bufferlengde, correct;
 	while (i < (count / 5)) {
 		switch (d->state) {
@@ -505,10 +504,10 @@ unsigned long protodec_henten(int from, int size, unsigned char *frame)
 {
 	int i = 0;
 	unsigned long tmp = 0;
-	for (i = 0; i < size; i++) {
+	
+	for (i = 0; i < size; i++)
 		tmp |= (frame[from + i]) << (size - 1 - i);
-
-	}
+	
 	return tmp;
 }
 

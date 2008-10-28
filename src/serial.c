@@ -18,6 +18,7 @@
 
 #include "serial.h"
 #include "hlog.h"
+#include "hmalloc.h"
 #include "cfg.h"
 
 /*
@@ -93,6 +94,7 @@ int serial_write(struct serial_state_t *state, char *s, int len)
 	else
 		hlog(LOG_DEBUG, "Wrote %d bytes to serial port", n);
 #endif
+	return n;
 }
 
 /*
@@ -101,10 +103,17 @@ int serial_write(struct serial_state_t *state, char *s, int len)
 
 int serial_close(struct serial_state_t *state)
 {
+	int ret = 0;
+	
 	if (state->fd >= 0) {
-		if (close(state->fd))
+		if (close(state->fd)) {
 			hlog(LOG_ERR, "Could not close serial port %s: %s", serial_port, strerror(errno));
+			ret = -1;
+		}
 		state->fd = -1;
 	}
+	
 	hfree(state);
+	
+	return ret;
 }

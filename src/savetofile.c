@@ -30,15 +30,12 @@ int main(int argc, char *argv[])
 		printf("Could not open sound file\n");
 		return -1;
 	}
-	int err, i;
+	int err;
 	done = 0;
 	snd_pcm_t *handle;
 	short *buffer;
 	int buffer_l = 1024;
-	float *buff_f, *buff_fs;
-	char *buff_b;
-	char lastbit = 0;
-	struct demod_state_t demod_state;
+	
 	signal(SIGINT, closedown);
 	printf("Recording sound to: %s\n", argv[1]);
 	if ((err = snd_pcm_open(&handle, "hw:2,0", SND_PCM_STREAM_CAPTURE, 0)) < 0) {
@@ -57,4 +54,6 @@ int main(int argc, char *argv[])
 	printf("Closing down...\n");
 	fclose(soundfile);
 	input_cleanup(handle);
+	
+	return 0;
 }

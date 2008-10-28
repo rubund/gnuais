@@ -125,7 +125,6 @@ static struct cfgcmd cfg_cmds[] = {
 void free_uplink_config(struct uplink_config_t **lc)
 {
 	struct uplink_config_t *this;
-	int i;
 
 	while (*lc) {
 		this = *lc;
@@ -218,8 +217,6 @@ int do_skip_type(int *dest, int argc, char **argv)
 
 int do_sound_ch(int *dest, int argc, char **argv)
 {
-	int i;
-	
 	if (argc < 2)
 		return -1;
 	
@@ -249,7 +246,7 @@ int do_sound_ch(int *dest, int argc, char **argv)
 int do_uplink(struct uplink_config_t **lq, int argc, char **argv)
 {
 	struct uplink_config_t *l;
-	int i, port;
+	int port;
 	struct addrinfo req, *ai;
 
 	if (argc < 5)
