@@ -6,6 +6,7 @@
 struct mysql_state_t {
 #ifdef HAVE_MYSQL
 	MYSQL conn;
+	int connected;
 	int inserts;
 #endif
 } *my;
