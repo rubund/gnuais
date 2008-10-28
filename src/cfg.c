@@ -45,20 +45,15 @@ char def_sound_device[] = "default";
 
 char *cfgfile = def_cfgfile;
 char *pidfile;
-char *new_logdir;
 char *logdir;	/* access logs go here */
 
 char *logname = def_logname;	/* syslog entries use this program name */
 
 char *mycall;
 char *myemail;
-char *new_mycall;
-char *new_myemail;
 
-char *new_sound_device;
-char *sound_device = def_sound_device;
-char *sound_file, *new_sound_file;
-int new_sound_channels;
+char *sound_device;
+char *sound_file;
 int sound_channels = SOUND_CHANNELS_MONO;
 
 char *mysql_host;
@@ -68,7 +63,7 @@ char *mysql_password;
 int mysql_keepsmall;
 int mysql_oldlimit;
 
-char *serial_port, *new_serial_port;
+char *serial_port;
 
 struct uplink_config_t *uplink_config;
 struct uplink_config_t *new_uplink_config;
@@ -93,9 +88,9 @@ int do_sound_ch(int *dest, int argc, char **argv);
 #define _CFUNC_ (int (*)(void *dest, int argc, char **argv))
 
 static struct cfgcmd cfg_cmds[] = {
-	{ "logdir",		_CFUNC_ do_string,	&new_logdir		},
-	{ "mycall",		_CFUNC_ do_string,	&new_mycall		},
-	{ "myemail",		_CFUNC_ do_string,	&new_myemail		},
+	{ "logdir",		_CFUNC_ do_string,	&logdir			},
+	{ "mycall",		_CFUNC_ do_string,	&mycall			},
+	{ "myemail",		_CFUNC_ do_string,	&myemail		},
 	{ "statsinterval",	_CFUNC_ do_interval,	&stats_interval		},
 	{ "expiryinterval",	_CFUNC_ do_interval,	&expiry_interval	},
 	{ "uplink",		_CFUNC_ do_uplink,	&new_uplink_config	},
@@ -107,11 +102,11 @@ static struct cfgcmd cfg_cmds[] = {
 	{ "mysql_keepsmall",	_CFUNC_ do_toggle,	&mysql_keepsmall	},
 	{ "mysql_oldlimit",	_CFUNC_ do_int,		&mysql_oldlimit		},
 	
-	{ "sounddevice",	_CFUNC_ do_string,	&new_sound_device	},
-	{ "soundfile",		_CFUNC_ do_string,	&new_sound_file		},
-	{ "soundchannels",	_CFUNC_ do_sound_ch,	&new_sound_channels	},
-	{ "serialport",		_CFUNC_ do_string,	&new_serial_port	},
-	{ "serial_port",	_CFUNC_ do_string,	&new_serial_port	},
+	{ "sounddevice",	_CFUNC_ do_string,	&sound_device		},
+	{ "soundfile",		_CFUNC_ do_string,	&sound_file		},
+	{ "soundchannels",	_CFUNC_ do_sound_ch,	&sound_channels		},
+	{ "serialport",		_CFUNC_ do_string,	&serial_port		},
+	{ "serial_port",	_CFUNC_ do_string,	&serial_port		},
 	
 	{ "skip_type",		_CFUNC_ do_skip_type,	&skip_type		},
 	
@@ -221,13 +216,13 @@ int do_sound_ch(int *dest, int argc, char **argv)
 		return -1;
 	
 	if (strcasecmp(argv[1], "mono") == 0) {
-		new_sound_channels = SOUND_CHANNELS_MONO;
+		*dest = SOUND_CHANNELS_MONO;
 	} else if (strcasecmp(argv[1], "both") == 1) {
-		new_sound_channels = SOUND_CHANNELS_BOTH;
+		*dest = SOUND_CHANNELS_BOTH;
 	} else if (strcasecmp(argv[1], "left") == 1) {
-		new_sound_channels = SOUND_CHANNELS_LEFT;
+		*dest = SOUND_CHANNELS_LEFT;
 	} else if (strcasecmp(argv[1], "right") == 1) {
-		new_sound_channels = SOUND_CHANNELS_RIGHT;
+		*dest = SOUND_CHANNELS_RIGHT;
 	} else {
 		hlog(LOG_CRIT, "SoundChannels value unknown: %s", argv[1]);
 		return -1;
@@ -356,78 +351,33 @@ int read_config(void)
 	 * for the first time.
 	 */
 	if (!logdir) {
-		if (new_logdir) {
-			logdir = new_logdir;
-			new_logdir = NULL;
-		} else {
-			hlog(LOG_CRIT, "Config: logdir not defined.");
-			failed = 1;
-		}
+		hlog(LOG_CRIT, "Config: logdir not defined.");
+		failed = 1;
 	}
 	
 	/* mycall is only applied when running for the first time. */
-	if (!new_mycall) {
+	if (!mycall) {
 		hlog(LOG_CRIT, "Config: mycall is not defined.");
 		failed = 1;
-	} else if (!valid_aprsis_call(new_mycall)) {
-		hlog(LOG_CRIT, "Config: mycall '%s' is not valid.", new_mycall);
+	} else if (!valid_aprsis_call(mycall)) {
+		hlog(LOG_CRIT, "Config: mycall '%s' is not valid.", mycall);
 		failed = 1;
-	} else {
-		if (mycall)
-			hfree(mycall);
-		mycall = new_mycall;
-		new_mycall = NULL;
 	}
 	
-	if (new_myemail) {
-		if (myemail)
-			hfree(myemail);
-		myemail = new_myemail;
-		new_myemail = NULL;
-	} else {
+	if (!myemail) {
 		hlog(LOG_WARNING, "Config: myemail is not defined.");
 		failed = 1;
 	}
 	
-	if (new_sound_device) {
-		if (sound_device && sound_device != def_sound_device)
+	if (!sound_file && !sound_device) {
+		sound_device = def_sound_device;
+		hlog(LOG_WARNING, "Config: SoundDevice is not defined - using: %s", sound_device);
+	}
+	
+	if (sound_file && sound_device) {
+		if (sound_device != def_sound_device)
 			hfree(sound_device);
-		if (!new_sound_file) {
-			sound_device = new_sound_device;
-			new_sound_device = NULL;
-		} else {
-			sound_device = NULL;
-		}
-	} else {
-		if (!new_sound_file)
-			hlog(LOG_WARNING, "Config: SoundDevice is not defined - using: %s", sound_device);
-	}
-	
-	if (new_sound_file) {
-		if (sound_device) {
-			if (sound_device != def_sound_device)
-				hfree(sound_device);
-			sound_device = NULL;
-		}
-		
-		if (sound_file)
-			sound_file = NULL;
-		sound_file = new_sound_file;
-		new_sound_file = NULL;
-	}
-	
-	sound_channels = new_sound_channels;
-	
-	if (new_serial_port) {
-		if (serial_port)
-			hfree(serial_port);
-		serial_port = new_serial_port;
-		new_serial_port = NULL;
-	} else {
-		if (serial_port) {
-			hfree(serial_port);
-			serial_port = NULL;
-		}
+		sound_device = NULL;
 	}
 	
 	/* put in the new uplink config */
@@ -516,7 +466,7 @@ void parse_cmdline(int argc, char *argv[])
 			}
 			break;
 		case 'l':
-			new_sound_file = hstrdup(optarg);
+			sound_file = hstrdup(optarg);
 			break;
 		case '?':
 		case 'h':
