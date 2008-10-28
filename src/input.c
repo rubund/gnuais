@@ -36,7 +36,7 @@ int input_initialize(snd_pcm_t * handle, short **buffer, int *buffer_l)
 		return -1;
 	}
 
-	int rate = 48000;
+	unsigned int rate = 48000;
 
 	if ((err = snd_pcm_hw_params_set_rate_near(handle, hwparams, &rate, 0)) < 0) {
 		hlog(LOG_CRIT, LOGPREFIX "Error setting sample rate (%d)", rate);
