@@ -12,7 +12,10 @@ x.x.x:
 	Fixed buffer overflow (security) bugs in the SQL query generation.
 	The SQL code crashed on SEGV when run with file input (lots of
 	data coming in and overwriting the query buffers).
-
+	
+	Implemented automatic reconnection to MySQL if the connection goes
+	away (server crash, network outage, inactivity timeout).
+	
 0.0.7:
 	gnuais can decode positions south of equator + minor other fixes
 
