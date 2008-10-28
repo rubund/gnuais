@@ -1,13 +1,7 @@
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include <time.h>
 #include <string.h>		/* String function definitions */
-#include <unistd.h>		/* UNIX standard function definitions */
-#include <fcntl.h>		/* File control definitions */
-#include <errno.h>		/* Error number definitions */
-#include <string.h>
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -546,7 +540,7 @@ int protodec_calculate_crc(int lengde, struct demod_state_t *d)
 {
 	int antallbytes = lengde / 8;
 	unsigned char *data =
-	    (unsigned char *) malloc(sizeof(unsigned char) *
+	    (unsigned char *) hmalloc(sizeof(unsigned char) *
 				     (antallbytes + 2));
 	int i, j;
 
@@ -565,7 +559,7 @@ int protodec_calculate_crc(int lengde, struct demod_state_t *d)
 		for (i = 0; i < 8; i++)
 			d->rbuffer[j * 8 + i] = (data[j] >> (7 - i)) & 1;
 	}
-	free(data);
+	hfree(data);
 	return (crc == 0x0f47);
 }
 
