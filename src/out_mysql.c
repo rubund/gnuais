@@ -21,7 +21,7 @@ struct mysql_state_t *myout_init()
 		hlog(LOG_CRIT, "Could not initialize MySQL library!");
 		return NULL;
 	}
-	//printf("Host: %s\nDB: %s\nuser: %s\npassword: %s\ntable: %s\n",mysql_host,mysql_dbname,mysql_username,mysql_password,mysql_table);
+	
 	if (!mysql_real_connect(&my->conn, mysql_host, mysql_user, mysql_password, mysql_db, 0, NULL, 0)) {
 		hlog(LOG_CRIT, "Could not connect to MySQL!");
 		return NULL;
