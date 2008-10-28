@@ -20,7 +20,7 @@ void signal_filter(short *buffer, int count, float *bufout)
 		0.003403655719012022, 0.0026929380837827921, 2.0942120342892902e-18, -0.0016600260278210044, -0.001315040048211813,
 		-1.2112550466221181e-18, 0.00091766606783494353, 0.00084686721675097942
 	};
-	static coeffs_l = 53;
+	static int coeffs_l = 53;
 	static short tmpbuf[53];
 	int i, j, tmp, tmp2;
 	double sum;
@@ -54,7 +54,7 @@ void signal_clockrecovery(float *bufin, int count, float *bufout)
 //      int mangler = (count % 5);
 //      int avstand = (count / 5) / mangler;
 	float sum = 0;
-	int i, j, k = 0;
+	int i, j;
 	for (i = 0; i < (count / 5); i++) {
 //              if (((i+1) % avstand) == 0) k++;
 		sum = 0;
