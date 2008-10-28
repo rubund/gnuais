@@ -26,7 +26,7 @@ void closedown(int sig)
 
 int main(int argc, char *argv[])
 {
-	int err, i;
+	int err;
 	done = 0;
 	snd_pcm_t *handle;
 	FILE *sound_fd = NULL;
@@ -158,5 +158,7 @@ int main(int argc, char *argv[])
 		"Received correctly: %d packets, wrong CRC: %d packets, wrong size: %d packets",
 		demod_state_a.receivedframes, demod_state_a.lostframes,
 		demod_state_a.lostframes2);
+	
+	return 0;
 }
 
