@@ -217,11 +217,11 @@ int do_sound_ch(int *dest, int argc, char **argv)
 	
 	if (strcasecmp(argv[1], "mono") == 0) {
 		*dest = SOUND_CHANNELS_MONO;
-	} else if (strcasecmp(argv[1], "both") == 1) {
+	} else if (strcasecmp(argv[1], "both") == 0) {
 		*dest = SOUND_CHANNELS_BOTH;
-	} else if (strcasecmp(argv[1], "left") == 1) {
+	} else if (strcasecmp(argv[1], "left") == 0) {
 		*dest = SOUND_CHANNELS_LEFT;
-	} else if (strcasecmp(argv[1], "right") == 1) {
+	} else if (strcasecmp(argv[1], "right") == 0) {
 		*dest = SOUND_CHANNELS_RIGHT;
 	} else {
 		hlog(LOG_CRIT, "SoundChannels value unknown: %s", argv[1]);
