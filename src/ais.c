@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 	int buffer_l;
 	float *buff_f, *buff_fs;
 	char *buff_b;
-	char lastbit = 0;
+	char lastbit_a = 0, lastbit_b = 0;
 	struct demod_state_t demod_state_a, demod_state_b;
 	struct serial_state_t *serial = NULL;
 	
@@ -76,9 +76,12 @@ int main(int argc, char *argv[])
 		serial = serial_init();
 	
 	/* initialize the AIS decoders */
-	protodec_initialize(&demod_state_a, serial);
-	if (sound_channels == SOUND_CHANNELS_BOTH)
-		protodec_initialize(&demod_state_b, serial);
+	hlog(LOG_DEBUG, "Initializing demodulator A");
+	protodec_initialize(&demod_state_a, serial, 'A');
+	if (sound_channels != SOUND_CHANNELS_MONO) {
+		hlog(LOG_DEBUG, "Initializing demodulator B");
+		protodec_initialize(&demod_state_b, serial, 'B');
+	}
 	
 	if (sound_device) {
 		if ((err = snd_pcm_open(&handle, sound_device, SND_PCM_STREAM_CAPTURE, 0)) < 0) {
@@ -133,10 +136,28 @@ int main(int argc, char *argv[])
 			input_read(handle, buffer, buffer_l);
 		}
 		
-		signal_filter(buffer, buffer_l, buff_f);
-		signal_clockrecovery(buff_f, buffer_l, buff_fs);
-		signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit);
-		protodec_decode(buff_b, buffer_l, &demod_state_a);
+		if (sound_channels == SOUND_CHANNELS_MONO) {
+			signal_filter(buffer, 1, 0, buffer_l, buff_f);
+			signal_clockrecovery(buff_f, buffer_l, buff_fs);
+			signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit_a);
+			protodec_decode(buff_b, buffer_l, &demod_state_a);
+		}
+		if (sound_channels == SOUND_CHANNELS_BOTH
+		    || sound_channels == SOUND_CHANNELS_RIGHT) {
+			/* ch a/0/right */
+			signal_filter(buffer, 2, 0, buffer_l, buff_f);
+			signal_clockrecovery(buff_f, buffer_l, buff_fs);
+			signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit_a);
+			protodec_decode(buff_b, buffer_l, &demod_state_a);
+		}
+		if (sound_channels == SOUND_CHANNELS_BOTH
+		    || sound_channels == SOUND_CHANNELS_LEFT) {	
+			/* ch b/1/left */
+			signal_filter(buffer, 2, 1, buffer_l, buff_f);
+			signal_clockrecovery(buff_f, buffer_l, buff_fs);
+			signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit_b);
+			protodec_decode(buff_b, buffer_l, &demod_state_b);
+		}
 	}
 	
 	hlog(LOG_NOTICE, "Closing down...");

@@ -53,7 +53,7 @@ gnuais_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(gnuais_LDFLAGS) \
 	$(LDFLAGS) -o $@
 am_gnuaissavesoundtofile_OBJECTS = savetofile.$(OBJEXT) \
 	input.$(OBJEXT) hmalloc.$(OBJEXT) hlog.$(OBJEXT) \
-	rwlock.$(OBJEXT)
+	rwlock.$(OBJEXT) cfg.$(OBJEXT) cfgfile.$(OBJEXT)
 gnuaissavesoundtofile_OBJECTS = $(am_gnuaissavesoundtofile_OBJECTS)
 gnuaissavesoundtofile_LDADD = $(LDADD)
 gnuaissavesoundtofile_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -173,7 +173,9 @@ gnuais_SOURCES = ais.c input.c signalin.c protodec.c \
 	cfgfile.c hmalloc.c cfg.c hlog.c rwlock.c
 
 gnuais_LDFLAGS = -pthread -lm -lasound  @mysqleller@
-gnuaissavesoundtofile_SOURCES = savetofile.c input.c hmalloc.c hlog.c rwlock.c
+gnuaissavesoundtofile_SOURCES = savetofile.c input.c \
+	hmalloc.c hlog.c rwlock.c cfg.c cfgfile.c
+
 gnuaissavesoundtofile_LDFLAGS = -pthread -lm -lasound 
 EXTRA_DIST = input.h signalin.h protodec.h ais.h \
 	serial.h out_mysql.h \

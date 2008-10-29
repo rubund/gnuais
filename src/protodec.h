@@ -17,6 +17,7 @@
 #define DBG(x)
 
 struct demod_state_t {
+	char chanid;
 	int state;
 	unsigned int offset;
 	int nskurr, npreamble, nstartsign, ndata, nstopsign;
@@ -37,7 +38,7 @@ struct demod_state_t {
 	struct serial_state_t *serial;
 };
 
-void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial);
+void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, char chanid);
 void protodec_reset(struct demod_state_t *d);
 void protodec_getdata(int bufferlengde, struct demod_state_t *d);
 void protodec_decode(char *in, int count, struct demod_state_t *d);

@@ -12,8 +12,9 @@
 #include "hmalloc.h"
 #include "cfg.h"
 
-void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial)
+void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, char chanid)
 {
+	d->chanid = chanid;
 	d->serial = serial;
 	
 	d->receivedframes = 0;
@@ -197,7 +198,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	if (skip_type[type])
 		return; // ignored by configuration
 	
-	printf("(cntr %ld type %d): ", cntr, type);
+	printf("(ch %c cntr %ld type %d): ", d->chanid, cntr, type);
 	switch (type) {
 	case 1:
 		longitude = protodec_henten(61, 28, d->rbuffer);

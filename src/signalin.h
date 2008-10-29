@@ -7,9 +7,9 @@
 
 
 
-void signal_filter(short *buffer, int count, float *bufout);
-void signal_clockrecovery(float *bufin, int count, float *bufout);
-void signal_bitslice(float *bufin, int count, char *bufout, char *last);
+extern void signal_filter(short *buffer, int buf_ch_num, int buf_ch_ofs, int count, float *bufout);
+extern void signal_clockrecovery(float *bufin, int count, float *bufout);
+extern void signal_bitslice(float *bufin, int count, char *bufout, char *last);
 
 
 

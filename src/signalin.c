@@ -3,9 +3,10 @@
 #endif
 
 #include "signalin.h"
+#include "hlog.h"
 
 
-void signal_filter(short *buffer, int count, float *bufout)
+void signal_filter(short *buffer, int buf_ch_num, int buf_ch_ofs, int count, float *bufout)
 {
 	static float coeffs[] = {
 		0.00084686721675097942, 0.00091766606783494353, -1.2112550466221181e-18, -0.001315040048211813, -0.0016600260278210044,
@@ -20,54 +21,67 @@ void signal_filter(short *buffer, int count, float *bufout)
 		0.003403655719012022, 0.0026929380837827921, 2.0942120342892902e-18, -0.0016600260278210044, -0.001315040048211813,
 		-1.2112550466221181e-18, 0.00091766606783494353, 0.00084686721675097942
 	};
+	
 	static int coeffs_l = 53;
-	static short tmpbuf[53];
+	static short tmpbuf[2][53];
+	
 	int i, j, tmp, tmp2;
 	double sum;
+	
+	/* check volume */
+	/* TODO: log it every now and then, if it's over the top... */
+	/*
+	short v;
+	short max = 0;
+	for (i = 0; i < count; i++) {
+		v = abs(buffer[ (i*buf_ch_num)+buf_ch_ofs ]);
+		if (v > max)
+			max = v;
+	}
+	hlog(LOG_DEBUG, "ch %d: level %.0f %%", buf_ch_ofs, (float)max / (float)32768 * (float)100);
+	*/
+		
 	for (i = 0; i < count; i++) {
 		sum = 0;
 		for (j = i; j < coeffs_l; j++) {
-			sum += coeffs[j - i] * ((float) tmpbuf[j] * (1.0 / 32768));
+			sum += coeffs[j - i] * ((float) tmpbuf[buf_ch_ofs][j] * (1.0 / 32768));
 		}
+		
 		if (i > coeffs_l)
 			tmp = coeffs_l;
 		else
 			tmp = i;
+			
 		tmp2 = i - coeffs_l;
+		
 		if (tmp2 > 0)
 			tmp2 = tmp2;
 		else
 			tmp2 = 0;
+			
 		for (j = 0; j < tmp; j++) {
-			sum += coeffs[j + coeffs_l - tmp] * ((float) buffer[tmp2 + j] * (1.0 / 32768));
+			sum += coeffs[j + coeffs_l - tmp] * ((float) buffer[ ((tmp2 + j) * buf_ch_num) + buf_ch_ofs ] * (1.0 / 32768));
 		}
+		
 		bufout[i] = sum;
 	}
+	
+	/* copy last coeffs_l samples to tmpbuf */
 	for (j = 0; j < coeffs_l; j++) {
-		tmpbuf[j] = buffer[count - coeffs_l + j];
+		tmpbuf[buf_ch_ofs][j] = buffer[ (count - coeffs_l + j) * buf_ch_num + buf_ch_ofs ];
 	}
-
 }
 
 void signal_clockrecovery(float *bufin, int count, float *bufout)
 {
-//      int mangler = (count % 5);
-//      int avstand = (count / 5) / mangler;
 	float sum = 0;
 	int i, j;
 	for (i = 0; i < (count / 5); i++) {
-//              if (((i+1) % avstand) == 0) k++;
 		sum = 0;
-		//      for(j=i;j<(count%5);j++)
-		//              sum += last[10];
 		for (j = 0; j < 5; j++)
 			sum += bufin[i * 5 + j];
 		bufout[i] = sum;
-		//printf("%d\n",k);
 	}
-	/*for(i=0;i<(count%5);i++)
-	   last[i] = bufin[]
-	 */
 }
 
 void signal_bitslice(float *bufin, int count, char *bufout, char *last)
