@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
 			hlog(LOG_CRIT, "Could not open sound file %s: %s", sound_in_file, strerror(errno));
 			return -1;
 		}
+		hlog(LOG_NOTICE, "Reading audio from file: %s", sound_in_file);
 		buffer_l = 1024;
 		int extra = buffer_l % 5;
 		buffer_l -= extra;
@@ -115,6 +116,7 @@ int main(int argc, char *argv[])
 			hlog(LOG_CRIT, "Could not open sound output file %s: %s", sound_out_file, strerror(errno));
 			return -1;
 		}
+		hlog(LOG_NOTICE, "Recording audio to file: %s", sound_out_file);
 	}
 	
 	buff_f = (float *) hmalloc(sizeof(float) * buffer_l);
