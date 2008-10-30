@@ -98,7 +98,7 @@ int input_read(snd_pcm_t * handle, short *buffer, int count)
 	return err;
 }
 
-void input_cleanup(snd_pcm_t * handle)
+void input_cleanup(snd_pcm_t *handle)
 {
 	snd_pcm_close(handle);
 }

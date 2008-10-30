@@ -11,6 +11,11 @@
 #include "out_mysql.h"
 #include "hmalloc.h"
 #include "cfg.h"
+#include "hlog.h"
+
+#define SERBUFFER_LEN	100
+char *serbuffer = NULL;
+char *nmea = NULL;
 
 void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, char chanid)
 {
@@ -24,6 +29,14 @@ void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial,
 	protodec_reset(d);
 	
 	d->seqnr = 0;
+	
+	d->buffer = hmalloc(DEMOD_BUFFER_LEN);
+	d->rbuffer = hmalloc(DEMOD_BUFFER_LEN);
+	
+	if (!serbuffer)
+		serbuffer = hmalloc(SERBUFFER_LEN);
+	if (!nmea)
+		nmea = hmalloc(SERBUFFER_LEN);
 }
 
 
@@ -42,11 +55,8 @@ void protodec_reset(struct demod_state_t *d)
 	d->bufferpos = 0;
 }
 
-#define SERBUFFER_LEN	100
-
 void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 {
-	char serbuffer[SERBUFFER_LEN];
 	int serbuffer_l;
 	
 	unsigned char type = protodec_henten(0, 6, d->rbuffer);
@@ -63,7 +73,6 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	unsigned char C, D;
 	unsigned char draught;
 	int m;
-	char nmea[100];
 	unsigned char sentences, sentencenum, nmeachk;
 	int senlen;
 	unsigned char fillbits;
@@ -458,8 +467,7 @@ void protodec_decode(char *in, int count, struct demod_state_t *d)
 					d->state = ST_DATA;
 					d->nstartsign = 0;
 					d->antallenner = 0;
-					memset(d->buffer, 0,
-					       250 * sizeof(char));
+					memset(d->buffer, 0, sizeof(d->buffer));
 					d->bufferpos = 0;
 				} else {
 					protodec_reset(d);
@@ -538,14 +546,19 @@ unsigned short protodec_sdlc_crc(unsigned char *data, unsigned len)	// Calculate
 
 int protodec_calculate_crc(int lengde, struct demod_state_t *d)
 {
-	int antallbytes = lengde / 8;
-	unsigned char *data =
-	    (unsigned char *) hmalloc(sizeof(unsigned char) *
-				     (antallbytes + 2));
+	int antallbytes;
+	unsigned char *data;
 	int i, j;
-
 	unsigned char tmp;
-
+	
+	if (lengde <= 0) {
+		hlog(LOG_ERR, "protodec_calculate_crc: length <= 0!");
+		return 0;
+	}
+	
+	antallbytes = lengde / 8;
+	data = (unsigned char *) hmalloc(sizeof(unsigned char) *
+				     (antallbytes + 2));
 	for (j = 0; j < antallbytes + 2; j++) {
 		tmp = 0;
 		for (i = 0; i < 8; i++)
@@ -554,7 +567,7 @@ int protodec_calculate_crc(int lengde, struct demod_state_t *d)
 	}
 	unsigned short crc = protodec_sdlc_crc(data, antallbytes + 2);
 //DBG(printf("CRC: %04x\n",crc));
-	memset(d->rbuffer, 0, 450 * sizeof(char));
+	memset(d->rbuffer, 0, sizeof(d->rbuffer));
 	for (j = 0; j < antallbytes; j++) {
 		for (i = 0; i < 8; i++)
 			d->rbuffer[j * 8 + i] = (data[j] >> (7 - i)) & 1;

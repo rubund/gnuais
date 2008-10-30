@@ -34,10 +34,12 @@ int main(int argc, char *argv[])
 	int channels;
 	short *buffer;
 	int buffer_l;
+	int buffer_read;
 	float *buff_f, *buff_fs;
 	char *buff_b;
 	char lastbit_a = 0, lastbit_b = 0;
-	struct demod_state_t demod_state_a, demod_state_b;
+	struct demod_state_t *demod_state_a = NULL;
+	struct demod_state_t *demod_state_b = NULL;
 	struct serial_state_t *serial = NULL;
 	
 	/* command line */
@@ -79,10 +81,12 @@ int main(int argc, char *argv[])
 	
 	/* initialize the AIS decoders */
 	hlog(LOG_DEBUG, "Initializing demodulator A");
-	protodec_initialize(&demod_state_a, serial, 'A');
+	demod_state_a = hmalloc(sizeof(*demod_state_a));
+	protodec_initialize(demod_state_a, serial, 'A');
 	if (sound_channels != SOUND_CHANNELS_MONO) {
 		hlog(LOG_DEBUG, "Initializing demodulator B");
-		protodec_initialize(&demod_state_b, serial, 'B');
+		demod_state_b = hmalloc(sizeof(*demod_state_b));
+		protodec_initialize(demod_state_b, serial, 'B');
 		channels = 2;
 	} else {
 		channels = 1;
@@ -144,21 +148,26 @@ int main(int argc, char *argv[])
 	while (!done) {
 		if (sound_in_fd) {
 			cntr += buffer_l;
-			if (fread(buffer, channels * sizeof(short), buffer_l, sound_in_fd) == 0)
+			buffer_read = fread(buffer, channels * sizeof(short), buffer_l, sound_in_fd);
+			if (buffer_read <= 0)
 				done = 1;
 		} else {
-			input_read(handle, buffer, buffer_l);
+			buffer_read = input_read(handle, buffer, buffer_l);
+			//printf("read %d\n", buffer_read);
 		}
 		
+		if (buffer_read <= 0)
+			continue;
+		
 		if (sound_out_fd) {
-			fwrite(buffer, channels * sizeof(short), buffer_l, sound_out_fd);
+			fwrite(buffer, channels * sizeof(short), buffer_read, sound_out_fd);
 		}
 		
 		if (sound_channels == SOUND_CHANNELS_MONO) {
 			signal_filter(buffer, 1, 0, buffer_l, buff_f);
 			signal_clockrecovery(buff_f, buffer_l, buff_fs);
 			signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit_a);
-			protodec_decode(buff_b, buffer_l, &demod_state_a);
+			protodec_decode(buff_b, buffer_l, demod_state_a);
 		}
 		if (sound_channels == SOUND_CHANNELS_BOTH
 		    || sound_channels == SOUND_CHANNELS_RIGHT) {
@@ -166,7 +175,7 @@ int main(int argc, char *argv[])
 			signal_filter(buffer, 2, 0, buffer_l, buff_f);
 			signal_clockrecovery(buff_f, buffer_l, buff_fs);
 			signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit_a);
-			protodec_decode(buff_b, buffer_l, &demod_state_a);
+			protodec_decode(buff_b, buffer_l, demod_state_a);
 		}
 		if (sound_channels == SOUND_CHANNELS_BOTH
 		    || sound_channels == SOUND_CHANNELS_LEFT) {	
@@ -174,7 +183,7 @@ int main(int argc, char *argv[])
 			signal_filter(buffer, 2, 1, buffer_l, buff_f);
 			signal_clockrecovery(buff_f, buffer_l, buff_fs);
 			signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit_b);
-			protodec_decode(buff_b, buffer_l, &demod_state_b);
+			protodec_decode(buff_b, buffer_l, demod_state_b);
 		}
 	}
 	
@@ -183,6 +192,7 @@ int main(int argc, char *argv[])
 		fclose(sound_in_fd);
 	} else {
 		input_cleanup(handle);
+		handle = NULL;
 	}
 	
 	if (sound_out_fd)
@@ -196,10 +206,23 @@ int main(int argc, char *argv[])
 	if (serial)
 		serial_close(serial);
 		
-	hlog(LOG_INFO,
-		"Received correctly: %d packets, wrong CRC: %d packets, wrong size: %d packets",
-		demod_state_a.receivedframes, demod_state_a.lostframes,
-		demod_state_a.lostframes2);
+	if (demod_state_a) {
+		hlog(LOG_INFO,
+			"A: Received correctly: %d packets, wrong CRC: %d packets, wrong size: %d packets",
+			demod_state_a->receivedframes, demod_state_a->lostframes,
+			demod_state_a->lostframes2);
+		hfree(demod_state_a);
+	}
+	
+	if (demod_state_b) {
+		hlog(LOG_INFO,
+			"B: Received correctly: %d packets, wrong CRC: %d packets, wrong size: %d packets",
+			demod_state_b->receivedframes, demod_state_b->lostframes,
+			demod_state_b->lostframes2);
+		hfree(demod_state_b);
+	}
+	
+	free_config();
 	
 	return 0;
 }

@@ -16,6 +16,9 @@
 // if you want to see all debug text
 #define DBG(x)
 
+#define DEMOD_BUFFER_LEN 450
+
+
 struct demod_state_t {
 	char chanid;
 	int state;
@@ -23,8 +26,8 @@ struct demod_state_t {
 	int nskurr, npreamble, nstartsign, ndata, nstopsign;
 	
 	int antallenner;
-	unsigned char buffer[450];
-	unsigned char rbuffer[450];
+	unsigned char *buffer;
+	unsigned char *rbuffer;
 	char *tbuffer;
 	int bufferpos;
 	char last;
