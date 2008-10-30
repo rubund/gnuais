@@ -1,4 +1,11 @@
 x.x.x:
+	Implemented decoding from a stereo sound card, either left, right, or
+	both channels at the same time. Supports two receivers on the two
+	AIS channels.
+	
+	Implemented sound peak level logging at configurable interval, or
+	every 30 seconds when the level is higher than 98%.
+	
 	Added configurable logging to stderr/syslog/log file.
 	
 	Added a nice configuration file and command line parser.
