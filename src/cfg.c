@@ -36,7 +36,7 @@
 #include "hlog.h"
 #include "cfgfile.h"
 
-#define HELPS	"Usage: " PACKAGE " [-c cfgfile] [-f (fork)] [-n <logname>] [-e <loglevel>] [-o <logdest>] [-r <logdir>] [-l <inputsoundfile>] [-h (help)]\n"
+#define HELPS	"Usage: " PACKAGE " [-c cfgfile] [-f (fork)] [-n <logname>] [-e <loglevel>] [-o <logdest>] [-r <logdir>] [-l <inputsoundfile>] [-s <recordsoundfile>] [-h (help)]\n"
 
 
 char def_cfgfile[] = PROGNAME ".conf";
@@ -53,7 +53,8 @@ char *mycall;
 char *myemail;
 
 char *sound_device;
-char *sound_file;
+char *sound_in_file;
+char *sound_out_file;
 int sound_channels = SOUND_CHANNELS_MONO;
 int sound_levellog = 0;
 
@@ -104,7 +105,8 @@ static struct cfgcmd cfg_cmds[] = {
 	{ "mysql_oldlimit",	_CFUNC_ do_int,		&mysql_oldlimit		},
 	
 	{ "sounddevice",	_CFUNC_ do_string,	&sound_device		},
-	{ "soundfile",		_CFUNC_ do_string,	&sound_file		},
+	{ "soundinfile",	_CFUNC_ do_string,	&sound_in_file		},
+	{ "soundoutfile",	_CFUNC_ do_string,	&sound_out_file		},
 	{ "soundchannels",	_CFUNC_ do_sound_ch,	&sound_channels		},
 	{ "soundlevellog",	_CFUNC_ do_int,		&sound_levellog	},
 	{ "serialport",		_CFUNC_ do_string,	&serial_port		},
@@ -371,12 +373,12 @@ int read_config(void)
 		failed = 1;
 	}
 	
-	if (!sound_file && !sound_device) {
+	if (!sound_in_file && !sound_device) {
 		sound_device = def_sound_device;
 		hlog(LOG_WARNING, "Config: SoundDevice is not defined - using: %s", sound_device);
 	}
 	
-	if (sound_file && sound_device) {
+	if (sound_in_file && sound_device) {
 		if (sound_device != def_sound_device)
 			hfree(sound_device);
 		sound_device = NULL;
@@ -435,7 +437,7 @@ void parse_cmdline(int argc, char *argv[])
 	int s, i;
 	int failed = 0;
 	
-	while ((s = getopt(argc, argv, "c:fn:r:e:o:l:?h")) != -1) {
+	while ((s = getopt(argc, argv, "c:fn:r:e:o:l:s:?h")) != -1) {
 	switch (s) {
 		case 'c':
 			cfgfile = hstrdup(optarg);
@@ -468,7 +470,10 @@ void parse_cmdline(int argc, char *argv[])
 			}
 			break;
 		case 'l':
-			sound_file = hstrdup(optarg);
+			sound_in_file = hstrdup(optarg);
+			break;
+		case 's':
+			sound_out_file = hstrdup(optarg);
 			break;
 		case '?':
 		case 'h':

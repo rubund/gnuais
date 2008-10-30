@@ -29,7 +29,9 @@ int main(int argc, char *argv[])
 	int err;
 	done = 0;
 	snd_pcm_t *handle;
-	FILE *sound_fd = NULL;
+	FILE *sound_in_fd = NULL;
+	FILE *sound_out_fd = NULL;
+	int channels;
 	short *buffer;
 	int buffer_l;
 	float *buff_f, *buff_fs;
@@ -81,6 +83,9 @@ int main(int argc, char *argv[])
 	if (sound_channels != SOUND_CHANNELS_MONO) {
 		hlog(LOG_DEBUG, "Initializing demodulator B");
 		protodec_initialize(&demod_state_b, serial, 'B');
+		channels = 2;
+	} else {
+		channels = 1;
 	}
 	
 	if (sound_device) {
@@ -91,18 +96,25 @@ int main(int argc, char *argv[])
 		
 		if (input_initialize(handle, &buffer, &buffer_l) < 0)
 			return -1;
-	} else if (sound_file) {
-		if ((sound_fd = fopen(sound_file, "r")) == NULL) {
-			hlog(LOG_CRIT, "Could not open sound file");
+	} else if (sound_in_file) {
+		if ((sound_in_fd = fopen(sound_in_file, "r")) == NULL) {
+			hlog(LOG_CRIT, "Could not open sound file %s: %s", sound_in_file, strerror(errno));
 			return -1;
 		}
 		buffer_l = 1024;
 		int extra = buffer_l % 5;
 		buffer_l -= extra;
-		buffer = (short *) hmalloc((buffer_l) * sizeof(short));
+		buffer = (short *) hmalloc(buffer_l * sizeof(short) * channels);
 	} else {
 		hlog(LOG_CRIT, "Neither sound device or sound file configured.");
 		return -1;
+	}
+	
+	if (sound_out_file) {
+		if ((sound_out_fd = fopen(sound_out_file, "w")) == NULL) {
+			hlog(LOG_CRIT, "Could not open sound output file %s: %s", sound_out_file, strerror(errno));
+			return -1;
+		}
 	}
 	
 	buff_f = (float *) hmalloc(sizeof(float) * buffer_l);
@@ -128,12 +140,16 @@ int main(int argc, char *argv[])
 	hlog(LOG_NOTICE, "Started");
 	
 	while (!done) {
-		if (sound_fd) {
+		if (sound_in_fd) {
 			cntr += buffer_l;
-			if (fread(buffer, 2, buffer_l, sound_fd) == 0)
+			if (fread(buffer, channels * sizeof(short), buffer_l, sound_in_fd) == 0)
 				done = 1;
 		} else {
 			input_read(handle, buffer, buffer_l);
+		}
+		
+		if (sound_out_fd) {
+			fwrite(buffer, channels * sizeof(short), buffer_l, sound_out_fd);
 		}
 		
 		if (sound_channels == SOUND_CHANNELS_MONO) {
@@ -161,11 +177,14 @@ int main(int argc, char *argv[])
 	}
 	
 	hlog(LOG_NOTICE, "Closing down...");
-	if (sound_fd) {
-		fclose(sound_fd);
+	if (sound_in_fd) {
+		fclose(sound_in_fd);
 	} else {
 		input_cleanup(handle);
 	}
+	
+	if (sound_out_fd)
+		fclose(sound_out_fd);
 	
 	hfree(buffer);
 	hfree(buff_f);
