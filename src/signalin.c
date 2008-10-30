@@ -94,13 +94,15 @@ void signal_filter(short *buffer, int buf_ch_num, int buf_ch_ofs, int count, flo
 
 void signal_clockrecovery(float *bufin, int count, float *bufout)
 {
+	/* This function needs improvements!!! */
 	float sum = 0;
 	int i, j;
 	for (i = 0; i < (count / 5); i++) {
 		sum = 0;
-		for (j = 0; j < 5; j++)
+/*		for (j = 0; j < 5; j++)
 			sum += bufin[i * 5 + j];
-		bufout[i] = sum;
+		bufout[i] = sum;*/
+		bufout[i] = bufin[i*5];   // This actually works better than take the average of 5 samples.
 	}
 }
 
