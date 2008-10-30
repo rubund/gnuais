@@ -18,7 +18,7 @@
  */
 
 /*
- *	config.c: configuration parsing, based on Tomi's code
+ *	cfg.c: configuration parsing, based on Tomi's code
  */
 
 #include <string.h>
@@ -55,6 +55,7 @@ char *myemail;
 char *sound_device;
 char *sound_file;
 int sound_channels = SOUND_CHANNELS_MONO;
+int sound_levellog = 0;
 
 char *mysql_host;
 char *mysql_db;
@@ -105,6 +106,7 @@ static struct cfgcmd cfg_cmds[] = {
 	{ "sounddevice",	_CFUNC_ do_string,	&sound_device		},
 	{ "soundfile",		_CFUNC_ do_string,	&sound_file		},
 	{ "soundchannels",	_CFUNC_ do_sound_ch,	&sound_channels		},
+	{ "soundlevellog",	_CFUNC_ do_int,		&sound_levellog	},
 	{ "serialport",		_CFUNC_ do_string,	&serial_port		},
 	{ "serial_port",	_CFUNC_ do_string,	&serial_port		},
 	

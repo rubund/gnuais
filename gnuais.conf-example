@@ -14,6 +14,18 @@ LogDir logs
 # input of the third card.
 SoundDevice default
 
+# Which sound channels to decode:
+#   mono - ask the sound card for a single mono channel
+#   left - ask the sound card for a stereo signal and decode the left channel
+#   right - ask the sound card for a stereo signal and decode the right channel
+#   both - ask the sound card for a stereo signal and decode both channels
+SoundChannels mono
+
+# Print sound peak level information in the log every N seconds.
+# The input level should be around 70-90% - if it's 100% the signal is too loud
+# and distorted. Tune your mixer settings.
+SoundLevelLog 1
+
 # MySQL database configuration
 #mysql_host localhost
 #mysql_db yourmysqldatabase

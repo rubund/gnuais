@@ -1,9 +1,13 @@
+
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+#include <time.h>
+
 #include "signalin.h"
 #include "hlog.h"
+#include "cfg.h"
 
 
 void signal_filter(short *buffer, int buf_ch_num, int buf_ch_ofs, int count, float *bufout)
@@ -24,13 +28,13 @@ void signal_filter(short *buffer, int buf_ch_num, int buf_ch_ofs, int count, flo
 	
 	static int coeffs_l = 53;
 	static short tmpbuf[2][53];
+	static time_t last_levellog[2] = { 0, 0 };
+	time_t level_distance;
 	
 	int i, j, tmp, tmp2;
 	double sum;
 	
-	/* check volume */
-	/* TODO: log it every now and then, if it's over the top... */
-	/*
+	/* check level */
 	short v;
 	short max = 0;
 	for (i = 0; i < count; i++) {
@@ -38,9 +42,19 @@ void signal_filter(short *buffer, int buf_ch_num, int buf_ch_ofs, int count, flo
 		if (v > max)
 			max = v;
 	}
-	hlog(LOG_DEBUG, "ch %d: level %.0f %%", buf_ch_ofs, (float)max / (float)32768 * (float)100);
-	*/
-		
+	
+	float level = (float)max / (float)32768 * (float)100;
+	level_distance = time(NULL) - last_levellog[buf_ch_ofs];
+	
+	if (level > 98.0 && (level_distance >= 30 || level_distance >= sound_levellog)) {
+		hlog(LOG_NOTICE, "Level on ch %d too high: %.0f %%", buf_ch_ofs, level);
+		time(&last_levellog[buf_ch_ofs]);
+	} else if (sound_levellog != 0 && level_distance >= sound_levellog) {
+		hlog(LOG_INFO, "Level on ch %d: %.0f %%", buf_ch_ofs, level);
+		time(&last_levellog[buf_ch_ofs]);
+	}
+	
+	/* get on with the filtering... */
 	for (i = 0; i < count; i++) {
 		sum = 0;
 		for (j = i; j < coeffs_l; j++) {

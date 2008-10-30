@@ -62,6 +62,7 @@ extern char *serial_port;
 #define SOUND_CHANNELS_LEFT 3
 #define SOUND_CHANNELS_RIGHT 4
 extern int sound_channels;
+extern int sound_levellog;
 
 extern char *cfgfile;
 extern char *pidfile;
