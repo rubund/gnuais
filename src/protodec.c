@@ -17,6 +17,8 @@
 char *serbuffer = NULL;
 char *nmea = NULL;
 
+int collect_positions = 0;
+
 void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, char chanid)
 {
 	d->chanid = chanid;
@@ -65,7 +67,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	unsigned long mmsi = protodec_henten(8, 30, d->rbuffer);
 	unsigned long day, hour, minute, second, year, month;
 	int longitude, latitude;
-	unsigned short coarse, sog, heading;
+	unsigned short course, sog, heading;
 	char name[21];
 	char destination[21];
 	char rateofturn, underway;
@@ -216,24 +218,24 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		latitude = protodec_henten(38 + 22 + 29, 27, d->rbuffer);
 		if (((latitude >> 26) & 1) == 1)
 			latitude |= 0xf8000000;
-		coarse = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
+		course = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
 		sog = protodec_henten(50, 10, d->rbuffer);
 		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
 		underway = protodec_henten(38, 2, d->rbuffer);
 		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
 		printf("%09ld %10f %10f %5f %5f %5i %5d %5d",
-			mmsi, (float) latitude / 600000,
-			(float) longitude / 600000,
-			(float) coarse / 10, (float) sog / 10,
+			mmsi, (float) latitude / 600000.0,
+			(float) longitude / 600000.0,
+			(float) course / 10.0, (float) sog / 10.0,
 			rateofturn, underway, heading);
 		printf("  ( !%s )", nmea);
 		
 		if (my) {
-			myout_ais_position(my, (int) tid, (int) mmsi,
-				(float) latitude / 600000,
-				(float) longitude / 600000,
-				(float) heading, (float) coarse / 10,
-				(float) sog / 10);
+			myout_ais_position(my, (int) tid, mmsi,
+				(float) latitude / 600000.0,
+				(float) longitude / 600000.0,
+				(float) heading, (float) course / 10.0,
+				(float) sog / 10.0);
 		}
 		
 		break;
@@ -245,24 +247,24 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		latitude = protodec_henten(38 + 22 + 29, 27, d->rbuffer);
 		if (((latitude >> 26) & 1) == 1)
 			latitude |= 0xf8000000;
-		coarse = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
+		course = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
 		sog = protodec_henten(50, 10, d->rbuffer);
 		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
 		underway = protodec_henten(38, 2, d->rbuffer);
 		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
 		printf("%09ld %10f %10f %5f %5f %5i %5d %5d",
-			mmsi, (float) latitude / 600000,
-			(float) longitude / 600000,
-			(float) coarse / 10, (float) sog / 10,
+			mmsi, (float) latitude / 600000.0,
+			(float) longitude / 600000.0,
+			(float) course / 10.0, (float) sog / 10.0,
 			rateofturn, underway, heading);
 		printf("  ( !%s )", nmea);
 		
 		if (my) {
-			myout_ais_position(my, (int) tid, (int) mmsi,
-				(float) latitude / 600000,
-				(float) longitude / 600000,
-				(float) heading, (float) coarse / 10,
-				(float) sog / 10);
+			myout_ais_position(my, (int) tid, mmsi,
+				(float) latitude / 600000.0,
+				(float) longitude / 600000.0,
+				(float) heading, (float) course / 10.0,
+				(float) sog / 10.0);
 		}
 		
 		break;
@@ -274,24 +276,24 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		latitude = protodec_henten(38 + 22 + 29, 27, d->rbuffer);
 		if (((latitude >> 26) & 1) == 1)
 			latitude |= 0xf8000000;
-		coarse = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
+		course = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
 		sog = protodec_henten(50, 10, d->rbuffer);
 		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
 		underway = protodec_henten(38, 2, d->rbuffer);
 		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
 		printf("%09ld %10f %10f %5f %5f %5i %5d %5d",
-			mmsi, (float) latitude / 600000,
-			(float) longitude / 600000,
-			(float) coarse / 10, (float) sog / 10,
+			mmsi, (float) latitude / 600000.0,
+			(float) longitude / 600000.0,
+			(float) course / 10.0, (float) sog / 10.0,
 			rateofturn, underway, heading);
 		printf("  ( !%s )", nmea);
 		
 		if (my) {
-			myout_ais_position(my, (int) tid, (int) mmsi,
-				(float) latitude / 600000,
-				(float) longitude / 600000,
-				(float) heading, (float) coarse / 10,
-				(float) sog / 10);
+			myout_ais_position(my, (int) tid, mmsi,
+				(float) latitude / 600000.0,
+				(float) longitude / 600000.0,
+				(float) heading, (float) course / 10.0,
+				(float) sog / 10.0);
 		}
 		
 		break;
@@ -306,20 +308,20 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		longitude = protodec_henten(79, 28, d->rbuffer);
 		if (((longitude >> 27) & 1) == 1)
 			longitude |= 0xF0000000;
-		longit = ((float) longitude) / 10000 / 60;
+		longit = ((float) longitude) / 10000.0 / 60.0;
 		latitude = protodec_henten(107, 27, d->rbuffer);
 		if (((latitude >> 26) & 1) == 1)
 			latitude |= 0xf8000000;
-		latit = ((float) latitude) / 10000 / 60;
+		latit = ((float) latitude) / 10000.0 / 60.0;
 		printf("%09ld %ld %ld %ld %ld %ld %ld %f %f",
 			mmsi, year, month, day, hour, minute,
 			second, latit, longit);
 		printf("  ( !%s )", nmea);
 		
 		if (my) {
-			myout_ais_basestation(my, (int) tid, (int) mmsi,
-				(float) latitude / 600000,
-				(float) longitude / 600000);
+			myout_ais_basestation(my, (int) tid, mmsi,
+				(float) latitude / 600000.0,
+				(float) longitude / 600000.0);
 		}
 		
 		break;
@@ -349,13 +351,13 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		// printf("Length: %d\nWidth: %d\nDraught: %f\n",A+B,C+D,(float)draught/10);
 		printf("%09ld %s %s %d %d %f", mmsi,
 			name, destination, A + B, C + D,
-			(float) draught / 10);
+			(float) draught / 10.0);
 		printf("  ( !%s )", nmea);
 		
 		if (my) {
-			myout_ais_vesseldata(my, (int) tid, (int) mmsi,
+			myout_ais_vesseldata(my, (int) tid, mmsi,
 				name, destination,
-				(float) draught / 10,
+				(float) draught / 10.0,
 				(int) A, (int) B, (int) C, (int) D);
 		}
 		
