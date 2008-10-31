@@ -45,18 +45,17 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_gnuais_OBJECTS = ais.$(OBJEXT) input.$(OBJEXT) signalin.$(OBJEXT) \
 	protodec.$(OBJEXT) serial.$(OBJEXT) out_mysql.$(OBJEXT) \
-	cache.$(OBJEXT) cfgfile.$(OBJEXT) hmalloc.$(OBJEXT) \
-	cfg.$(OBJEXT) hlog.$(OBJEXT) rwlock.$(OBJEXT) splay.$(OBJEXT) \
-	spsymbol.$(OBJEXT) crc32.$(OBJEXT)
+	out_json.$(OBJEXT) cache.$(OBJEXT) cfgfile.$(OBJEXT) \
+	hmalloc.$(OBJEXT) cfg.$(OBJEXT) hlog.$(OBJEXT) \
+	rwlock.$(OBJEXT) splay.$(OBJEXT) spsymbol.$(OBJEXT) \
+	crc32.$(OBJEXT)
 gnuais_OBJECTS = $(am_gnuais_OBJECTS)
 gnuais_LDADD = $(LDADD)
 gnuais_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(gnuais_LDFLAGS) \
 	$(LDFLAGS) -o $@
 am_gnuaissavesoundtofile_OBJECTS = savetofile.$(OBJEXT) \
 	input.$(OBJEXT) hmalloc.$(OBJEXT) hlog.$(OBJEXT) \
-	rwlock.$(OBJEXT) cfg.$(OBJEXT) cfgfile.$(OBJEXT) \
-	cache.$(OBJEXT) splay.$(OBJEXT) spsymbol.$(OBJEXT) \
-	crc32.$(OBJEXT)
+	rwlock.$(OBJEXT) cfg.$(OBJEXT) cfgfile.$(OBJEXT)
 gnuaissavesoundtofile_OBJECTS = $(am_gnuaissavesoundtofile_OBJECTS)
 gnuaissavesoundtofile_LDADD = $(LDADD)
 gnuaissavesoundtofile_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -172,18 +171,17 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 gnuais_SOURCES = ais.c input.c signalin.c protodec.c \
-	serial.c out_mysql.c cache.c \
+	serial.c out_mysql.c out_json.c cache.c \
 	cfgfile.c hmalloc.c cfg.c hlog.c rwlock.c \
 	splay.c spsymbol.c crc32.c
 
 gnuais_LDFLAGS = -pthread -lm -lasound  @mysqleller@
 gnuaissavesoundtofile_SOURCES = savetofile.c input.c \
-	hmalloc.c hlog.c rwlock.c cfg.c cfgfile.c cache.c \
-	splay.c spsymbol.c crc32.c
+	hmalloc.c hlog.c rwlock.c cfg.c cfgfile.c
 
 gnuaissavesoundtofile_LDFLAGS = -pthread -lm -lasound 
 EXTRA_DIST = input.h signalin.h protodec.h ais.h \
-	serial.h out_mysql.h cache.h \
+	serial.h out_mysql.h out_json.h cache.h \
 	cfgfile.h hmalloc.h cfg.h hlog.h \
 	rwlock.h splay.h crc32.h
 
@@ -266,6 +264,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hlog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hmalloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/out_json.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/out_mysql.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protodec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rwlock.Po@am__quote@

@@ -13,6 +13,7 @@
 #include "hlog.h"
 #include "cfg.h"
 #include "out_mysql.h"
+#include "out_json.h"
 #include "cache.h"
 
 #include "config.h"
@@ -77,8 +78,10 @@ int main(int argc, char *argv[])
 	signal(SIGINT, closedown);
 	
 	/* initialize position cache for timed JSON AIS transmission */
-	if (uplink_config)
+	if (uplink_config) {
 		cache_init();
+		jsonout_init();
+	}
 	
 	/* initialize serial port for NMEA output */
 	if (serial_port)
@@ -212,7 +215,7 @@ int main(int argc, char *argv[])
 		serial_close(serial);
 	
 	if (cache_positions)
-		cache_free();
+		cache_deinit();
 		
 	if (demod_state_a) {
 		hlog(LOG_INFO,

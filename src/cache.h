@@ -23,11 +23,33 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "splay.h"
+
+/* an entry in the cache */
+struct cache_ent {
+	time_t received_t;
+	int mmsi;
+	float lat;
+	float lon;
+	float hdg;
+	float course;
+	float sog;
+	char *name;
+	char *destination;
+	int A;
+	int B;
+	int C;
+	int D;
+};
 
 extern int cache_positions;
 
-extern int cache_init();
-extern int cache_free();
+extern int cache_init(void);
+extern int cache_deinit(void);
+
+extern void cache_free_entry(struct cache_ent *e);
+extern int cache_free(struct sptree *sp);
+extern struct sptree *cache_rotate(void);
 
 extern int cache_position(
 	int received_t, int mmsi, float lat, float lon,

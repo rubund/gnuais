@@ -27,7 +27,7 @@
 #include <time.h>
 #include <string.h>
 
-#include "splay.h"
+#include "cache.h"
 #include "crc32.h"
 #include "hlog.h"
 #include "hmalloc.h"
@@ -45,28 +45,11 @@ int cache_positions = 0;
 struct sptree *cache_spt;
 pthread_mutex_t cache_spt_mut = PTHREAD_MUTEX_INITIALIZER;
 
-/* an entry in the cache */
-struct cache_ent {
-	time_t received_t;
-	int mmsi;
-	float lat;
-	float lon;
-	float hdg;
-	float course;
-	float sog;
-	char *name;
-	char *destination;
-	int A;
-	int B;
-	int C;
-	int D;
-};
-
 /*
  *	initialize the cache
  */
  
-int cache_init()
+int cache_init(void)
 {
 	CACHE_DBG(hlog(LOG_DEBUG, "cache_init"));
 	
@@ -87,10 +70,23 @@ int cache_init()
 }
 
 /*
- *	uninitialize the cache, free memory
+ *	free a cache entry
  */
 
-int cache_free()
+void cache_free_entry(struct cache_ent *e)
+{
+	if (e->name)
+		hfree(e->name);
+	if (e->destination)
+		hfree(e->destination);
+	hfree(e);
+}
+
+/*
+ *	uninitialize a copy of the cache
+ */
+
+int cache_free(struct sptree *sp)
 {
 	struct spblk *x, *nextx;
 	struct cache_ent *e;
@@ -98,25 +94,54 @@ int cache_free()
 	
 	CACHE_DBG(hlog(LOG_DEBUG, "cache_free"));
 	
-	pthread_mutex_lock(&cache_spt_mut);
-	
-	for (x = sp_fhead(cache_spt); x != NULL; x = nextx) {
+		for (x = sp_fhead(sp); x != NULL; x = nextx) {
 		nextx = sp_fnext(x);
 		e = (struct cache_ent *)x->data;
-		if (e->name)
-			hfree(e->name);
-		if (e->destination)
-			hfree(e->destination);
-		hfree(e);
-		sp_delete(x, cache_spt);
+		cache_free_entry(e);
+		sp_delete(x, sp);
 		freed++;
 	}
-	
-	pthread_mutex_unlock(&cache_spt_mut);
 	
 	hlog(LOG_DEBUG, "cache_free: %d ship entries freed", freed);
 	
 	return 0;
+}
+
+/*
+ *	uninitialize the main cache
+ */
+
+int cache_deinit(void)
+{
+	int ret;
+	
+	pthread_mutex_lock(&cache_spt_mut);
+	
+	ret = cache_free(cache_spt);
+	
+	pthread_mutex_unlock(&cache_spt_mut);
+	
+	return ret;
+}
+
+/*
+ *	get the existing cache (for export) and create a new one
+ */
+
+struct sptree *cache_rotate(void)
+{
+	struct sptree *got_spt;
+	
+	pthread_mutex_lock(&cache_spt_mut);
+	
+	got_spt = cache_spt;
+	
+	cache_spt = sp_init();
+	cache_spt->symbols = NULL;
+
+	pthread_mutex_unlock(&cache_spt_mut);
+	
+	return got_spt;
 }
 
 /*
