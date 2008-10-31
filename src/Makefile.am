@@ -8,7 +8,8 @@ gnuais_SOURCES = ais.c input.c signalin.c protodec.c \
 gnuais_LDFLAGS = -pthread -lm -lasound  @mysqleller@
 
 gnuaissavesoundtofile_SOURCES = savetofile.c input.c \
-	hmalloc.c hlog.c rwlock.c cfg.c cfgfile.c cache.c
+	hmalloc.c hlog.c rwlock.c cfg.c cfgfile.c cache.c \
+	splay.c spsymbol.c crc32.c
 gnuaissavesoundtofile_LDFLAGS = -pthread -lm -lasound 
 
 EXTRA_DIST = input.h signalin.h protodec.h ais.h \

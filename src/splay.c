@@ -38,7 +38,7 @@
 #include	"hmalloc.h"
 #include	"cfg.h"
 
-int dump_splay = 1;
+int dump_splay = 0;
 
 extern struct spblk * _sp_enq __((struct spblk *, struct sptree *));
 			/* insert item into the tree */

@@ -77,7 +77,8 @@ int main(int argc, char *argv[])
 	signal(SIGINT, closedown);
 	
 	/* initialize position cache for timed JSON AIS transmission */
-	cache_init();
+	if (uplink_config)
+		cache_init();
 	
 	/* initialize serial port for NMEA output */
 	if (serial_port)
@@ -210,7 +211,8 @@ int main(int argc, char *argv[])
 	if (serial)
 		serial_close(serial);
 	
-	cache_free();
+	if (cache_positions)
+		cache_free();
 		
 	if (demod_state_a) {
 		hlog(LOG_INFO,

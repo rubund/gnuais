@@ -77,14 +77,15 @@ extern char *mysql_password;
 extern int mysql_keepsmall;
 extern int mysql_oldlimit;
 
+#define UPLINK_JSON 1
+
 struct uplink_config_t {
 	struct uplink_config_t *next;
 	struct uplink_config_t **prevp; /* pointer to the *next pointer in the previous node */
 	
+	int proto;
 	const char *name;			/* name of socket */
-	const char *proto;
-	const char *host;			/* hostname or dotted-quad IP to bind the UDP socket to, default INADDR_ANY */
-	const char *port;
+	const char *url;
 };
 
 extern struct uplink_config_t *uplink_config;
