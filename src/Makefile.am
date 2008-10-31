@@ -5,7 +5,7 @@ gnuais_SOURCES = ais.c input.c signalin.c protodec.c \
 	serial.c out_mysql.c out_json.c cache.c \
 	cfgfile.c hmalloc.c cfg.c hlog.c rwlock.c \
 	splay.c spsymbol.c crc32.c
-gnuais_LDFLAGS = -pthread -lm -lasound  @mysqleller@
+gnuais_LDFLAGS = -pthread -lm -lasound @mysqleller@ @curleller@
 
 gnuaissavesoundtofile_SOURCES = savetofile.c input.c \
 	hmalloc.c hlog.c rwlock.c cfg.c cfgfile.c

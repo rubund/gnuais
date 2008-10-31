@@ -141,6 +141,7 @@ bindir = @bindir@
 build_alias = @build_alias@
 builddir = @builddir@
 buildgui = @buildgui@
+curleller = @curleller@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
@@ -175,7 +176,7 @@ gnuais_SOURCES = ais.c input.c signalin.c protodec.c \
 	cfgfile.c hmalloc.c cfg.c hlog.c rwlock.c \
 	splay.c spsymbol.c crc32.c
 
-gnuais_LDFLAGS = -pthread -lm -lasound  @mysqleller@
+gnuais_LDFLAGS = -pthread -lm -lasound @mysqleller@ @curleller@
 gnuaissavesoundtofile_SOURCES = savetofile.c input.c \
 	hmalloc.c hlog.c rwlock.c cfg.c cfgfile.c
 

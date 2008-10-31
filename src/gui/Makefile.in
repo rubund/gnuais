@@ -120,6 +120,7 @@ bindir = @bindir@
 build_alias = @build_alias@
 builddir = @builddir@
 buildgui = @buildgui@
+curleller = @curleller@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@

@@ -3,6 +3,9 @@
 /* Define to 1 if you have <alsa/asoundlib.h> header file */
 #undef HAVE_ALSA
 
+/* Define to 1 if you have <curl/curl.h> header file */
+#undef HAVE_CURL
+
 /* Define to 1 if you have GTK 2.0 installed */
 #undef HAVE_GTK
 

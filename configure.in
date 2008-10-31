@@ -2,17 +2,24 @@ AC_INIT(src/ais.c)
 
 AC_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE(gnuais,0.0.7)
+
 mysqleller=""
 AC_CHECK_HEADER(mysql/mysql.h,[AC_DEFINE([HAVE_MYSQL],[1],[Define to 1 if you have <mysql/mysql.h> header file])
 mysqleller="-lmysqlclient"],[echo "Not building with MySQL support because you don't have those libraries installed."])
+
+AC_CHECK_HEADER(curl/curl.h,[AC_DEFINE([HAVE_CURL],[1],[Define to 1 if you have <curl/curl.h> header file])
+curleller="-lcurl"],[echo "Not building with JSON AIS export support because libcurl is not installed."])
+
 AC_CHECK_HEADER(alsa/asoundlib.h,[AC_DEFINE([HAVE_ALSA],[1],[Define to 1 if you have <alsa/asoundlib.h> header file])
 ],[echo "";AC_MSG_ERROR(You don't have ALSA installed which you will need to get things working. GNU AIS is using the newer sound API ALSA instead of the old OSS. ***)])
+
 buildgui=""
 AM_PATH_GTK_2_0(2.0.0,[AC_DEFINE([HAVE_GTK],[1],[Define to 1 if you have GTK 2.0 installed]) 
 buildgui="gui"],[echo "Not building GnuAIS GUI because you don't have GTK 2.0 or higher"])
 
 
 AC_SUBST([mysqleller],[$mysqleller])
+AC_SUBST([curleller],[$curleller])
 AC_SUBST([buildgui],[$buildgui])
 
 

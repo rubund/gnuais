@@ -22,10 +22,15 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "config.h"
 
 #include <pthread.h>
-#include <curl/curl.h>
 #include <unistd.h>
+
+#ifdef HAVE_CURL
+#define ENABLE_JSONAIS_CURL
+#include <curl/curl.h>
+#endif
 
 #include "out_json.h"
 #include "splay.h"
@@ -34,6 +39,8 @@
 #include "hmalloc.h"
 
 pthread_t jsonout_th;
+
+#ifdef ENABLE_JSONAIS_CURL
 
 /*
  *	export the contents of the buffer splaytree
@@ -108,3 +115,12 @@ int jsonout_init(void)
 	return 0;
 }
 
+#else // ENABLE_JSONAIS_CURL
+
+int jsonout_init(void)
+{
+	hlog(LOG_CRIT, "jsonout_init: JSON AIS export not available in this build");
+	return -1;
+}
+
+#endif

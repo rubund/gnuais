@@ -79,8 +79,10 @@ int main(int argc, char *argv[])
 	
 	/* initialize position cache for timed JSON AIS transmission */
 	if (uplink_config) {
-		cache_init();
-		jsonout_init();
+		if (cache_init())
+			exit(1);
+		if (jsonout_init())
+			exit(1);
 	}
 	
 	/* initialize serial port for NMEA output */
