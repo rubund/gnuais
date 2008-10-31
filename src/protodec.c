@@ -12,12 +12,11 @@
 #include "hmalloc.h"
 #include "cfg.h"
 #include "hlog.h"
+#include "cache.h"
 
 #define SERBUFFER_LEN	100
 char *serbuffer = NULL;
 char *nmea = NULL;
-
-int collect_positions = 0;
 
 void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, char chanid)
 {
@@ -80,8 +79,8 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	unsigned char fillbits;
 	float longit, latit;
 	int k, hvor, letter;
-	time_t tid;
-	time(&tid);
+	time_t received_t;
+	time(&received_t);
 
 	DBG(printf("Bufferlen: %d,", bufferlengde));
 	
@@ -194,7 +193,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		DBG(printf("End of nmea->ascii-loop with sentences:%d sentencenum:%d\n",
 			sentences, sentencenum));
 		if (my)
-			myout_nmea(my, (int) tid, nmea);
+			myout_nmea(my, (int) received_t, nmea);
 	}
 	while (sentencenum < sentences);
 	//multipart message ready. Increase seqnr for next one
@@ -230,13 +229,19 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			rateofturn, underway, heading);
 		printf("  ( !%s )", nmea);
 		
-		if (my) {
-			myout_ais_position(my, (int) tid, mmsi,
+		if (my)
+			myout_ais_position(my, (int) received_t, mmsi,
 				(float) latitude / 600000.0,
 				(float) longitude / 600000.0,
 				(float) heading, (float) course / 10.0,
 				(float) sog / 10.0);
-		}
+		
+		if (cache_positions)
+			cache_position(received_t, mmsi,
+				(float) latitude / 600000.0,
+				(float) longitude / 600000.0,
+				(float) heading, (float) course / 10.0,
+				(float) sog / 10.0);
 		
 		break;
 		
@@ -259,13 +264,19 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			rateofturn, underway, heading);
 		printf("  ( !%s )", nmea);
 		
-		if (my) {
-			myout_ais_position(my, (int) tid, mmsi,
+		if (my)
+			myout_ais_position(my, (int) received_t, mmsi,
 				(float) latitude / 600000.0,
 				(float) longitude / 600000.0,
 				(float) heading, (float) course / 10.0,
 				(float) sog / 10.0);
-		}
+		
+		if (cache_positions)
+			cache_position(received_t, mmsi,
+				(float) latitude / 600000.0,
+				(float) longitude / 600000.0,
+				(float) heading, (float) course / 10.0,
+				(float) sog / 10.0);
 		
 		break;
 		
@@ -288,13 +299,19 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			rateofturn, underway, heading);
 		printf("  ( !%s )", nmea);
 		
-		if (my) {
-			myout_ais_position(my, (int) tid, mmsi,
+		if (my)
+			myout_ais_position(my, (int) received_t, mmsi,
 				(float) latitude / 600000.0,
 				(float) longitude / 600000.0,
 				(float) heading, (float) course / 10.0,
 				(float) sog / 10.0);
-		}
+		
+		if (cache_positions)
+			cache_position(received_t, mmsi,
+				(float) latitude / 600000.0,
+				(float) longitude / 600000.0,
+				(float) heading, (float) course / 10.0,
+				(float) sog / 10.0);
 		
 		break;
 		
@@ -318,11 +335,16 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			second, latit, longit);
 		printf("  ( !%s )", nmea);
 		
-		if (my) {
-			myout_ais_basestation(my, (int) tid, mmsi,
+		if (my)
+			myout_ais_basestation(my, (int) received_t, mmsi,
 				(float) latitude / 600000.0,
 				(float) longitude / 600000.0);
-		}
+		
+		if (cache_positions)
+			cache_position(received_t, mmsi,
+				(float) latitude / 600000.0,
+				(float) longitude / 600000.0,
+				0.0, 0.0, 0.0);
 		
 		break;
 		
@@ -354,12 +376,15 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			(float) draught / 10.0);
 		printf("  ( !%s )", nmea);
 		
-		if (my) {
-			myout_ais_vesseldata(my, (int) tid, mmsi,
+		if (my)
+			myout_ais_vesseldata(my, (int) received_t, mmsi,
 				name, destination,
 				(float) draught / 10.0,
 				(int) A, (int) B, (int) C, (int) D);
-		}
+		
+		if (cache_positions)
+			cache_vesseldata(received_t, mmsi,
+				name, destination, A, B, C, D);
 		
 		break;
 		
