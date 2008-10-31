@@ -548,7 +548,7 @@ int protodec_calculate_crc(int lengde, struct demod_state_t *d)
 {
 	int antallbytes;
 	unsigned char *data;
-	int i, j;
+	int i, j, x;
 	unsigned char tmp;
 	
 	if (lengde <= 0) {
@@ -557,8 +557,7 @@ int protodec_calculate_crc(int lengde, struct demod_state_t *d)
 	}
 	
 	antallbytes = lengde / 8;
-	data = (unsigned char *) hmalloc(sizeof(unsigned char) *
-				     (antallbytes + 2));
+	data = (unsigned char *) hmalloc(sizeof(unsigned char) * (antallbytes + 2));
 	for (j = 0; j < antallbytes + 2; j++) {
 		tmp = 0;
 		for (i = 0; i < 8; i++)
@@ -569,8 +568,16 @@ int protodec_calculate_crc(int lengde, struct demod_state_t *d)
 //DBG(printf("CRC: %04x\n",crc));
 	memset(d->rbuffer, 0, sizeof(d->rbuffer));
 	for (j = 0; j < antallbytes; j++) {
-		for (i = 0; i < 8; i++)
-			d->rbuffer[j * 8 + i] = (data[j] >> (7 - i)) & 1;
+		for (i = 0; i < 8; i++) {
+			x = j * 8 + i;
+			if (x >= DEMOD_BUFFER_LEN) {
+				hlog(LOG_ERR, "protodec_calculate_crc: would run over rbuffer length");
+				hfree(data);
+				return 0;
+			} else {
+				d->rbuffer[x] = (data[j] >> (7 - i)) & 1;
+			}
+		}
 	}
 	hfree(data);
 	return (crc == 0x0f47);
