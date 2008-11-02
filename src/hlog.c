@@ -93,7 +93,7 @@ char *str_append(char *s, const char *fmt, ...)
 	va_start(args, fmt);
 	vsnprintf(buf, LOG_LEN, fmt, args);
 	va_end(args);
-	buf[LOG_LEN-1] = 0;
+	buf[LOG_LEN-1] = 0; /* maybe not necessary... paranoid? */
 	
 	len = strlen(s);
 	ret = hrealloc(s, len + strlen(buf) + 1);
