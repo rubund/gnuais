@@ -95,7 +95,11 @@ char *str_append(char *s, const char *fmt, ...)
 	va_end(args);
 	buf[LOG_LEN-1] = 0; /* maybe not necessary... paranoid? */
 	
-	len = strlen(s);
+	if (s)
+		len = strlen(s);
+	else
+		len = 0;
+		
 	ret = hrealloc(s, len + strlen(buf) + 1);
 	strcpy(ret + len, buf);
 	
