@@ -349,6 +349,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		break;
 		
 	case 5:
+		/* get name */
 		hvor = 112;
 		for (k = 0; k < 20; k++) {
 			letter = protodec_henten(hvor, 6, d->rbuffer);
@@ -356,7 +357,16 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			hvor += 6;
 		}
 		name[20] = 0;
+		/* remove trailing spaces */
+		for (k = 19; k >= 0; k--) {
+			if (name[k] == ' ')
+				name[k] = 0;
+			else
+				k = -1;
+		}
 		// printf("Name: %s\n", name);
+		
+		/* get destination */
 		hvor = 120 + 106 + 68 + 8;
 		for (k = 0; k < 20; k++) {
 			letter = protodec_henten(hvor, 6, d->rbuffer);
@@ -364,6 +374,14 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			hvor += 6;
 		}
 		destination[20] = 0;
+		/* remove trailing spaces */
+		for (k = 19; k >= 0; k--) {
+			if (destination[k] == ' ')
+				destination[k] = 0;
+			else
+				k = -1;
+		}
+		
 		// printf("Destination: %s\n",destination);
 		A = protodec_henten(240, 9, d->rbuffer);
 		B = protodec_henten(240 + 9, 9, d->rbuffer);
@@ -571,19 +589,20 @@ unsigned short protodec_sdlc_crc(unsigned char *data, unsigned len)	// Calculate
 
 }
 
-int protodec_calculate_crc(int lengde, struct demod_state_t *d)
+int protodec_calculate_crc(int length, struct demod_state_t *d)
 {
 	int antallbytes;
 	unsigned char *data;
 	int i, j, x;
 	unsigned char tmp;
 	
-	if (lengde <= 0) {
+	/*
+	if (length <= 0) {
 		hlog(LOG_ERR, "protodec_calculate_crc: length <= 0!");
 		return 0;
-	}
+	}*/
 	
-	antallbytes = lengde / 8;
+	antallbytes = length / 8;
 	data = (unsigned char *) hmalloc(sizeof(unsigned char) * (antallbytes + 2));
 	for (j = 0; j < antallbytes + 2; j++) {
 		tmp = 0;

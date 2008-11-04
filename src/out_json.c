@@ -37,6 +37,7 @@
 #include "cache.h"
 #include "hlog.h"
 #include "hmalloc.h"
+#include "cfg.h"
 
 pthread_t jsonout_th;
 
@@ -49,11 +50,24 @@ pthread_t jsonout_th;
 static void jsonout_export(void)
 {
 	unsigned int entries = 0;
-	uint32_t *i;
+	unsigned int exported = 0;
 	struct spblk *x, *nextx;
 	//char *post = hstrdup("c=dnshits");
 	struct sptree *sp;
 	struct cache_ent *e;
+	char *json = NULL;
+	int got_pos;
+	
+	/* fill in initial json */
+	json = str_append(json,
+		"{\n"
+		"\t\"protocol\": \"jsonais\",\n"
+		"\t\"groups\": [\n" /* start of groups */
+		"\t\t{\n" /* start of group */
+		"\t\t\t\"path\": [ { \"name\": \"%s\" } ],\n"
+		"\t\t\t\"msgs\": [\n",
+		mycall
+		);
 	
 	/* get the current position cache */
 	sp = cache_rotate();
@@ -64,8 +78,37 @@ static void jsonout_export(void)
 		nextx = sp_fnext(x);
 		e = (struct cache_ent *)x->data;
 		
-		hlog(LOG_DEBUG, "jsonout: exporting MMSI %d", e->mmsi);
-		//post = str_append(post, "%s%s/%u", (entries == 1) ? "&z=" : ",", pname(x->key), *i);
+		got_pos = ((e->lat > 0.0001 || e->lat < -0.0001) && (e->lon > 0.0001 || e->lon < -0.0001));
+		
+		if ((e->mmsi) && ( (got_pos) || (e->name) ) ) {
+			hlog(LOG_DEBUG, "jsonout: exporting MMSI %d", e->mmsi);
+			json = str_append(json,
+				"%s{\"msgtype\": \"sp\", \"mmsi\": %d",
+				(exported == 0) ? "" : ",\n",
+				e->mmsi
+				);
+			
+			if (got_pos)
+				json = str_append(json, ", \"lat\": %.7f, \"lon\": %.7f",
+					e->lat,
+					e->lon
+					);
+			
+			if (e->course >= 0)
+				str_append(json, ", \"course\": %.1f", e->course);
+			if (e->hdg >= 0)
+				str_append(json, ", \"heading\": %.1f", e->hdg);
+			if (e->sog >= 0)
+				str_append(json, ", \"speed\": %.1f", e->sog);
+			if (e->name)
+				str_append(json, ", \"shipname\": \"%s\"", e->name);
+			if (e->destination)
+				str_append(json, ", \"destination\": \"%s\"", e->destination);
+			
+			str_append(json, "}");
+			
+			exported++;
+		}
 		
 		cache_free_entry(e);
 		
@@ -81,9 +124,25 @@ static void jsonout_export(void)
 	hfree(post);
 	*/
 	
-	/* clean up in case */
+	json = str_append(json,
+		"\n\n"
+		"\t\t\t]\n" /* end of message array */
+		"\t\t}\n" /* end of the message group */
+		"\t]\n" /* end of groups */
+		"}\n" /* end of the whole json blob */
+		);
+	
+	/* clean up */
 	sp_null(sp);
 	hfree(sp);
+	
+	hlog(LOG_DEBUG, "jsonout: %s", json);
+	
+	if (exported) {
+		/* send out */
+	}
+	
+	hfree(json);
 }
 
 /*

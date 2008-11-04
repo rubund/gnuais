@@ -32,6 +32,7 @@
 #include "hlog.h"
 #include "hmalloc.h"
 
+/*#define DEBUG_CACHE*/
 #ifdef DEBUG_CACHE
 #define CACHE_DBG(x) x
 #else
@@ -172,9 +173,9 @@ static struct cache_ent *cache_get(int mmsi)
 		/* floats need to be set separately */
 		e->lat = 0;
 		e->lon = 0;
-		e->hdg = 0;
-		e->course = 0;
-		e->sog = 0;
+		e->hdg = -1;
+		e->course = -1;
+		e->sog = -1;
 	}
 	
 	return e;
@@ -216,12 +217,13 @@ int cache_vesseldata(int received_t, int mmsi, char *name, char *destination, in
 {
 	struct cache_ent *e;
 	
-	CACHE_DBG(hlog(LOG_DEBUG, "cache_vesseldata %d", mmsi));
+	CACHE_DBG(hlog(LOG_DEBUG, "cache_vesseldata %d: name '%s' dest '%s'", mmsi, name, destination));
 	
 	pthread_mutex_lock(&cache_spt_mut);
 	
 	e = cache_get(mmsi);
 	
+	e->mmsi = mmsi;
 	e->received_t = received_t;
 	if (!e->name || strcmp(e->name, name) != 0) {
 		if (e->name)
