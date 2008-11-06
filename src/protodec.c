@@ -56,6 +56,23 @@ void protodec_reset(struct demod_state_t *d)
 	d->bufferpos = 0;
 }
 
+/*
+ *	Mark trailing spaces as NULL bytes in a string
+ */
+
+static void remove_trailing_spaces(char *s, int len)
+{
+	int i;
+	
+	s[len] = 0;
+	for (i = len-1; i >= 0; i--) {
+		if (s[i] == ' ' || s[i] == 0)
+			s[i] = 0;
+		else
+			i = -1;
+	}
+}
+
 void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 {
 	int serbuffer_l;
@@ -64,12 +81,15 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	if (type < 1 || type > 9)
 		return;
 	unsigned long mmsi = protodec_henten(8, 30, d->rbuffer);
+	unsigned long imo;
+	unsigned int shiptype;
 	unsigned long day, hour, minute, second, year, month;
 	int longitude, latitude;
 	unsigned short course, sog, heading;
+	char callsign[7];
 	char name[21];
 	char destination[21];
-	char rateofturn, underway;
+	char rateofturn, navstat;
 	unsigned int A, B;
 	unsigned char C, D;
 	unsigned char draught;
@@ -81,7 +101,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	int k, hvor, letter;
 	time_t received_t;
 	time(&received_t);
-
+	
 	DBG(printf("Bufferlen: %d,", bufferlengde));
 	
 	if (bufferlengde % 6 > 0) {
@@ -211,75 +231,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	printf("(ch %c cntr %ld type %d): ", d->chanid, cntr, type);
 	switch (type) {
 	case 1:
-		longitude = protodec_henten(61, 28, d->rbuffer);
-		if (((longitude >> 27) & 1) == 1)
-			longitude |= 0xF0000000;
-		latitude = protodec_henten(38 + 22 + 29, 27, d->rbuffer);
-		if (((latitude >> 26) & 1) == 1)
-			latitude |= 0xf8000000;
-		course = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
-		sog = protodec_henten(50, 10, d->rbuffer);
-		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
-		underway = protodec_henten(38, 2, d->rbuffer);
-		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
-		printf("%09ld %10f %10f %5f %5f %5i %5d %5d",
-			mmsi, (float) latitude / 600000.0,
-			(float) longitude / 600000.0,
-			(float) course / 10.0, (float) sog / 10.0,
-			rateofturn, underway, heading);
-		printf("  ( !%s )", nmea);
-		
-		if (my)
-			myout_ais_position(my, (int) received_t, mmsi,
-				(float) latitude / 600000.0,
-				(float) longitude / 600000.0,
-				(float) heading, (float) course / 10.0,
-				(float) sog / 10.0);
-		
-		if (cache_positions)
-			cache_position(received_t, mmsi,
-				(float) latitude / 600000.0,
-				(float) longitude / 600000.0,
-				(float) heading, (float) course / 10.0,
-				(float) sog / 10.0);
-		
-		break;
-		
 	case 2:
-		longitude = protodec_henten(61, 28, d->rbuffer);
-		if (((longitude >> 27) & 1) == 1)
-			longitude |= 0xF0000000;
-		latitude = protodec_henten(38 + 22 + 29, 27, d->rbuffer);
-		if (((latitude >> 26) & 1) == 1)
-			latitude |= 0xf8000000;
-		course = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
-		sog = protodec_henten(50, 10, d->rbuffer);
-		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
-		underway = protodec_henten(38, 2, d->rbuffer);
-		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
-		printf("%09ld %10f %10f %5f %5f %5i %5d %5d",
-			mmsi, (float) latitude / 600000.0,
-			(float) longitude / 600000.0,
-			(float) course / 10.0, (float) sog / 10.0,
-			rateofturn, underway, heading);
-		printf("  ( !%s )", nmea);
-		
-		if (my)
-			myout_ais_position(my, (int) received_t, mmsi,
-				(float) latitude / 600000.0,
-				(float) longitude / 600000.0,
-				(float) heading, (float) course / 10.0,
-				(float) sog / 10.0);
-		
-		if (cache_positions)
-			cache_position(received_t, mmsi,
-				(float) latitude / 600000.0,
-				(float) longitude / 600000.0,
-				(float) heading, (float) course / 10.0,
-				(float) sog / 10.0);
-		
-		break;
-		
 	case 3:
 		longitude = protodec_henten(61, 28, d->rbuffer);
 		if (((longitude >> 27) & 1) == 1)
@@ -290,13 +242,13 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		course = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
 		sog = protodec_henten(50, 10, d->rbuffer);
 		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
-		underway = protodec_henten(38, 2, d->rbuffer);
+		navstat = protodec_henten(38, 2, d->rbuffer);
 		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
 		printf("%09ld %10f %10f %5f %5f %5i %5d %5d",
 			mmsi, (float) latitude / 600000.0,
 			(float) longitude / 600000.0,
 			(float) course / 10.0, (float) sog / 10.0,
-			rateofturn, underway, heading);
+			rateofturn, navstat, heading);
 		printf("  ( !%s )", nmea);
 		
 		if (my)
@@ -312,7 +264,6 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 				(float) longitude / 600000.0,
 				(float) heading, (float) course / 10.0,
 				(float) sog / 10.0);
-		
 		break;
 		
 	case 4:
@@ -349,6 +300,21 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		break;
 		
 	case 5:
+		/* get IMO number */
+		imo = protodec_henten(40, 30, d->rbuffer);
+		//printf("--- 5: mmsi %lu imo %lu\n", mmsi, imo);
+		
+		/* get callsign */
+		hvor = 70;
+		for (k = 0; k < 6; k++) {
+			letter = protodec_henten(hvor, 6, d->rbuffer);
+			protodec_bokstavtabell(letter, callsign, k);
+			hvor += 6;
+		}
+		callsign[6] = 0;
+		remove_trailing_spaces(callsign, 6);
+		//printf("Callsign: '%s'\n", callsign);
+		
 		/* get name */
 		hvor = 112;
 		for (k = 0; k < 20; k++) {
@@ -357,14 +323,8 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			hvor += 6;
 		}
 		name[20] = 0;
-		/* remove trailing spaces */
-		for (k = 19; k >= 0; k--) {
-			if (name[k] == ' ')
-				name[k] = 0;
-			else
-				k = -1;
-		}
-		// printf("Name: %s\n", name);
+		remove_trailing_spaces(name, 20);
+		//printf("Name: '%s'\n", name);
 		
 		/* get destination */
 		hvor = 120 + 106 + 68 + 8;
@@ -374,15 +334,13 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			hvor += 6;
 		}
 		destination[20] = 0;
-		/* remove trailing spaces */
-		for (k = 19; k >= 0; k--) {
-			if (destination[k] == ' ')
-				destination[k] = 0;
-			else
-				k = -1;
-		}
+		remove_trailing_spaces(destination, 20);
+		//printf("Destination: '%s'\n",destination);
 		
-		// printf("Destination: %s\n",destination);
+		/* type of ship and cargo */
+		shiptype = protodec_henten(232, 8, d->rbuffer);
+		
+		/* dimensions and reference GPS position */
 		A = protodec_henten(240, 9, d->rbuffer);
 		B = protodec_henten(240 + 9, 9, d->rbuffer);
 		C = protodec_henten(240 + 9 + 9, 6, d->rbuffer);
