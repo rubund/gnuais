@@ -259,10 +259,12 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 				(float) sog / 10.0);
 		
 		if (cache_positions)
-			cache_position(received_t, mmsi,
+			cache_position(received_t, mmsi, navstat,
 				(float) latitude / 600000.0,
 				(float) longitude / 600000.0,
-				(float) heading, (float) course / 10.0,
+				heading,
+				(float) course / 10.0,
+				rateofturn,
 				(float) sog / 10.0);
 		break;
 		
@@ -292,10 +294,10 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 				(float) longitude / 600000.0);
 		
 		if (cache_positions)
-			cache_position(received_t, mmsi,
+			cache_position(received_t, mmsi, 0,
 				(float) latitude / 600000.0,
 				(float) longitude / 600000.0,
-				0.0, 0.0, 0.0);
+				0, 0.0, 0, 0.0);
 		
 		break;
 		
@@ -359,8 +361,8 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 				(int) A, (int) B, (int) C, (int) D);
 		
 		if (cache_positions)
-			cache_vesseldata(received_t, mmsi,
-				name, destination, A, B, C, D);
+			cache_vesseldata(received_t, mmsi, imo, callsign,
+				name, destination, shiptype, A, B, C, D);
 		
 		break;
 		

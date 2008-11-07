@@ -29,13 +29,17 @@
 struct cache_ent {
 	time_t received_t;
 	int mmsi;
+	int imo;
 	float lat;
 	float lon;
-	float hdg;
+	int hdg;
 	float course;
 	float sog;
+	char *callsign;
 	char *name;
 	char *destination;
+	int shiptype;
+	int navstat;
 	int A;
 	int B;
 	int C;
@@ -52,11 +56,11 @@ extern int cache_free(struct sptree *sp);
 extern struct sptree *cache_rotate(void);
 
 extern int cache_position(
-	int received_t, int mmsi, float lat, float lon,
-	float hdg, float course, float sog);
+	int received_t, int mmsi, int navstat, float lat, float lon,
+	int hdg, float course, int rateofturn, float sog);
 
 extern int cache_vesseldata(
-	int received_t, int mmsi,
-	char *name, char *destination,
-	int A, int B, int C, int D);
+	int received_t, int mmsi, int imo,
+	char *callsign, char *name, char *destination,
+	int shiptype, int A, int B, int C, int D);
 

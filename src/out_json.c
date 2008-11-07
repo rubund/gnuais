@@ -94,12 +94,20 @@ static void jsonout_export(void)
 					e->lon
 					);
 			
+			if (e->imo >= 0)
+				str_append(json, ", \"imo\": %d", e->imo);
 			if (e->course >= 0)
 				str_append(json, ", \"course\": %.1f", e->course);
 			if (e->hdg >= 0)
-				str_append(json, ", \"heading\": %.1f", e->hdg);
+				str_append(json, ", \"heading\": %d", e->hdg);
 			if (e->sog >= 0)
 				str_append(json, ", \"speed\": %.1f", e->sog);
+			if (e->shiptype >= 0)
+				str_append(json, ", \"shiptype\": %d", e->shiptype);
+			if (e->navstat >= 0)
+				str_append(json, ", \"status\": %d", e->navstat);
+			if (e->callsign)
+				str_append(json, ", \"callsign\": \"%s\"", e->callsign);
 			if (e->name)
 				str_append(json, ", \"shipname\": \"%s\"", e->name);
 			if (e->destination)

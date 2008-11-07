@@ -80,6 +80,8 @@ void cache_free_entry(struct cache_ent *e)
 		hfree(e->name);
 	if (e->destination)
 		hfree(e->destination);
+	if (e->callsign)
+		hfree(e->callsign);
 	hfree(e);
 }
 
@@ -176,6 +178,9 @@ static struct cache_ent *cache_get(int mmsi)
 		e->hdg = -1;
 		e->course = -1;
 		e->sog = -1;
+		e->shiptype = -1;
+		e->imo = -1;
+		e->navstat = -1;
 	}
 	
 	return e;
@@ -185,7 +190,9 @@ static struct cache_ent *cache_get(int mmsi)
  *	cache a ship's position
  */
 
-int cache_position(int received_t, int mmsi, float lat, float lon, float hdg, float course, float sog)
+int cache_position(
+	int received_t, int mmsi, int navstat, float lat, float lon,
+	int hdg, float course, int rateofturn, float sog)
 {
 	struct cache_ent *e;
 	
@@ -203,6 +210,7 @@ int cache_position(int received_t, int mmsi, float lat, float lon, float hdg, fl
 	e->hdg = hdg;
 	e->course = course;
 	e->sog = sog;
+	e->navstat = navstat;
 	
 	pthread_mutex_unlock(&cache_spt_mut);
 	
@@ -213,7 +221,9 @@ int cache_position(int received_t, int mmsi, float lat, float lon, float hdg, fl
  *	cache static vessel data
  */
 
-int cache_vesseldata(int received_t, int mmsi, char *name, char *destination, int A, int B, int C, int D)
+int cache_vesseldata(int received_t, int mmsi, int imo,
+	char *callsign, char *name, char *destination,
+	int shiptype, int A, int B, int C, int D)
 {
 	struct cache_ent *e;
 	
@@ -224,7 +234,13 @@ int cache_vesseldata(int received_t, int mmsi, char *name, char *destination, in
 	e = cache_get(mmsi);
 	
 	e->mmsi = mmsi;
+	e->imo = imo;
 	e->received_t = received_t;
+	if (!e->callsign || strcmp(e->callsign, callsign) != 0) {
+		if (e->callsign)
+			hfree(e->callsign);
+		e->callsign = hstrdup(callsign);
+	}
 	if (!e->name || strcmp(e->name, name) != 0) {
 		if (e->name)
 			hfree(e->name);
@@ -235,6 +251,7 @@ int cache_vesseldata(int received_t, int mmsi, char *name, char *destination, in
 			hfree(e->destination);
 		e->destination = hstrdup(destination);
 	}
+	e->shiptype = shiptype;
 	e->A = A;
 	e->B = B;
 	e->C = C;
