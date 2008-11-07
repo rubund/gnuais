@@ -113,6 +113,16 @@ static void jsonout_export(void)
 			if (e->destination)
 				str_append(json, ", \"destination\": \"%s\"", e->destination);
 			
+			if (e->A >= 0 && e->B >= 0) {
+				str_append(json, ", \"length\": %d", e->A + e->B);
+				str_append(json, ", \"ref_front\": %d", e->A);
+			}
+			
+			if (e->C >= 0 && e->D >= 0) {
+				str_append(json, ", \"width\": %d", e->C + e->D);
+				str_append(json, ", \"ref_left\": %d", e->C);
+			}
+			
 			str_append(json, "}");
 			
 			exported++;

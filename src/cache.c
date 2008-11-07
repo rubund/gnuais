@@ -181,6 +181,7 @@ static struct cache_ent *cache_get(int mmsi)
 		e->shiptype = -1;
 		e->imo = -1;
 		e->navstat = -1;
+		e->A = e->B = e->C = e->D = -1;
 	}
 	
 	return e;
