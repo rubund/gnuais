@@ -44,6 +44,101 @@ pthread_t jsonout_th;
 #ifdef ENABLE_JSONAIS_CURL
 
 /*
+ *	a dummy curl response data handler - it'll get to handle whatever
+ *	the upstream server gives us back
+ */
+
+size_t curl_wdata(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+	return size * nmemb;
+}
+
+
+/*
+ *	send a single json POST request to an upstream server
+ */
+
+static int jsonout_post_single(struct curl_httppost *post, const char *url)
+{
+	CURL *ch;
+	CURLcode r;
+	long retcode = 200;
+	
+	if (!(ch = curl_easy_init())) {
+		hlog(LOG_ERR, "curl_easy_init() returned NULL");
+		return 1;
+	}
+	
+	do {
+		if ((r = curl_easy_setopt(ch, CURLOPT_HTTPPOST, post))) {
+			hlog(LOG_ERR, "curl_easy_setopt(CURLOPT_HTTPPOST) failed: %s", curl_easy_strerror(r));
+			break;
+		}
+		
+		if ((r = curl_easy_setopt(ch, CURLOPT_URL, url))) {
+			hlog(LOG_ERR, "curl_easy_setopt(CURLOPT_URL) failed: %s (%s)", curl_easy_strerror(r), url);
+			break;
+		}
+		
+		if ((r = curl_easy_setopt(ch, CURLOPT_WRITEFUNCTION, &curl_wdata))) {
+			hlog(LOG_ERR, "curl_easy_setopt(CURLOPT_WRITEFUNCTION) failed: %s", curl_easy_strerror(r));
+			break;
+		}
+		
+		if ((r = curl_easy_setopt(ch, CURLOPT_NOPROGRESS, 1))) {
+			hlog(LOG_ERR, "curl_easy_setopt(CURLOPT_NOPROGRESS) failed: %s", curl_easy_strerror(r));
+			break;
+		}
+		if ((r = curl_easy_setopt(ch, CURLOPT_VERBOSE, 0))) {
+			hlog(LOG_ERR, "curl_easy_setopt(CURLOPT_VERBOSE) failed: %s", curl_easy_strerror(r));
+			break;
+		}
+		
+		if ((r = curl_easy_perform(ch))) {
+			hlog(LOG_ERR, "curl_easy_perform() failed: %s (%s)", curl_easy_strerror(r), url);
+			break;
+		}
+		
+		if ((r = curl_easy_getinfo(ch, CURLINFO_RESPONSE_CODE, &retcode))) {
+			hlog(LOG_ERR, "curl_easy_getinfo(CURLINFO_RESPONSE_CODE) failed: %s (%s)", curl_easy_strerror(r), url);
+			break;
+		}
+	} while (0);
+	
+	curl_easy_cleanup(ch);
+	
+	if (retcode != 200) {
+		hlog(LOG_ERR, "JSON AIS export: server for %s returned %ld\n", url, retcode);
+		r = -1;
+	}
+	
+	return (r);
+}
+
+/*
+ *	produce a curl form structure containing the JSON data, and send
+ *	it to all upstream servers one by one
+ */
+
+static void jsonout_post_all(char *json)
+{
+	struct uplink_config_t *up;
+	struct curl_httppost *cpost = NULL, *last = NULL;
+	
+	curl_formadd(&cpost, &last,
+		CURLFORM_COPYNAME, "jsonais",
+		CURLFORM_CONTENTTYPE, "application/json",
+		CURLFORM_PTRCONTENTS, json,
+		CURLFORM_END);
+	
+	for (up = uplink_config; (up); up = up->next)
+		if (up->proto == UPLINK_JSON)
+			jsonout_post_single(cpost, up->url);
+	
+	curl_formfree(cpost);
+}
+
+/*
  *	export the contents of the buffer splaytree
  */
 
@@ -133,15 +228,6 @@ static void jsonout_export(void)
 		sp_delete(x, sp);
 	}
 	
-	//printf("POST data: %s\n", post);
-	/*
-	if ((url) && (entries)) {
-		while (post_stats(url, post))
-			sleep(60);
-	}
-	hfree(post);
-	*/
-	
 	json = str_append(json,
 		"\n\n"
 		"\t\t\t]\n" /* end of message array */
@@ -157,7 +243,8 @@ static void jsonout_export(void)
 	hlog(LOG_DEBUG, "jsonout: %s", json);
 	
 	if (exported) {
-		/* send out */
+		/* if we have some entries, send them out */
+		jsonout_post_all(json);
 	}
 	
 	hfree(json);
