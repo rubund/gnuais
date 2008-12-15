@@ -154,7 +154,7 @@ int time_jsonais(time_t *t, char *buf, int buflen)
 		dt.tm_min,
 		dt.tm_sec);
 	
-	hlog(LOG_DEBUG, "time_jsonais: %d => %s", *t, buf);
+	//hlog(LOG_DEBUG, "time_jsonais: %d => %s", *t, buf);
 	
 	return i;
 }
