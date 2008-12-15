@@ -20,7 +20,7 @@
 #ifndef LOG_H
 #define LOG_H
 
-#define LOG_LEN	2048
+#define LOG_LEN	8192
 
 #define L_STDERR        1	/* Log to stderror */
 #define L_SYSLOG        2	/* Log to syslog */
