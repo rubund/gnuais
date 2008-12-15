@@ -227,7 +227,7 @@ int cache_position(
 
 int cache_vesseldata(int received_t, int mmsi, int imo,
 	char *callsign, char *name, char *destination,
-	int shiptype, int A, int B, int C, int D)
+	int shiptype, int A, int B, int C, int D, float draught)
 {
 	struct cache_ent *e;
 	
@@ -260,6 +260,7 @@ int cache_vesseldata(int received_t, int mmsi, int imo,
 	e->B = B;
 	e->C = C;
 	e->D = D;
+	e->draught = draught;
 	
 	pthread_mutex_unlock(&cache_spt_mut);
 	

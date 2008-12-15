@@ -277,6 +277,9 @@ static void jsonout_export(void)
 				json = str_append(json, ", \"ref_front\": %d", e->A);
 			}
 			
+			if (e->draught >= 0)
+				json = str_append(json, ", \"draught\": %.1f", e->draught);
+			
 			if (e->C >= 0 && e->D >= 0) {
 				json = str_append(json, ", \"width\": %d", e->C + e->D);
 				json = str_append(json, ", \"ref_left\": %d", e->C);

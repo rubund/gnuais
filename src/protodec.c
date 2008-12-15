@@ -372,7 +372,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		
 		if (cache_positions)
 			cache_vesseldata(received_t, mmsi, imo, callsign,
-				name, destination, shiptype, A, B, C, D);
+				name, destination, shiptype, A, B, C, D, draught / 10.0);
 		
 		break;
 		
@@ -560,7 +560,8 @@ unsigned short protodec_sdlc_crc(unsigned char *data, unsigned len)	// Calculate
 int protodec_calculate_crc(int length_bits, struct demod_state_t *d)
 {
 	int length_bytes;
-	unsigned char *data;
+	unsigned char *buf;
+	int buflen;
 	int i, j, x;
 	unsigned char tmp;
 	
@@ -570,29 +571,38 @@ int protodec_calculate_crc(int length_bits, struct demod_state_t *d)
 	}
 	
 	length_bytes = length_bits / 8;
-	data = (unsigned char *) hmalloc(sizeof(unsigned char) * (length_bytes + 2));
-	for (j = 0; j < length_bytes + 2; j++) {
+	buflen = length_bytes + 2;
+	
+	/* what is this? */
+	buf = (unsigned char *) hmalloc(sizeof(*buf) * buflen);
+	for (j = 0; j < buflen; j++) {
 		tmp = 0;
 		for (i = 0; i < 8; i++)
 			tmp |= (((d->buffer[i + 8 * j]) << (i)));
-		data[j] = tmp;
+		buf[j] = tmp;
 	}
-	unsigned short crc = protodec_sdlc_crc(data, length_bytes + 2);
+	
+	/* ok, here's the actual CRC calculation */
+	unsigned short crc = protodec_sdlc_crc(buf, buflen);
 	//DBG(printf("CRC: %04x\n",crc));
+	
+	/* what is this? */
 	memset(d->rbuffer, 0, sizeof(d->rbuffer));
 	for (j = 0; j < length_bytes; j++) {
 		for (i = 0; i < 8; i++) {
 			x = j * 8 + i;
 			if (x >= DEMOD_BUFFER_LEN) {
 				hlog(LOG_ERR, "protodec_calculate_crc: would run over rbuffer length");
-				hfree(data);
+				hfree(buf);
 				return 0;
 			} else {
-				d->rbuffer[x] = (data[j] >> (7 - i)) & 1;
+				d->rbuffer[x] = (buf[j] >> (7 - i)) & 1;
 			}
 		}
 	}
-	hfree(data);
+	
+	hfree(buf);
+	
 	return (crc == 0x0f47);
 }
 

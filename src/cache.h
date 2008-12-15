@@ -27,24 +27,29 @@
 
 /* an entry in the cache */
 struct cache_ent {
-	time_t received_pos;
-	time_t received_data;
 	int mmsi;
-	int imo;
+	
+	/* position message */
+	time_t received_pos;
 	float lat;
 	float lon;
 	int hdg;
 	float course;
 	float sog;
+	int navstat;
+	
+	/* vessel data message */
+	time_t received_data;
+	int imo;
 	char *callsign;
 	char *name;
 	char *destination;
 	int shiptype;
-	int navstat;
 	int A;
 	int B;
 	int C;
 	int D;
+	float draught;
 };
 
 extern int cache_positions;
@@ -63,5 +68,5 @@ extern int cache_position(
 extern int cache_vesseldata(
 	int received_t, int mmsi, int imo,
 	char *callsign, char *name, char *destination,
-	int shiptype, int A, int B, int C, int D);
+	int shiptype, int A, int B, int C, int D, float draught);
 
