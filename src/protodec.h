@@ -39,6 +39,9 @@ struct demod_state_t {
 	unsigned char seqnr;
 	
 	struct serial_state_t *serial;
+	
+	char *serbuffer;
+	char *nmea;
 };
 
 void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, char chanid);

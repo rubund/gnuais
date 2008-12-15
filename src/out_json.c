@@ -27,6 +27,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <time.h>
+#include <errno.h>
 
 #ifdef HAVE_CURL
 #define ENABLE_JSONAIS_CURL
@@ -44,7 +45,8 @@
 #include <dmalloc.h>
 #endif
 
-pthread_t jsonout_th;
+static pthread_t jsonout_th;
+static int jsonout_die = 0;
 
 #ifdef ENABLE_JSONAIS_CURL
 
@@ -193,7 +195,6 @@ static void jsonout_export(void)
 	unsigned int entries = 0;
 	unsigned int exported = 0;
 	struct spblk *x, *nextx;
-	//char *post = hstrdup("c=dnshits");
 	struct sptree *sp;
 	struct cache_ent *e;
 	char *json = NULL;
@@ -308,8 +309,10 @@ static void jsonout_export(void)
 		);
 	
 	/* clean up */
-	sp_null(sp);
-	hfree(sp);
+	if (sp) {
+		sp_null(sp);
+		hfree(sp);
+	}
 	
 	hlog(LOG_DEBUG, "jsonout: %s", json);
 	
@@ -327,12 +330,15 @@ static void jsonout_export(void)
 
 static void jsonout_thread(void *asdf)
 {
+	int i;
 	hlog(LOG_DEBUG, "jsonout: thread started");
 	
-	//curl_global_init(CURL_GLOBAL_NOTHING);
-	
 	while (1) {
-		sleep(60);
+		for (i = 0; i < 60; i++) {
+			if (jsonout_die)
+				return;
+			sleep(1);
+		}
 		
 		hlog(LOG_DEBUG, "jsonout: exporting");
 		
@@ -342,6 +348,8 @@ static void jsonout_thread(void *asdf)
 
 int jsonout_init(void)
 {
+	curl_global_init(CURL_GLOBAL_ALL);
+	
 	if (pthread_create(&jsonout_th, NULL, (void *)jsonout_thread, NULL)) {
 		hlog(LOG_CRIT, "pthread_create failed for jsonout_thread");
 		return -1;
@@ -350,11 +358,33 @@ int jsonout_init(void)
 	return 0;
 }
 
+int jsonout_deinit(void)
+{
+	int ret;
+	
+	/* request death */
+	jsonout_die = 1;
+	
+	if ((ret = pthread_join(jsonout_th, NULL))) {
+		hlog(LOG_CRIT, "pthread_join of jsonout_thread failed: %s", strerror(ret));
+		return -1;
+	}
+	
+	curl_global_cleanup();
+	
+	return 0;
+}
+
 #else // ENABLE_JSONAIS_CURL
 
 int jsonout_init(void)
 {
 	hlog(LOG_CRIT, "jsonout_init: JSON AIS export not available in this build");
+	return -1;
+}
+
+int jsonout_deinit(void)
+{
 	return -1;
 }
 

@@ -28,8 +28,6 @@
 
 
 #define SERBUFFER_LEN	100
-char *serbuffer = NULL;
-char *nmea = NULL;
 
 void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, char chanid)
 {
@@ -47,12 +45,17 @@ void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial,
 	d->buffer = hmalloc(DEMOD_BUFFER_LEN);
 	d->rbuffer = hmalloc(DEMOD_BUFFER_LEN);
 	
-	if (!serbuffer)
-		serbuffer = hmalloc(SERBUFFER_LEN);
-	if (!nmea)
-		nmea = hmalloc(SERBUFFER_LEN);
+	d->serbuffer = hmalloc(SERBUFFER_LEN);
+	d->nmea = hmalloc(SERBUFFER_LEN);
 }
 
+void protodec_deinit(struct demod_state_t *d)
+{
+	hfree(d->buffer);
+	hfree(d->rbuffer);
+	hfree(d->serbuffer);
+	hfree(d->nmea);
+}
 
 void protodec_reset(struct demod_state_t *d)
 {
@@ -153,60 +156,60 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 				letter = letter + 48;
 			else
 				letter = letter + 56;
-			nmea[k] = letter;
+			d->nmea[k] = letter;
 			hvor += 6;
 			k++;
 		}
 		NMEA_DBG(printf("NMEA: Drop from loop with k:%d hvor:%d senlen:%d bufferlengde\n",
 			k, hvor, senlen, bufferlengde));
 		//set nmea trailer with 00 checksum (calculate later)
-		nmea[k] = 44;
-		nmea[k + 1] = 48;
-		nmea[k + 2] = 42;
-		nmea[k + 3] = 48;
-		nmea[k + 4] = 48;
-		nmea[k + 5] = 0;
+		d->nmea[k] = 44;
+		d->nmea[k + 1] = 48;
+		d->nmea[k + 2] = 42;
+		d->nmea[k + 3] = 48;
+		d->nmea[k + 4] = 48;
+		d->nmea[k + 5] = 0;
 		sentencenum++;
 		
 		// printout one frame starts here
 		//AIVDM,x,x,,, - header comes here first
 		
-		nmea[0] = 65;
-		nmea[1] = 73;
-		nmea[2] = 86;
-		nmea[3] = 68;
-		nmea[4] = 77;
-		nmea[5] = 44;
-		nmea[6] = 48 + sentences;
-		nmea[7] = 44;
-		nmea[8] = 48 + sentencenum;
-		nmea[9] = 44;
+		d->nmea[0] = 65;
+		d->nmea[1] = 73;
+		d->nmea[2] = 86;
+		d->nmea[3] = 68;
+		d->nmea[4] = 77;
+		d->nmea[5] = 44;
+		d->nmea[6] = 48 + sentences;
+		d->nmea[7] = 44;
+		d->nmea[8] = 48 + sentencenum;
+		d->nmea[9] = 44;
 		
 		//if multipart message it needs sequential id number
 		if (sentences > 1) {
 			NMEA_DBG(printf("NMEA: It is multipart (%d/%d), add sequence number (%d) to header\n",
 				sentences, sentencenum, d->seqnr));
-			nmea[10] = d->seqnr + 48;
-			nmea[11] = 44;
-			nmea[12] = 44;
+			d->nmea[10] = d->seqnr + 48;
+			d->nmea[11] = 44;
+			d->nmea[12] = 44;
 			//and if the last of multipart we need to show fillbits at trailer
 			if (sentencenum == sentences) {
 				NMEA_DBG(printf("NMEA: It is last of multipart (%d/%d), add fillbits (%d) to trailer\n",
 					sentences, sentencenum, fillbits));
-				nmea[k + 1] = 48 + fillbits;
+				d->nmea[k + 1] = 48 + fillbits;
 			}
 		} else {	//else put channel A & no seqnr to keep equal lenght (foo!)
-			nmea[10] = 44;
-			nmea[11] = 65;
-			nmea[12] = 44;
+			d->nmea[10] = 44;
+			d->nmea[11] = 65;
+			d->nmea[12] = 44;
 		}
 
 		//strcpy(nmea,"!AIVDM,1,1,,,");
 		//calculate xor checksum in hex for nmea[0] until nmea[m]='*'(42)
-		nmeachk = nmea[0];
+		nmeachk = d->nmea[0];
 		m = 1;
-		while (nmea[m] != 42) {	//!="*"
-			nmeachk = nmeachk ^ nmea[m];
+		while (d->nmea[m] != 42) {	//!="*"
+			nmeachk = nmeachk ^ d->nmea[m];
 			m++;
 		}
 		// convert calculated checksum to 2 digit hex there are 00 as base
@@ -215,20 +218,20 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		nchk[1] = 0;
 		snprintf(nchk, NCHK_LEN, "%X", nmeachk);
 		if (nchk[1] == 0) {
-			nmea[k + 4] = nchk[0];
+			d->nmea[k + 4] = nchk[0];
 		} else {
-			nmea[k + 3] = nchk[0];
-			nmea[k + 4] = nchk[1];
+			d->nmea[k + 3] = nchk[0];
+			d->nmea[k + 4] = nchk[1];
 		}
 		//In final. Add header "!" and trailer <cr><lf>
 		// here it could be sent to /dev/ttySx
-		serbuffer_l = snprintf(serbuffer, SERBUFFER_LEN, "!%s\r\n", nmea);
+		serbuffer_l = snprintf(d->serbuffer, SERBUFFER_LEN, "!%s\r\n", d->nmea);
 		if (d->serial)
-			serial_write(d->serial, serbuffer, serbuffer_l);
+			serial_write(d->serial, d->serbuffer, serbuffer_l);
 		NMEA_DBG(printf("NMEA: End of nmea->ascii-loop with sentences:%d sentencenum:%d\n",
 			sentences, sentencenum));
 		if (my)
-			myout_nmea(my, received_t, nmea);
+			myout_nmea(my, received_t, d->nmea);
 	} while (sentencenum < sentences);
 	//multipart message ready. Increase seqnr for next one
 	//rolling 1-9. Single msg ready may also increase this, no matter.
@@ -263,7 +266,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			(float) longitude / 600000.0,
 			(float) course / 10.0, (float) sog / 10.0,
 			rateofturn, navstat, heading);
-		printf("  ( !%s )", nmea);
+		printf("  ( !%s )", d->nmea);
 		
 		if (my)
 			myout_ais_position(my, received_t, mmsi,
@@ -300,7 +303,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		printf("%09ld %ld %ld %ld %ld %ld %ld %f %f",
 			mmsi, year, month, day, hour, minute,
 			second, latit, longit);
-		printf("  ( !%s )", nmea);
+		printf("  ( !%s )", d->nmea);
 		
 		if (my)
 			myout_ais_basestation(my, received_t, mmsi,
@@ -366,7 +369,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		printf("%09ld %s %s %d %d %f", mmsi,
 			name, destination, A + B, C + D,
 			(float) draught / 10.0);
-		printf("  ( !%s )", nmea);
+		printf("  ( !%s )", d->nmea);
 		
 		if (my)
 			myout_ais_vesseldata(my, received_t, mmsi,
@@ -381,7 +384,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		break;
 		
 	default:
-		printf("  ( !%s )", nmea);
+		printf("  ( !%s )", d->nmea);
 		break;
 	}
 	printf("\n");

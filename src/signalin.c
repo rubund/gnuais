@@ -31,6 +31,14 @@ static float coeffs[] =  {
 #define COEFFS_L 53
 short *tmpbuf[2] = { 0, 0 };
 
+void signalin_deinit(void)
+{
+	if (tmpbuf[0])
+		hfree(tmpbuf[0]);
+	if (tmpbuf[1])
+		hfree(tmpbuf[1]);
+}
+
 void signal_filter(short *buffer, int buf_ch_num, int buf_ch_ofs, int count, float *bufout)
 {
 	//static short tmpbuf[2][53];

@@ -23,5 +23,6 @@
  */
 
 extern int jsonout_init(void);
+extern int jsonout_deinit(void);
 
 

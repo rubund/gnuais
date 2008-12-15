@@ -374,21 +374,29 @@ int read_config(void)
 
 void free_config(void)
 {
-	if (logdir)
-		hfree(logdir);
-	logdir = NULL;
-	if (pidfile)
-		hfree(pidfile);
-	pidfile = NULL;
+	hfree(logdir);
+	hfree(pidfile);
+	
 	if (cfgfile != def_cfgfile)
 		hfree(cfgfile);
-	cfgfile = NULL;
+	
 	if (logname != def_logname)
 		hfree(logname);
+	
+	if (sound_device != def_sound_device)
+		hfree(sound_device);
+	
+	hfree(sound_in_file);
+	hfree(sound_out_file);
+	hfree(mysql_host);
+	hfree(mysql_db);
+	hfree(mysql_user);
+	hfree(mysql_password);
+	hfree(serial_port);
+	
 	hfree(mycall);
 	hfree(myemail);
-	mycall = myemail = NULL;
-	logname = NULL;
+	
 	free_uplink_config(&uplink_config);
 }
 

@@ -128,6 +128,8 @@ int cache_deinit(void)
 	pthread_mutex_lock(&cache_spt_mut);
 	
 	ret = cache_free(cache_spt);
+	hfree(cache_spt);
+	sp_free_freelist();
 	
 	pthread_mutex_unlock(&cache_spt_mut);
 	

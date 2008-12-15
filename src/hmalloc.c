@@ -49,6 +49,8 @@ void *hmalloc(size_t size)
 		exit(1);
 	}
 	
+	//fprintf(stderr, "hmalloc: allocated %d bytes\n", size);
+	
 	return p;
 }
 

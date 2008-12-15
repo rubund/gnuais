@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 	FILE *sound_in_fd = NULL;
 	FILE *sound_out_fd = NULL;
 	int channels;
-	short *buffer;
+	short *buffer = NULL;
 	int buffer_l;
 	int buffer_read;
 	float *buff_f, *buff_fs;
@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
 	}
 	
 	/* write pid file, now that we have our final pid... might fail, which is critical */
+	hlog(LOG_DEBUG, "Writing pid...");
 	if (!writepid(pidfile))
 		exit(1);
 	
@@ -83,8 +84,10 @@ int main(int argc, char *argv[])
 	
 	/* initialize position cache for timed JSON AIS transmission */
 	if (uplink_config) {
+		hlog(LOG_DEBUG, "Initializing cache...");
 		if (cache_init())
 			exit(1);
+		hlog(LOG_DEBUG, "Initializing jsonout...");
 		if (jsonout_init())
 			exit(1);
 	}
@@ -220,6 +223,9 @@ int main(int argc, char *argv[])
 	if (serial)
 		serial_close(serial);
 	
+	if (uplink_config)
+		jsonout_deinit();
+	
 	if (cache_positions)
 		cache_deinit();
 		
@@ -228,6 +234,8 @@ int main(int argc, char *argv[])
 			"A: Received correctly: %d packets, wrong CRC: %d packets, wrong size: %d packets",
 			demod_state_a->receivedframes, demod_state_a->lostframes,
 			demod_state_a->lostframes2);
+			
+		protodec_deinit(demod_state_a);
 		hfree(demod_state_a);
 	}
 	
@@ -236,10 +244,15 @@ int main(int argc, char *argv[])
 			"B: Received correctly: %d packets, wrong CRC: %d packets, wrong size: %d packets",
 			demod_state_b->receivedframes, demod_state_b->lostframes,
 			demod_state_b->lostframes2);
+			
+		protodec_deinit(demod_state_b);
 		hfree(demod_state_b);
 	}
 	
+	signalin_deinit();
+	
 	free_config();
+	close_log(0);
 	
 	return 0;
 }
