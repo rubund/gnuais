@@ -21,6 +21,10 @@
 #include "hmalloc.h"
 #include "cfg.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 /*
  *	allocate serial state structure, open the serial device, configure
  *	terminal parameters, returns the structure

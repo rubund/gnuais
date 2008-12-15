@@ -38,6 +38,10 @@
 #include	"hmalloc.h"
 #include	"cfg.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 int dump_splay = 0;
 
 extern struct spblk * _sp_enq __((struct spblk *, struct sptree *));

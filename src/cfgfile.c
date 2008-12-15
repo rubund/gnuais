@@ -28,6 +28,10 @@
 #include "cfgfile.h"
 #include "hmalloc.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
  /* ***************************************************************** */
 
 /*

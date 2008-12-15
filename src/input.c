@@ -8,6 +8,10 @@
 #include "hmalloc.h"
 #include "cfg.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 #define LOGPREFIX "Sound device: "
 
 int input_initialize(snd_pcm_t * handle, short **buffer, int *buffer_l)

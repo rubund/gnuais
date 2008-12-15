@@ -16,6 +16,10 @@
 #include "hmalloc.h"
 #include "crc32.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 #ifdef	symbol
 #undef	symbol
 #endif	/* symbol */

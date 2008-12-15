@@ -34,6 +34,10 @@
 #include "hlog.h"
 #include "hmalloc.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 #define DEBUG_CACHE
 #ifdef DEBUG_CACHE
 #define CACHE_DBG(x) x

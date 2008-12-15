@@ -41,6 +41,10 @@
 #include "hmalloc.h"
 #include "rwlock.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 int log_dest = L_DEFDEST;	/* Logging destination */
 int log_level = LOG_INFO;	/* Logging level */
 int log_facility = LOG_LOCAL1;	/* Logging facility */

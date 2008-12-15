@@ -15,6 +15,10 @@
 #include "hlog.h"
 #include "cache.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 // #define DEBUG_NMEA
 #ifdef DEBUG_NMEA
 #define NMEA_DBG(x) x

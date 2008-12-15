@@ -31,6 +31,10 @@
 #include <errno.h>
 #include "rwlock.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 #ifndef PTHREAD_RWLOCK_INITIALIZER
 // #ifndef HAVE_PTHREAD_RWLOCK
 

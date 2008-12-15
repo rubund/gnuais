@@ -40,6 +40,10 @@
 #include "hmalloc.h"
 #include "cfg.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 pthread_t jsonout_th;
 
 #ifdef ENABLE_JSONAIS_CURL

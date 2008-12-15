@@ -18,6 +18,10 @@
 
 #include "config.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 int done;
 long int cntr;
 

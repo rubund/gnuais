@@ -12,6 +12,10 @@
 
 #include <sys/types.h>
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 /* crc table and hash algorithm from pathalias */
 /*
  * fold a string into a long int.  31 bit crc (from andrew appel).

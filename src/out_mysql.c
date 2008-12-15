@@ -33,6 +33,10 @@
 #include <mysql/errmsg.h>
 #endif
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 #define MAX_SQL_LEN 2000
 
 struct mysql_state_t *my;

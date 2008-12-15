@@ -31,6 +31,10 @@
 
 #include "hmalloc.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 int mem_panic = 0;
 
 void *hmalloc(size_t size)

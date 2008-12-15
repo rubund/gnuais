@@ -11,6 +11,9 @@
 #include "signalin.h"
 #include "protodec.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
 
 int done;
 

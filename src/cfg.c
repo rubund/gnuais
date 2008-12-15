@@ -36,6 +36,10 @@
 #include "hlog.h"
 #include "cfgfile.h"
 
+#ifdef DMALLOC
+#include <dmalloc.h>
+#endif
+
 #define HELPS	"Usage: " PACKAGE " [-c cfgfile] [-f (fork)] [-n <logname>] [-e <loglevel>] [-o <logdest>] [-r <logdir>] [-l <inputsoundfile>] [-s <recordsoundfile>] [-h (help)]\n"
 
 
