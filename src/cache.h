@@ -27,7 +27,8 @@
 
 /* an entry in the cache */
 struct cache_ent {
-	time_t received_t;
+	time_t received_pos;
+	time_t received_data;
 	int mmsi;
 	int imo;
 	float lat;

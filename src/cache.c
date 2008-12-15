@@ -23,6 +23,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "config.h"
+
 #include <pthread.h>
 #include <time.h>
 #include <string.h>
@@ -32,7 +34,7 @@
 #include "hlog.h"
 #include "hmalloc.h"
 
-/*#define DEBUG_CACHE*/
+#define DEBUG_CACHE
 #ifdef DEBUG_CACHE
 #define CACHE_DBG(x) x
 #else
@@ -198,14 +200,14 @@ int cache_position(
 {
 	struct cache_ent *e;
 	
-	CACHE_DBG(hlog(LOG_DEBUG, "cache_position %d", mmsi));
+	CACHE_DBG(hlog(LOG_DEBUG, "cache_position %d t %d", mmsi, received_t));
 	
 	pthread_mutex_lock(&cache_spt_mut);
 	
 	e = cache_get(mmsi);
 	
 	e->mmsi = mmsi;
-	e->received_t = received_t;
+	e->received_pos = received_t;
 	e->mmsi = mmsi;
 	e->lat = lat;
 	e->lon = lon;
@@ -229,7 +231,7 @@ int cache_vesseldata(int received_t, int mmsi, int imo,
 {
 	struct cache_ent *e;
 	
-	CACHE_DBG(hlog(LOG_DEBUG, "cache_vesseldata %d: name '%s' dest '%s'", mmsi, name, destination));
+	CACHE_DBG(hlog(LOG_DEBUG, "cache_vesseldata %d: name '%s' dest '%s' t %d", mmsi, name, destination, received_t));
 	
 	pthread_mutex_lock(&cache_spt_mut);
 	
@@ -237,7 +239,7 @@ int cache_vesseldata(int received_t, int mmsi, int imo,
 	
 	e->mmsi = mmsi;
 	e->imo = imo;
-	e->received_t = received_t;
+	e->received_data = received_t;
 	if (!e->callsign || strcmp(e->callsign, callsign) != 0) {
 		if (e->callsign)
 			hfree(e->callsign);

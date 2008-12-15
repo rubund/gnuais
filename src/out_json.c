@@ -26,6 +26,7 @@
 
 #include <pthread.h>
 #include <unistd.h>
+#include <time.h>
 
 #ifdef HAVE_CURL
 #define ENABLE_JSONAIS_CURL
@@ -116,6 +117,45 @@ static int jsonout_post_single(struct curl_httppost *post, const char *url)
 }
 
 /*
+ *	Encode an unix timestamp in JSON AIS format
+ *
+ *	YYYYMMDDHHMMSS
+ *	01234567890123
+ */
+
+int time_jsonais(time_t *t, char *buf, int buflen)
+{
+	int i;
+	struct tm dt;
+	
+	/* check that the buffer is large enough - we use
+	 * 14 bytes plus the NULL
+	 */
+	if (buflen < 15) {
+		hlog(LOG_ERR, "time_jsonais: not enough space to produce JSON AIS timestamp");
+		return -1;
+	}
+	
+	/* thread-safe UTC */
+	if (gmtime_r(t, &dt) == NULL) {
+		hlog(LOG_ERR, "time_jsonais: gmtime_r failed");
+		return -1;
+	}
+	
+	i = snprintf(buf, buflen, "%04d%02d%02d%02d%02d%02d",
+		dt.tm_year + 1900,
+		dt.tm_mon + 1,
+		dt.tm_mday,
+		dt.tm_hour,
+		dt.tm_min,
+		dt.tm_sec);
+	
+	hlog(LOG_DEBUG, "time_jsonais: %d => %s", *t, buf);
+	
+	return i;
+}
+
+/*
  *	produce a curl form structure containing the JSON data, and send
  *	it to all upstream servers one by one
  */
@@ -142,6 +182,8 @@ static void jsonout_post_all(char *json)
  *	export the contents of the buffer splaytree
  */
 
+#define TBUF_LEN 15
+
 static void jsonout_export(void)
 {
 	unsigned int entries = 0;
@@ -152,15 +194,22 @@ static void jsonout_export(void)
 	struct cache_ent *e;
 	char *json = NULL;
 	int got_pos;
+	char tbuf[TBUF_LEN];
+	time_t now;
+	
+	time(&now);
+	time_jsonais(&now, tbuf, TBUF_LEN);
 	
 	/* fill in initial json */
 	json = str_append(json,
 		"{\n"
 		"\t\"protocol\": \"jsonais\",\n"
+		"\t\"encodetime\": \"%s\",\n"
 		"\t\"groups\": [\n" /* start of groups */
 		"\t\t{\n" /* start of group */
 		"\t\t\t\"path\": [ { \"name\": \"%s\" } ],\n"
 		"\t\t\t\"msgs\": [\n",
+		tbuf,
 		mycall
 		);
 	
@@ -175,32 +224,47 @@ static void jsonout_export(void)
 		
 		got_pos = ((e->lat > 0.0001 || e->lat < -0.0001) && (e->lon > 0.0001 || e->lon < -0.0001));
 		
-		if ((e->mmsi) && ( (got_pos) || (e->name) ) ) {
-			hlog(LOG_DEBUG, "jsonout: exporting MMSI %d", e->mmsi);
+		if ((e->mmsi) && (got_pos) ) {
+			hlog(LOG_DEBUG, "jsonout: exporting MMSI %d position", e->mmsi);
+			time_jsonais(&e->received_pos, tbuf, TBUF_LEN);
 			json = str_append(json,
-				"%s{\"msgtype\": \"sp\", \"mmsi\": %d",
+				"%s{\"msgtype\": 3, \"mmsi\": %d, \"rxtime\": \"%s\"",
 				(exported == 0) ? "" : ",\n",
-				e->mmsi
+				e->mmsi, tbuf
 				);
 			
-			if (got_pos)
-				json = str_append(json, ", \"lat\": %.7f, \"lon\": %.7f",
-					e->lat,
-					e->lon
-					);
+			json = str_append(json, ", \"lat\": %.7f, \"lon\": %.7f",
+				e->lat,
+				e->lon
+				);
 			
-			if (e->imo >= 0)
-				json = str_append(json, ", \"imo\": %d", e->imo);
 			if (e->course >= 0)
 				json = str_append(json, ", \"course\": %.1f", e->course);
 			if (e->hdg >= 0)
 				json = str_append(json, ", \"heading\": %d", e->hdg);
 			if (e->sog >= 0)
 				json = str_append(json, ", \"speed\": %.1f", e->sog);
-			if (e->shiptype >= 0)
-				json = str_append(json, ", \"shiptype\": %d", e->shiptype);
 			if (e->navstat >= 0)
 				json = str_append(json, ", \"status\": %d", e->navstat);
+			
+			json = str_append(json, "}");
+			
+			exported++;
+		}
+		
+		if ((e->mmsi) && (e->name) ) {
+			hlog(LOG_DEBUG, "jsonout: exporting MMSI %d data", e->mmsi);
+			time_jsonais(&e->received_data, tbuf, TBUF_LEN);
+			json = str_append(json,
+				"%s{\"msgtype\": 5, \"mmsi\": %d, \"rxtime\": \"%s\"",
+				(exported == 0) ? "" : ",\n",
+				e->mmsi, tbuf
+				);
+			
+			if (e->imo >= 0)
+				json = str_append(json, ", \"imo\": %d", e->imo);
+			if (e->shiptype >= 0)
+				json = str_append(json, ", \"shiptype\": %d", e->shiptype);
 			if (e->callsign)
 				json = str_append(json, ", \"callsign\": \"%s\"", e->callsign);
 			if (e->name)
