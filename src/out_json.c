@@ -190,35 +190,35 @@ static void jsonout_export(void)
 					);
 			
 			if (e->imo >= 0)
-				str_append(json, ", \"imo\": %d", e->imo);
+				json = str_append(json, ", \"imo\": %d", e->imo);
 			if (e->course >= 0)
-				str_append(json, ", \"course\": %.1f", e->course);
+				json = str_append(json, ", \"course\": %.1f", e->course);
 			if (e->hdg >= 0)
-				str_append(json, ", \"heading\": %d", e->hdg);
+				json = str_append(json, ", \"heading\": %d", e->hdg);
 			if (e->sog >= 0)
-				str_append(json, ", \"speed\": %.1f", e->sog);
+				json = str_append(json, ", \"speed\": %.1f", e->sog);
 			if (e->shiptype >= 0)
-				str_append(json, ", \"shiptype\": %d", e->shiptype);
+				json = str_append(json, ", \"shiptype\": %d", e->shiptype);
 			if (e->navstat >= 0)
-				str_append(json, ", \"status\": %d", e->navstat);
+				json = str_append(json, ", \"status\": %d", e->navstat);
 			if (e->callsign)
-				str_append(json, ", \"callsign\": \"%s\"", e->callsign);
+				json = str_append(json, ", \"callsign\": \"%s\"", e->callsign);
 			if (e->name)
-				str_append(json, ", \"shipname\": \"%s\"", e->name);
+				json = str_append(json, ", \"shipname\": \"%s\"", e->name);
 			if (e->destination)
-				str_append(json, ", \"destination\": \"%s\"", e->destination);
+				json = str_append(json, ", \"destination\": \"%s\"", e->destination);
 			
 			if (e->A >= 0 && e->B >= 0) {
-				str_append(json, ", \"length\": %d", e->A + e->B);
-				str_append(json, ", \"ref_front\": %d", e->A);
+				json = str_append(json, ", \"length\": %d", e->A + e->B);
+				json = str_append(json, ", \"ref_front\": %d", e->A);
 			}
 			
 			if (e->C >= 0 && e->D >= 0) {
-				str_append(json, ", \"width\": %d", e->C + e->D);
-				str_append(json, ", \"ref_left\": %d", e->C);
+				json = str_append(json, ", \"width\": %d", e->C + e->D);
+				json = str_append(json, ", \"ref_left\": %d", e->C);
 			}
 			
-			str_append(json, "}");
+			json = str_append(json, "}");
 			
 			exported++;
 		}

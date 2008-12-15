@@ -59,6 +59,7 @@ int cache_init(void)
 	
 	/* initialize the cache splay tree */
 	pthread_mutex_lock(&cache_spt_mut);
+	
 	cache_spt = sp_init();
 	cache_spt->symbols = NULL;
 	
@@ -97,7 +98,7 @@ int cache_free(struct sptree *sp)
 	
 	CACHE_DBG(hlog(LOG_DEBUG, "cache_free"));
 	
-		for (x = sp_fhead(sp); x != NULL; x = nextx) {
+	for (x = sp_fhead(sp); x != NULL; x = nextx) {
 		nextx = sp_fnext(x);
 		e = (struct cache_ent *)x->data;
 		cache_free_entry(e);
