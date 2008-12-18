@@ -23,6 +23,12 @@ x.x.x:
 	Implemented automatic reconnection to MySQL if the connection goes
 	away (server crash, network outage, inactivity timeout).
 	
+	Improved AIS decoding DSP code.
+	
+	Added JSON AIS HTTP POST data exporting.
+	
+	Fixed memory corruption bugs, now works when compiled with -O3.
+	
 0.0.7:
 	gnuais can decode positions south of equator + minor other fixes
 
