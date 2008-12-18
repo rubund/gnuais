@@ -43,12 +43,12 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_gnuais_OBJECTS = ais.$(OBJEXT) input.$(OBJEXT) signalin.$(OBJEXT) \
+am_gnuais_OBJECTS = ais.$(OBJEXT) input.$(OBJEXT) receiver.$(OBJEXT) \
 	protodec.$(OBJEXT) serial.$(OBJEXT) out_mysql.$(OBJEXT) \
 	out_json.$(OBJEXT) cache.$(OBJEXT) cfgfile.$(OBJEXT) \
 	hmalloc.$(OBJEXT) cfg.$(OBJEXT) hlog.$(OBJEXT) \
 	rwlock.$(OBJEXT) splay.$(OBJEXT) spsymbol.$(OBJEXT) \
-	crc32.$(OBJEXT)
+	crc32.$(OBJEXT) filter.$(OBJEXT)
 gnuais_OBJECTS = $(am_gnuais_OBJECTS)
 gnuais_LDADD = $(LDADD)
 gnuais_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(gnuais_LDFLAGS) \
@@ -171,10 +171,11 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-gnuais_SOURCES = ais.c input.c signalin.c protodec.c \
+gnuais_SOURCES = ais.c input.c receiver.c protodec.c \
 	serial.c out_mysql.c out_json.c cache.c \
 	cfgfile.c hmalloc.c cfg.c hlog.c rwlock.c \
-	splay.c spsymbol.c crc32.c
+	splay.c spsymbol.c crc32.c \
+	filter.c filter.h
 
 gnuais_LDFLAGS = -pthread -lm -lasound @mysqleller@ @curleller@
 gnuaissavesoundtofile_SOURCES = savetofile.c input.c \
@@ -262,16 +263,17 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cfg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cfgfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crc32.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/filter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hlog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hmalloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/out_json.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/out_mysql.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protodec.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/receiver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rwlock.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/savetofile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serial.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signalin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/splay.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spsymbol.Po@am__quote@
 

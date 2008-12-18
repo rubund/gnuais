@@ -31,6 +31,8 @@
 
 void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, char chanid)
 {
+	memset(d, 0, sizeof(struct demod_state_t));
+
 	d->chanid = chanid;
 	d->serial = serial;
 	
@@ -114,7 +116,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	int m;
 	unsigned char sentences, sentencenum, nmeachk;
 	int senlen;
-	unsigned char fillbits;
+	unsigned char fillbits = 0;
 	float longit, latit;
 	int k, hvor, letter;
 	char nchk[NCHK_LEN];
@@ -245,7 +247,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	if (skip_type[type])
 		return; // ignored by configuration
 	
-	printf("(ch %c cntr %ld type %d): ", d->chanid, cntr, type);
+	printf("(ch %c cntr %ld type %d): ", d->chanid, d->cntr, type);
 	switch (type) {
 	case 1:
 	case 2:
@@ -397,7 +399,7 @@ void protodec_decode(char *in, int count, struct demod_state_t *d)
 	int i = 0;
 	int bufferlength, correct;
 	
-	while (i < (count / 5)) {
+	while (i < count) {
 		switch (d->state) {
 		case ST_DATA:
 			if (d->bitstuff) {

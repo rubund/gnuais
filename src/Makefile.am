@@ -1,10 +1,11 @@
 
 bin_PROGRAMS = gnuais gnuaissavesoundtofile
 
-gnuais_SOURCES = ais.c input.c signalin.c protodec.c \
+gnuais_SOURCES = ais.c input.c receiver.c protodec.c \
 	serial.c out_mysql.c out_json.c cache.c \
 	cfgfile.c hmalloc.c cfg.c hlog.c rwlock.c \
-	splay.c spsymbol.c crc32.c
+	splay.c spsymbol.c crc32.c \
+	filter.c filter.h
 gnuais_LDFLAGS = -pthread -lm -lasound @mysqleller@ @curleller@
 
 gnuaissavesoundtofile_SOURCES = savetofile.c input.c \

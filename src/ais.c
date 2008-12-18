@@ -7,7 +7,7 @@
 
 #include "ais.h"
 #include "input.h"
-#include "signalin.h"
+#include "receiver.h"
 #include "protodec.h"
 #include "hmalloc.h"
 #include "hlog.h"
@@ -41,12 +41,9 @@ int main(int argc, char *argv[])
 	short *buffer = NULL;
 	int buffer_l;
 	int buffer_read;
-	float *buff_f, *buff_fs;
-	char *buff_b;
-	char lastbit_a = 0, lastbit_b = 0;
-	struct demod_state_t *demod_state_a = NULL;
-	struct demod_state_t *demod_state_b = NULL;
 	struct serial_state_t *serial = NULL;
+	struct receiver *rx_a = NULL;
+	struct receiver *rx_b = NULL;
 	
 	/* command line */
 	parse_cmdline(argc, argv);
@@ -98,12 +95,10 @@ int main(int argc, char *argv[])
 	
 	/* initialize the AIS decoders */
 	hlog(LOG_DEBUG, "Initializing demodulator A");
-	demod_state_a = hmalloc(sizeof(*demod_state_a));
-	protodec_initialize(demod_state_a, serial, 'A');
+	rx_a = init_receiver('A', 2, 0);
 	if (sound_channels != SOUND_CHANNELS_MONO) {
 		hlog(LOG_DEBUG, "Initializing demodulator B");
-		demod_state_b = hmalloc(sizeof(*demod_state_b));
-		protodec_initialize(demod_state_b, serial, 'B');
+		rx_b = init_receiver('B', 2, 1);
 		channels = 2;
 	} else {
 		channels = 1;
@@ -139,10 +134,6 @@ int main(int argc, char *argv[])
 		}
 		hlog(LOG_NOTICE, "Recording audio to file: %s", sound_out_file);
 	}
-	
-	buff_f = (float *) hmalloc(sizeof(float) * buffer_l);
-	buff_fs = (float *) hmalloc(sizeof(float) * buffer_l / 5);
-	buff_b = (char *) hmalloc(sizeof(char) * buffer_l / 5);
 	
 #ifdef HAVE_MYSQL
 	if (mysql_db) {
@@ -181,26 +172,22 @@ int main(int argc, char *argv[])
 		}
 		
 		if (sound_channels == SOUND_CHANNELS_MONO) {
-			signal_filter(buffer, 1, 0, buffer_l, buff_f);
-			signal_clockrecovery(buff_f, buffer_l, buff_fs);
-			signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit_a);
-			protodec_decode(buff_b, buffer_l, demod_state_a);
+			//signal_filter(buffer, 1, 0, buffer_l, buff_f);
+			//signal_clockrecovery(buff_f, buffer_l, buff_fs);
+			//signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit_a);
+			//protodec_decode(buff_b, buffer_l, demod_state_a);
 		}
 		if (sound_channels == SOUND_CHANNELS_BOTH
 		    || sound_channels == SOUND_CHANNELS_RIGHT) {
 			/* ch a/0/right */
-			signal_filter(buffer, 2, 0, buffer_l, buff_f);
-			signal_clockrecovery(buff_f, buffer_l, buff_fs);
-			signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit_a);
-			protodec_decode(buff_b, buffer_l, demod_state_a);
+			//protodec_decode(buff_b, buffer_l, demod_state_a);
+			receiver_run(rx_a, buffer, buffer_l);
 		}
 		if (sound_channels == SOUND_CHANNELS_BOTH
 		    || sound_channels == SOUND_CHANNELS_LEFT) {	
 			/* ch b/1/left */
-			signal_filter(buffer, 2, 1, buffer_l, buff_f);
-			signal_clockrecovery(buff_f, buffer_l, buff_fs);
-			signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit_b);
-			protodec_decode(buff_b, buffer_l, demod_state_b);
+			//protodec_decode(buff_b, buffer_l, demod_state_b);
+			receiver_run(rx_b, buffer, buffer_l);
 		}
 	}
 	
@@ -216,9 +203,6 @@ int main(int argc, char *argv[])
 		fclose(sound_out_fd);
 	
 	hfree(buffer);
-	hfree(buff_f);
-	hfree(buff_fs);
-	hfree(buff_b);
 	
 	if (serial)
 		serial_close(serial);
@@ -228,28 +212,25 @@ int main(int argc, char *argv[])
 	
 	if (cache_positions)
 		cache_deinit();
-		
-	if (demod_state_a) {
+	
+	if (rx_a) {
+		struct demod_state_t *d = rx_a->decoder;
 		hlog(LOG_INFO,
 			"A: Received correctly: %d packets, wrong CRC: %d packets, wrong size: %d packets",
-			demod_state_a->receivedframes, demod_state_a->lostframes,
-			demod_state_a->lostframes2);
-			
-		protodec_deinit(demod_state_a);
-		hfree(demod_state_a);
+			d->receivedframes, d->lostframes,
+			d->lostframes2);
 	}
 	
-	if (demod_state_b) {
+	if (rx_b) {
+		struct demod_state_t *d = rx_b->decoder;
 		hlog(LOG_INFO,
 			"B: Received correctly: %d packets, wrong CRC: %d packets, wrong size: %d packets",
-			demod_state_b->receivedframes, demod_state_b->lostframes,
-			demod_state_b->lostframes2);
-			
-		protodec_deinit(demod_state_b);
-		hfree(demod_state_b);
+			d->receivedframes, d->lostframes,
+			d->lostframes2);
 	}
 	
-	signalin_deinit();
+	free_receiver(rx_a);
+	free_receiver(rx_b);
 	
 	free_config();
 	close_log(0);

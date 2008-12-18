@@ -8,7 +8,7 @@
 
 #include "ais.h"
 #include "input.h"
-#include "signalin.h"
+#include "receiver.h"
 #include "protodec.h"
 
 #ifdef DMALLOC
