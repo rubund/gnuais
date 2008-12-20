@@ -1,7 +1,7 @@
 AC_INIT(src/ais.c)
 
 AC_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(gnuais,0.0.8)
+AM_INIT_AUTOMAKE(gnuais,0.1.0)
 
 mysqleller=""
 AC_CHECK_HEADER(mysql/mysql.h,[AC_DEFINE([HAVE_MYSQL],[1],[Define to 1 if you have <mysql/mysql.h> header file])
