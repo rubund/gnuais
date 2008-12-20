@@ -2058,7 +2058,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=gnuais
- VERSION=0.0.8
+ VERSION=0.1.0
 
 
 cat >>confdefs.h <<_ACEOF
