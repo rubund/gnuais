@@ -68,8 +68,9 @@ int input_initialize(snd_pcm_t * handle, short **buffer, int *buffer_l)
 	}
 	
 	snd_pcm_hw_params_get_period_size(hwparams, &size, &dir);
-	int extra = (int) size % 5;
-	*buffer_l = (int) size - extra;
+	//int extra = (int) size % 5;
+	//*buffer_l = (int) size - extra;
+	*buffer_l = (int) size;
 	int buffer_len_in_bytes = *buffer_l * sizeof(short) * channels;
 	
 	hlog(LOG_DEBUG, LOGPREFIX "Using sound buffer size: %d frames of %d channels: %d bytes",

@@ -1,3 +1,8 @@
+0.1.1:
+	Fixed a little bug in ALSA sound device handling: use exactly
+	whatever buffer size is suggested by ALSA, so that some sound
+	devices won't fail with an overrun after running for a while.
+
 0.1.0:
 	Improved AIS decoding DSP code.
 	
