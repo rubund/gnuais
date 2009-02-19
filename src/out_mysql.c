@@ -201,7 +201,7 @@ int myout_ais_basestation(struct mysql_state_t *my, int tid, int mmsi, float lat
 	char ins[MAX_SQL_LEN], upd[MAX_SQL_LEN];
 	
 	snprintf(ins, MAX_SQL_LEN,
-		"INSERT INTO ais_basestation (time,mmsi,longitude,latitude) VALUES (%d,%d,%.7f,%.7f)",
+		"INSERT INTO ais_basestation (time,mmsi,latitude,longitude) VALUES (%d,%d,%.7f,%.7f)",
 		tid, mmsi, lat, lon);
 	snprintf(upd, MAX_SQL_LEN,
 		"UPDATE ais_basestation SET time=%d, latitude=%.7f, longitude=%.7f WHERE mmsi=%d",
