@@ -30,7 +30,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = gnuais$(EXEEXT) gnuaissavesoundtofile$(EXEEXT)
+bin_PROGRAMS = gnuais$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -53,13 +53,6 @@ gnuais_OBJECTS = $(am_gnuais_OBJECTS)
 gnuais_LDADD = $(LDADD)
 gnuais_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(gnuais_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am_gnuaissavesoundtofile_OBJECTS = savetofile.$(OBJEXT) \
-	input.$(OBJEXT) hmalloc.$(OBJEXT) hlog.$(OBJEXT) \
-	rwlock.$(OBJEXT) cfg.$(OBJEXT) cfgfile.$(OBJEXT)
-gnuaissavesoundtofile_OBJECTS = $(am_gnuaissavesoundtofile_OBJECTS)
-gnuaissavesoundtofile_LDADD = $(LDADD)
-gnuaissavesoundtofile_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(gnuaissavesoundtofile_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -67,8 +60,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(gnuais_SOURCES) $(gnuaissavesoundtofile_SOURCES)
-DIST_SOURCES = $(gnuais_SOURCES) $(gnuaissavesoundtofile_SOURCES)
+SOURCES = $(gnuais_SOURCES)
+DIST_SOURCES = $(gnuais_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -114,6 +107,9 @@ LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
+MYSQL_CFLAGS = @MYSQL_CFLAGS@
+MYSQL_CONFIG = @MYSQL_CONFIG@
+MYSQL_LIBS = @MYSQL_LIBS@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -158,7 +154,6 @@ localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
-mysqleller = @mysqleller@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
 prefix = @prefix@
@@ -190,11 +185,7 @@ gnuais_SOURCES = \
 	crc32.c crc32.h 			\
 	filter.c filter.h filter-i386.h
 
-gnuais_LDFLAGS = -pthread -lm -lasound @mysqleller@ @curleller@
-gnuaissavesoundtofile_SOURCES = savetofile.c input.c \
-	hmalloc.c hlog.c rwlock.c cfg.c cfgfile.c
-
-gnuaissavesoundtofile_LDFLAGS = -pthread -lm -lasound 
+gnuais_LDFLAGS = -pthread -lm -lasound @MYSQL_LIBS@ @curleller@
 SUBDIRS = @buildgui@
 DIST_SUBDIRS = gui
 all: all-recursive
@@ -256,9 +247,6 @@ clean-binPROGRAMS:
 gnuais$(EXEEXT): $(gnuais_OBJECTS) $(gnuais_DEPENDENCIES) 
 	@rm -f gnuais$(EXEEXT)
 	$(gnuais_LINK) $(gnuais_OBJECTS) $(gnuais_LDADD) $(LIBS)
-gnuaissavesoundtofile$(EXEEXT): $(gnuaissavesoundtofile_OBJECTS) $(gnuaissavesoundtofile_DEPENDENCIES) 
-	@rm -f gnuaissavesoundtofile$(EXEEXT)
-	$(gnuaissavesoundtofile_LINK) $(gnuaissavesoundtofile_OBJECTS) $(gnuaissavesoundtofile_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -280,7 +268,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protodec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/receiver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rwlock.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/savetofile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serial.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/splay.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spsymbol.Po@am__quote@

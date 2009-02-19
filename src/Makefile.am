@@ -1,5 +1,5 @@
 
-bin_PROGRAMS = gnuais gnuaissavesoundtofile
+bin_PROGRAMS = gnuais
 
 gnuais_SOURCES = 				\
 	ais.c ais.h 				\
@@ -20,11 +20,8 @@ gnuais_SOURCES = 				\
 	crc32.c crc32.h 			\
 	filter.c filter.h filter-i386.h
 
-gnuais_LDFLAGS = -pthread -lm -lasound @mysqleller@ @curleller@
+gnuais_LDFLAGS = -pthread -lm -lasound @MYSQL_LIBS@ @curleller@
 
-gnuaissavesoundtofile_SOURCES = savetofile.c input.c \
-	hmalloc.c hlog.c rwlock.c cfg.c cfgfile.c
-gnuaissavesoundtofile_LDFLAGS = -pthread -lm -lasound 
 
 SUBDIRS = @buildgui@
 DIST_SUBDIRS = gui
