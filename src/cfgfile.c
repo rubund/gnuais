@@ -94,9 +94,12 @@ int do_toggle(int *dest, int argc, char **argv)
 		|| strcasecmp(argv[1], "1") == 0
 		|| strcasecmp(argv[1], "enable") == 0
 		|| strcasecmp(argv[1], "enabled") == 0
-		)
+		|| strcasecmp(argv[1], "yes") == 0
+		) {
+		*dest = 1;
 			return 1;
-	
+	}
+	*dest = 0;
 	return 0;
 }
 
