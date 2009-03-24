@@ -1,7 +1,19 @@
+0.2.0:
+	Fixed 6-bit ASCII decoding to also handle numbers and special
+	characters. (Hessu)
+	
+	Latitude and longitude were mixed in the ais_basestation MySQL
+	table, fixed. (Ruben)
+	
+	The separate gnuaissavetofile program was removed. (Ruben)
+	
+	Fixed MySQL handling in the configure script. (David Herring)
+	
 0.1.1:
 	Fixed a little bug in ALSA sound device handling: use exactly
 	whatever buffer size is suggested by ALSA, so that some sound
 	devices won't fail with an overrun after running for a while.
+	(Tomi, Hessu)
 
 0.1.0:
 	Improved AIS decoding DSP code.
