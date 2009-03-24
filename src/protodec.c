@@ -91,6 +91,36 @@ static void remove_trailing_spaces(char *s, int len)
 	}
 }
 
+/*
+ *	Decode 6-bit ASCII to normal 8-bit ASCII
+ */
+
+void protodec_decode_sixbit_ascii(char sixbit, char *name, int pos)
+{
+	if (sixbit >= 1 && sixbit <= 31) {
+		name[pos] = sixbit + 64;
+		return;
+	}
+	
+	if (sixbit >= 32 && sixbit <= 63) {
+		name[pos] = sixbit;
+		return;
+	}
+	
+	name[pos] = ' ';
+}
+
+unsigned long protodec_henten(int from, int size, unsigned char *frame)
+{
+	int i = 0;
+	unsigned long tmp = 0;
+	
+	for (i = 0; i < size; i++)
+		tmp |= (frame[from + i]) << (size - 1 - i);
+	
+	return tmp;
+}
+
 #define NCHK_LEN 3
 
 void protodec_getdata(int bufferlengde, struct demod_state_t *d)
@@ -329,7 +359,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		hvor = 70;
 		for (k = 0; k < 6; k++) {
 			letter = protodec_henten(hvor, 6, d->rbuffer);
-			protodec_bokstavtabell(letter, callsign, k);
+			protodec_decode_sixbit_ascii(letter, callsign, k);
 			hvor += 6;
 		}
 		callsign[6] = 0;
@@ -340,7 +370,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		hvor = 112;
 		for (k = 0; k < 20; k++) {
 			letter = protodec_henten(hvor, 6, d->rbuffer);
-			protodec_bokstavtabell(letter, name, k);
+			protodec_decode_sixbit_ascii(letter, name, k);
 			hvor += 6;
 		}
 		name[20] = 0;
@@ -351,7 +381,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		hvor = 120 + 106 + 68 + 8;
 		for (k = 0; k < 20; k++) {
 			letter = protodec_henten(hvor, 6, d->rbuffer);
-			protodec_bokstavtabell(letter, destination, k);
+			protodec_decode_sixbit_ascii(letter, destination, k);
 			hvor += 6;
 		}
 		destination[20] = 0;
@@ -530,27 +560,6 @@ void protodec_decode(char *in, int count, struct demod_state_t *d)
 	}
 }
 
-
-unsigned long protodec_henten(int from, int size, unsigned char *frame)
-{
-	int i = 0;
-	unsigned long tmp = 0;
-	
-	for (i = 0; i < size; i++)
-		tmp |= (frame[from + i]) << (size - 1 - i);
-	
-	return tmp;
-}
-
-void protodec_bokstavtabell(char bokstav, char *name, int pos)
-{
-	name[pos] = bokstav + 64;
-	if (name[pos] == 64 || name[pos] == 96)
-		name[pos] = ' ';
-
-//      if (letter < 40) letter = letter + 48;
-//          else letter = letter + 56;
-}
 
 unsigned short protodec_sdlc_crc(unsigned char *data, unsigned len)	// Calculates CRC-checksum
 {
