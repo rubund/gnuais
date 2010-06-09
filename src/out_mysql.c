@@ -234,6 +234,46 @@ int myout_ais_vesseldata(struct mysql_state_t *my,
 #endif
 }
 
+int myout_ais_vesseldatab(struct mysql_state_t *my,
+	int tid, int mmsi, int A, int B, int C, int D)
+{
+#ifdef HAVE_MYSQL
+	char ins[MAX_SQL_LEN], upd[MAX_SQL_LEN];
+	
+	snprintf(ins, MAX_SQL_LEN,
+		"INSERT INTO ais_vesseldata (time,mmsi,A,B,C,D) VALUES (%d,%d,%d,%d,%d,%d)",
+		tid, mmsi, A, B, C, D);
+	
+	snprintf(upd, MAX_SQL_LEN,
+		"UPDATE ais_vesseldata SET time=%d, A=%d, B=%d, C=%d, D=%d WHERE mmsi=%d",
+		tid, A, B, C, D, mmsi);
+		
+	return myout_update_or_insert(my, upd, ins);
+#else
+	return -1;
+#endif
+}
+
+int myout_ais_vesselname(struct mysql_state_t *my,
+	int tid, int mmsi, char *name)
+{
+#ifdef HAVE_MYSQL
+	char ins[MAX_SQL_LEN], upd[MAX_SQL_LEN];
+	
+	snprintf(ins, MAX_SQL_LEN,
+		"INSERT INTO ais_vesseldata (time,mmsi,name) VALUES (%d,%d,\"%s\")",
+		tid, mmsi, name);
+	
+	snprintf(upd, MAX_SQL_LEN,
+		"UPDATE ais_vesseldata SET time=%d, name=\"%s\" WHERE mmsi=%d",
+		tid, name, mmsi);
+		
+	return myout_update_or_insert(my, upd, ins);
+#else
+	return -1;
+#endif
+}
+
 
 int myout_nmea(struct mysql_state_t *my, int tid, char *nmea)
 {

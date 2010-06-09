@@ -1,3 +1,12 @@
+0.2.1:
+	Added support of class B frames (types 18, 19, 24)
+	Type 19 may have bug(s). Very little class B transponders around
+	and type 19 frame is seen only if another station polls class B
+	transponder
+	(actualLy never here) so debugging is not easy on any class B
+	frames. (Sakari Nylund)
+
+
 0.2.0:
 	Fixed 6-bit ASCII decoding to also handle numbers and special
 	characters. (Hessu)

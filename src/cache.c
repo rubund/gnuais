@@ -273,3 +273,86 @@ int cache_vesseldata(int received_t, int mmsi, int imo,
 	return 0;
 }
 
+int cache_vesseldatab(int received_t, int mmsi,
+	char *callsign,
+	int shiptype, int A, int B, int C, int D)
+{
+	struct cache_ent *e;
+	
+	CACHE_DBG(hlog(LOG_DEBUG, "cache_vesseldatab %d:  t %d", mmsi, received_t));
+	
+	pthread_mutex_lock(&cache_spt_mut);
+	
+	e = cache_get(mmsi);
+	
+	e->mmsi = mmsi;
+	e->imo = 0; //NO imo;
+	e->received_data = received_t;
+	if (!e->callsign || strcmp(e->callsign, callsign) != 0) {
+		if (e->callsign)
+			hfree(e->callsign);
+		e->callsign = hstrdup(callsign);
+	}
+	
+	e->shiptype = shiptype;
+	e->A = A;
+	e->B = B;
+	e->C = C;
+	e->D = D;
+	e->draught = 0;//NO draught;
+	
+	pthread_mutex_unlock(&cache_spt_mut);
+	
+	return 0;
+}
+
+int cache_vesseldatabb(int received_t, int mmsi,
+        int shiptype, int A, int B, int C, int D)
+{
+	struct cache_ent *e;
+	
+	CACHE_DBG(hlog(LOG_DEBUG, "cache_vesseldatab %d:  t %d", mmsi, received_t));
+	
+	pthread_mutex_lock(&cache_spt_mut);
+	
+	e = cache_get(mmsi);
+	
+	e->mmsi = mmsi;
+	e->imo = 0; //NO imo;
+	e->received_data = received_t;
+	e->shiptype = shiptype;
+	e->A = A;
+	e->B = B;
+	e->C = C;
+	e->D = D;
+	e->draught = 0;//NO draught;
+	
+	pthread_mutex_unlock(&cache_spt_mut);
+	
+	return 0;
+}
+
+int cache_vesselname(int received_t, int mmsi, char *name)
+{
+	struct cache_ent *e;
+	
+	CACHE_DBG(hlog(LOG_DEBUG, "cache_vesselname %d: name '%s'  t %d", mmsi, name, received_t));
+	
+	pthread_mutex_lock(&cache_spt_mut);
+	
+	e = cache_get(mmsi);
+	
+	e->mmsi = mmsi;
+	e->received_data = received_t;
+
+	if (!e->name || strcmp(e->name, name) != 0) {
+		if (e->name)
+			hfree(e->name);
+		e->name = hstrdup(name);
+	}
+	
+	pthread_mutex_unlock(&cache_spt_mut);
+	
+	return 0;
+}
+
