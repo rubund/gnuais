@@ -1,3 +1,11 @@
+0.2.2:
+        Changed code a bit. Class B transponders do not have any
+	"destination"-field.
+	Code now adds fake destination field when it receives
+	class B transponders message (type 19, 24).
+        Fake field sets destination: "CLASS B TX".
+	Just for "nice to know it came from class B vessel"- purposes.
+	(Saku)
 0.2.1:
 	Added support of class B frames (types 18, 19, 24)
 	Type 19 may have bug(s). Very little class B transponders around

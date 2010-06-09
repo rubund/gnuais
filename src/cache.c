@@ -332,11 +332,11 @@ int cache_vesseldatabb(int received_t, int mmsi,
 	return 0;
 }
 
-int cache_vesselname(int received_t, int mmsi, char *name)
+int cache_vesselname(int received_t, int mmsi, char *name, char *destination)
 {
 	struct cache_ent *e;
 	
-	CACHE_DBG(hlog(LOG_DEBUG, "cache_vesselname %d: name '%s'  t %d", mmsi, name, received_t));
+	CACHE_DBG(hlog(LOG_DEBUG, "cache_vesselname %d: name '%s' destination '%s'  t %d", mmsi, name, destination, received_t));
 	
 	pthread_mutex_lock(&cache_spt_mut);
 	
@@ -351,6 +351,11 @@ int cache_vesselname(int received_t, int mmsi, char *name)
 		e->name = hstrdup(name);
 	}
 	
+	if (!e->destination || strcmp(e->destination, destination)) {
+		if (e->destination)
+			hfree(e->destination);
+		e->destination = hstrdup(destination);
+	}
 	pthread_mutex_unlock(&cache_spt_mut);
 	
 	return 0;

@@ -465,6 +465,11 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		remove_trailing_spaces(name, 20);
 		//printf("Name: '%s'\n", name);
 		
+		//Class B does not have destination, use "CLASS B TX" instead
+                destination[0] = 0;
+		strcat(destination,"CLASS B TX");
+		destination[10] = 0; //just to be sure ;)
+		
 		/* type of ship and cargo */
 		shiptype = protodec_henten(263, 8, d->rbuffer);
 		
@@ -480,9 +485,10 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		
 			        
 		if (my)
-			myout_ais_vesselname(my, received_t, mmsi, name);
+			myout_ais_vesselname(my, received_t, mmsi, name, destination);
+
 		if (cache_positions)
-			cache_vesselname(received_t, mmsi, name);
+			cache_vesselname(received_t, mmsi, name, destination);
 		
 				     
 		if (my)
@@ -517,10 +523,16 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		     remove_trailing_spaces(name, 20);
 		     //printf("Name: '%s'\n", name);
 	        
+		//Class B does not have destination, use "CLASS B TX" instead
+                destination[0] = 0;
+		strcat(destination,"CLASS B TX");
+		destination[10] = 0; //just to be sure ;)
+		
 		if (my)
-			myout_ais_vesselname(my, received_t, mmsi, name);
+			myout_ais_vesselname(my, received_t, mmsi, name, destination);
+			
 		if (cache_positions)
-			cache_vesselname(received_t, mmsi, name);
+			cache_vesselname(received_t, mmsi, name, destination);
 			
 		};
 		                     

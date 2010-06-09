@@ -255,18 +255,18 @@ int myout_ais_vesseldatab(struct mysql_state_t *my,
 }
 
 int myout_ais_vesselname(struct mysql_state_t *my,
-	int tid, int mmsi, char *name)
+	int tid, int mmsi, char *name, char *destination)
 {
 #ifdef HAVE_MYSQL
 	char ins[MAX_SQL_LEN], upd[MAX_SQL_LEN];
 	
 	snprintf(ins, MAX_SQL_LEN,
-		"INSERT INTO ais_vesseldata (time,mmsi,name) VALUES (%d,%d,\"%s\")",
-		tid, mmsi, name);
+		"INSERT INTO ais_vesseldata (time,mmsi,name,destination) VALUES (%d,%d,\"%s\",\"%s\")",
+		tid, mmsi, name, destination);
 	
 	snprintf(upd, MAX_SQL_LEN,
-		"UPDATE ais_vesseldata SET time=%d, name=\"%s\" WHERE mmsi=%d",
-		tid, name, mmsi);
+		"UPDATE ais_vesseldata SET time=%d, name=\"%s\", destination=\"%s\" WHERE mmsi=%d",
+		tid, name, destination, mmsi);
 		
 	return myout_update_or_insert(my, upd, ins);
 #else
