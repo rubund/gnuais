@@ -126,8 +126,6 @@ void protodec_20(struct demod_state_t *d, int bufferlen)
 	int i;
 	int pos;
 	
-	printf("buflen %d ", bufferlen);
-	
 	pos = 40;
 	
 	for (i = 0; i < 4 && pos + 30 < bufferlen; pos += 30) {
@@ -136,7 +134,7 @@ void protodec_20(struct demod_state_t *d, int bufferlen)
 		timeout = protodec_henten(pos + 12 + 4, 3, d->rbuffer);
 		incr = protodec_henten(pos + 12 + 4 + 3, 11, d->rbuffer);
 		
-		printf(" reserve %d pos %d ofs %d slots1 %d timeout1 %d incr1 %d",
+		printf(" reserve %d (pos %d ofs %d slots %d timeout %d incr %d)",
 			i, pos, ofs, slots, timeout, incr);
 		i++;
 	}
@@ -300,7 +298,7 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 	if (skip_type[type])
 		return; // ignored by configuration
 	
-	printf("ch %c cntr %ld type %d mmsi %09ld: ", d->chanid, d->cntr, type, mmsi);
+	printf("ch %c cntr %ld type %d mmsi %09ld:", d->chanid, d->cntr, type, mmsi);
 	
 	switch (type) {
 	case 1:
@@ -317,7 +315,7 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
 		navstat = protodec_henten(38, 2, d->rbuffer);
 		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
-		printf("lat %.6f lon %.6f course %.0f speed %.1f rateofturn %d navstat %d heading %d",
+		printf(" lat %.6f lon %.6f course %.0f speed %.1f rateofturn %d navstat %d heading %d",
 			(float) latitude / 600000.0,
 			(float) longitude / 600000.0,
 			(float) course / 10.0, (float) sog / 10.0,
@@ -355,7 +353,7 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 		if (((latitude >> 26) & 1) == 1)
 			latitude |= 0xf8000000;
 		latit = ((float) latitude) / 10000.0 / 60.0;
-		printf("date %ld-%ld-%ld time %ld:%ld:%ld lat %.6f lon %.6f",
+		printf(" date %ld-%ld-%ld time %ld:%ld:%ld lat %.6f lon %.6f",
 			year, month, day, hour, minute,
 			second, latit, longit);
 		
@@ -420,7 +418,7 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 		D = protodec_henten(240 + 9 + 9 + 6, 6, d->rbuffer);
 		draught = protodec_henten(294, 8, d->rbuffer);
 		// printf("Length: %d\nWidth: %d\nDraught: %f\n",A+B,C+D,(float)draught/10);
-		printf("name \"%s\" destination \"%s\" type %d length %d width %d draught %.1f",
+		printf(" name \"%s\" destination \"%s\" type %d length %d width %d draught %.1f",
 			name, destination, shiptype,
 			A + B, C + D,
 			(float) draught / 10.0);
@@ -439,7 +437,7 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 	
 	case 8: // Binary broadcast message
 		appid = protodec_henten(40, 16, d->rbuffer);
-		printf("appid %d", appid);
+		printf(" appid %d", appid);
 		break;
 
 	case 18: // class B transmitter
@@ -455,7 +453,7 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 		rateofturn = 0; //NOT in B
 		navstat = 15;   //NOT in B
 		heading = protodec_henten(124, 9, d->rbuffer);
-		printf("lat %.6f lon %.6f course %.0f speed %.1f rateofturn %d navstat %d heading %d",
+		printf(" lat %.6f lon %.6f course %.0f speed %.1f rateofturn %d navstat %d heading %d",
 			(float) latitude / 600000.0,
 			(float) longitude / 600000.0,
 			(float) course / 10.0, (float) sog / 10.0,
@@ -509,7 +507,7 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 	
 		// printf("Length: %d\nWidth: %d\n",A+B,C+D);
 		//printf("%09ld %d %d %f", mmsi, A + B, C + D);
-		printf("name \"%s\" type %d length %d  width %d", name, shiptype, A+B, C+D);
+		printf(" name \"%s\" type %d length %d  width %d", name, shiptype, A+B, C+D);
 		
 		if (my)
 			myout_ais_vesselname(my, received_t, mmsi, name, destination);
@@ -552,7 +550,7 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 			 */
 			strcpy(destination, "CLASS B");
 			
-			printf("name \"%s\"", name);
+			printf(" name \"%s\"", name);
 			
 			if (my)
 				myout_ais_vesselname(my, received_t, mmsi, name, destination);
@@ -588,7 +586,7 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 			printf("%09ld %d %d", mmsi, A + B, C + D);
 			*/
 			
-			printf("callsign \"%s\" type %d length %d width %d",
+			printf(" callsign \"%s\" type %d length %d width %d",
 				callsign, shiptype, A+B, C+D);
 			
 			if (my)
