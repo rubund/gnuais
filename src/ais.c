@@ -180,13 +180,11 @@ int main(int argc, char *argv[])
 		if (sound_channels == SOUND_CHANNELS_BOTH
 		    || sound_channels == SOUND_CHANNELS_RIGHT) {
 			/* ch a/0/right */
-			//protodec_decode(buff_b, buffer_l, demod_state_a);
 			receiver_run(rx_a, buffer, buffer_l);
 		}
 		if (sound_channels == SOUND_CHANNELS_BOTH
 		    || sound_channels == SOUND_CHANNELS_LEFT) {	
 			/* ch b/1/left */
-			//protodec_decode(buff_b, buffer_l, demod_state_b);
 			receiver_run(rx_b, buffer, buffer_l);
 		}
 	}
