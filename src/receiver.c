@@ -63,6 +63,7 @@ struct receiver *init_receiver(char name, int num_ch, int ch_ofs)
 	rx->pll = 0;
 	rx->pllinc = 0x10000 / 5;
 	rx->prev = 0;
+	rx->last_levellog = 0;
 
 	return rx;
 }
@@ -82,6 +83,9 @@ void receiver_run(struct receiver *rx, short *buf, int len)
 	float out;
 	int curr, bit;
 	char b;
+	short maxval = 0;
+	int level_distance;
+	float level;
 
 	len = (len * rx->num_ch) - rx->ch_ofs;
 	buf += rx->ch_ofs;
@@ -90,6 +94,10 @@ void receiver_run(struct receiver *rx, short *buf, int len)
 		static int u = 0;
 
 		rx->decoder->cntr++;
+		
+		// look for peak volume
+		if (*buf > maxval)
+			maxval = *buf;
 
 		filter_run(rx->filter, *buf / 32768.0, &out);
 
@@ -121,6 +129,18 @@ void receiver_run(struct receiver *rx, short *buf, int len)
 
 		buf += rx->num_ch;
 		len -= rx->num_ch;
+	}
+	
+	/* calculate level, and log it */
+	level = (float)maxval / (float)32768 * (float)100;
+	level_distance = time(NULL) - rx->last_levellog;
+	
+	if (level > 95.0 && (level_distance >= 30 || level_distance >= sound_levellog)) {
+		hlog(LOG_NOTICE, "Level on ch %d too high: %.0f %%", rx->ch_ofs, level);
+		time(&rx->last_levellog);
+	} else if (sound_levellog != 0 && level_distance >= sound_levellog) {
+		hlog(LOG_INFO, "Level on ch %d: %.0f %%", rx->ch_ofs, level);
+		time(&rx->last_levellog);
 	}
 }
 
