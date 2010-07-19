@@ -468,38 +468,17 @@ void protodec_24(struct demod_state_t *d, int bufferlen, time_t received_t, unsi
 	}
 }
 
-
 #define NCHK_LEN 3
 
-void protodec_getdata(int bufferlen, struct demod_state_t *d)
+void protodec_generate_nmea(struct demod_state_t *d, int bufferlen, int fillbits, time_t received_t)
 {
-	int serbuffer_l;
-	
-	unsigned char type = protodec_henten(0, 6, d->rbuffer);
-	if (type < 1 || type > MAX_AIS_PACKET_TYPE /* 9 */)
-		return;
-	unsigned long mmsi = protodec_henten(8, 30, d->rbuffer);
-	unsigned short appid;
+	int senlen;
+	int pos;
+	int k, letter;
 	int m;
 	unsigned char sentences, sentencenum, nmeachk;
-	int senlen;
-	unsigned char fillbits = 0;
-	int k, pos, letter;
 	char nchk[NCHK_LEN];
-	time_t received_t;
-	time(&received_t);
-	
-	DBG(printf("Bufferlen: %d,", bufferlen));
-	
-	if (bufferlen % 6 > 0) {
-		fillbits = 6 - (bufferlen % 6);
-		for (m = bufferlen; m < bufferlen + fillbits; m++) {
-			d->rbuffer[m] = 0;
-		}
-		bufferlen = bufferlen + fillbits;
-	}
-
-	DBG(printf(" fixed Bufferlen: %d with %d fillbits\n", bufferlen, fillbits));
+	int serbuffer_l;
 	
 	//6bits to nmea-ascii. One sentence len max 82char
 	//inc. head + tail.This makes inside datamax 62char multipart, 62 single
@@ -601,6 +580,35 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 		if (my)
 			myout_nmea(my, received_t, d->nmea);
 	} while (sentencenum < sentences);
+}
+
+void protodec_getdata(int bufferlen, struct demod_state_t *d)
+{
+	unsigned char type = protodec_henten(0, 6, d->rbuffer);
+	if (type < 1 || type > MAX_AIS_PACKET_TYPE /* 9 */)
+		return;
+	unsigned long mmsi = protodec_henten(8, 30, d->rbuffer);
+	unsigned short appid;
+	int fillbits = 0;
+	int k;
+	time_t received_t;
+	time(&received_t);
+	
+	DBG(printf("Bufferlen: %d,", bufferlen));
+	
+	if (bufferlen % 6 > 0) {
+		fillbits = 6 - (bufferlen % 6);
+		for (k = bufferlen; k < bufferlen + fillbits; k++)
+			d->rbuffer[k] = 0;
+		
+		bufferlen = bufferlen + fillbits;
+	}
+
+	DBG(printf(" fixed Bufferlen: %d with %d fillbits\n", bufferlen, fillbits));
+	
+	/* generate an NMEA string out of the binary packet */
+	protodec_generate_nmea(d, bufferlen, fillbits, received_t);
+	
 	//multipart message ready. Increase seqnr for next one
 	//rolling 1-9. Single msg ready may also increase this, no matter.
 	d->seqnr++;
