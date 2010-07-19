@@ -465,10 +465,11 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		remove_trailing_spaces(name, 20);
 		//printf("Name: '%s'\n", name);
 		
-		//Class B does not have destination, use "CLASS B TX" instead
-                destination[0] = 0;
-		strcat(destination,"CLASS B TX");
-		destination[10] = 0; //just to be sure ;)
+		/*
+		 * Class B does not have destination, use "CLASS B" instead
+		 * (same as ShipPlotter)
+		 */
+		strcpy(destination, "CLASS B");
 		
 		/* type of ship and cargo */
 		shiptype = protodec_henten(263, 8, d->rbuffer);
@@ -483,14 +484,12 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		//printf("%09ld %d %d %f", mmsi, A + B, C + D);
 		printf("  ( !%s )", d->nmea);
 		
-			        
 		if (my)
 			myout_ais_vesselname(my, received_t, mmsi, name, destination);
 
 		if (cache_positions)
 			cache_vesselname(received_t, mmsi, name, destination);
 		
-				     
 		if (my)
 			myout_ais_vesseldatab(my, received_t, mmsi,
 				(int) A, (int) B, (int) C, (int) D);
@@ -505,81 +504,80 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		
 
 	case 24: // class B transmitter
-
-                /* resolve type 24 frame's part A or B */
+		/* resolve type 24 frame's part A or B */
 		partnr = protodec_henten(38, 2, d->rbuffer);
-
-          	//printf("(partnr %d type %d): ",partnr, type);
-                if (partnr == 0) {
-		//printf("(Now in name:partnr %d type %d): ",partnr, type);
- 		     /* get name */
-		     hvor = 40;
-		     for (k = 0; k < 20; k++) {
-			letter = protodec_henten(hvor, 6, d->rbuffer);
-			protodec_decode_sixbit_ascii(letter, name, k);
-			hvor += 6;
-		     }
-		     name[20] = 0;
-		     remove_trailing_spaces(name, 20);
-		     //printf("Name: '%s'\n", name);
-	        
-		//Class B does not have destination, use "CLASS B TX" instead
-                destination[0] = 0;
-		strcat(destination,"CLASS B TX");
-		destination[10] = 0; //just to be sure ;)
 		
-		if (my)
-			myout_ais_vesselname(my, received_t, mmsi, name, destination);
+		//printf("(partnr %d type %d): ",partnr, type);
+		if (partnr == 0) {
+			//printf("(Now in name:partnr %d type %d): ",partnr, type);
+			/* get name */
+			hvor = 40;
+			for (k = 0; k < 20; k++) {
+				letter = protodec_henten(hvor, 6, d->rbuffer);
+				protodec_decode_sixbit_ascii(letter, name, k);
+				hvor += 6;
+			}
 			
-		if (cache_positions)
-			cache_vesselname(received_t, mmsi, name, destination);
+			name[20] = 0;
+			remove_trailing_spaces(name, 20);
+			//printf("Name: '%s'\n", name);
 			
-		};
-		                     
-                if (partnr == 1) {
-		     //printf("(Now in data:partnr %d type %d): ",partnr, type);
- 		     /* get callsign */
-		     hvor = 90; 
-		     for (k = 0; k < 6; k++) {
-			letter = protodec_henten(hvor, 6, d->rbuffer);
-			protodec_decode_sixbit_ascii(letter, callsign, k);
-			hvor += 6;
-		     }
-		     callsign[6] = 0;
-		     remove_trailing_spaces(callsign, 6);
-		     //printf("Callsign: '%s'\n", callsign);
+			/*
+			 * Class B does not have destination, use "CLASS B TX" instead
+			 * (same string as ShipPlotter uses)
+			 */
+			strcpy(destination, "CLASS B");
+			
+			if (my)
+				myout_ais_vesselname(my, received_t, mmsi, name, destination);
+			
+			if (cache_positions)
+				cache_vesselname(received_t, mmsi, name, destination);
+		}
 		
-		     /* type of ship and cargo */
-		     shiptype = protodec_henten(40, 8, d->rbuffer);
+		if (partnr == 1) {
+			//printf("(Now in data:partnr %d type %d): ",partnr, type);
+			/* get callsign */
+			hvor = 90; 
+			for (k = 0; k < 6; k++) {
+				letter = protodec_henten(hvor, 6, d->rbuffer);
+				protodec_decode_sixbit_ascii(letter, callsign, k);
+				hvor += 6;
+			}
+			callsign[6] = 0;
+			remove_trailing_spaces(callsign, 6);
+			//printf("Callsign: '%s'\n", callsign);
+			
+			/* type of ship and cargo */
+			shiptype = protodec_henten(40, 8, d->rbuffer);
+			
+			/* dimensions and reference GPS position */
+			A = protodec_henten(132, 9, d->rbuffer);
+			B = protodec_henten(132 + 9, 9, d->rbuffer);
+			C = protodec_henten(132 + 9 + 9, 6, d->rbuffer);
+			D = protodec_henten(132 + 9 + 9 + 6, 6, d->rbuffer);
+			
+			/*
+			printf("Length: %d\nWidth: %d\n",A+B,C+D);
+			printf("%09ld %d %d", mmsi, A + B, C + D);
+			*/
+			printf("  ( !%s )", d->nmea);
+			
+			if (my)
+				myout_ais_vesseldatab(my, received_t, mmsi,
+					(int) A, (int) B, (int) C, (int) D);
+			
+			if (cache_positions)
+				cache_vesseldatab(received_t, mmsi, callsign,
+					shiptype, A, B, C, D);
+		}
 		
-		     /* dimensions and reference GPS position */
-		     A = protodec_henten(132, 9, d->rbuffer);
-	 	     B = protodec_henten(132 + 9, 9, d->rbuffer);
-		     C = protodec_henten(132 + 9 + 9, 6, d->rbuffer);
-		     D = protodec_henten(132 + 9 + 9 + 6, 6, d->rbuffer);
-		    
-		     /* 
-		     printf("Length: %d\nWidth: %d\n",A+B,C+D);
-		     printf("%09ld %d %d", mmsi, A + B, C + D);
-		     */
-		     printf("  ( !%s )", d->nmea);
-		     
-		     if (my)
-			myout_ais_vesseldatab(my, received_t, mmsi,
-				(int) A, (int) B, (int) C, (int) D);
-		
-		     if (cache_positions)
-			cache_vesseldatab(received_t, mmsi, callsign,
-			 shiptype, A, B, C, D);
-		
-		};
-		
-	
 		break;
-		
-			default:
+	
+	default:
 		printf("  ( !%s )", d->nmea);
 		break;
+		
 	}
 	printf("\n");
 }
