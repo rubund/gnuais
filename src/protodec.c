@@ -120,9 +120,32 @@ unsigned long protodec_henten(int from, int size, unsigned char *frame)
 	return tmp;
 }
 
+void protodec_20(struct demod_state_t *d, int bufferlen)
+{
+	int ofs, slots, timeout, incr;
+	int i;
+	int pos;
+	
+	printf("buflen %d ", bufferlen);
+	
+	pos = 40;
+	
+	for (i = 0; i < 4 && pos + 30 < bufferlen; pos += 30) {
+		ofs = protodec_henten(pos, 12, d->rbuffer);
+		slots = protodec_henten(pos + 12, 4, d->rbuffer);
+		timeout = protodec_henten(pos + 12 + 4, 3, d->rbuffer);
+		incr = protodec_henten(pos + 12 + 4 + 3, 11, d->rbuffer);
+		
+		printf(" reserve %d pos %d ofs %d slots1 %d timeout1 %d incr1 %d",
+			i, pos, ofs, slots, timeout, incr);
+		i++;
+	}
+}
+
+
 #define NCHK_LEN 3
 
-void protodec_getdata(int bufferlengde, struct demod_state_t *d)
+void protodec_getdata(int bufferlen, struct demod_state_t *d)
 {
 	int serbuffer_l;
 	
@@ -142,6 +165,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	unsigned int A, B;
 	unsigned char C, D;
 	unsigned char draught;
+	unsigned short appid;
 	int m;
 	unsigned char sentences, sentencenum, nmeachk, partnr;
 	int senlen;
@@ -152,27 +176,27 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	time_t received_t;
 	time(&received_t);
 	
-	DBG(printf("Bufferlen: %d,", bufferlengde));
+	DBG(printf("Bufferlen: %d,", bufferlen));
 	
-	if (bufferlengde % 6 > 0) {
-		fillbits = 6 - (bufferlengde % 6);
-		for (m = bufferlengde; m < bufferlengde + fillbits; m++) {
+	if (bufferlen % 6 > 0) {
+		fillbits = 6 - (bufferlen % 6);
+		for (m = bufferlen; m < bufferlen + fillbits; m++) {
 			d->rbuffer[m] = 0;
 		}
-		bufferlengde = bufferlengde + fillbits;
+		bufferlen = bufferlen + fillbits;
 	}
 
-	DBG(printf(" fixed Bufferlen: %d with %d fillbits\n", bufferlengde, fillbits));
+	DBG(printf(" fixed Bufferlen: %d with %d fillbits\n", bufferlen, fillbits));
 	
 	//6bits to nmea-ascii. One sentence len max 82char
 	//inc. head + tail.This makes inside datamax 62char multipart, 62 single
 	senlen = 61;		//this is normally not needed.For testing only. May be fixed number
-	if (bufferlengde <= (senlen * 6)) {
+	if (bufferlen <= (senlen * 6)) {
 		sentences = 1;
 	} else {
-		sentences = bufferlengde / (senlen * 6);
+		sentences = bufferlen / (senlen * 6);
 		//sentences , if overflow put one more
-		if (bufferlengde % (senlen * 6) != 0)
+		if (bufferlen % (senlen * 6) != 0)
 			sentences++;
 	};
 	NMEA_DBG(printf("NMEA: %d sentences with max data of %d ascii chrs\n", sentences, senlen));
@@ -180,7 +204,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	hvor = 0;
 	do {
 		k = 13;		//leave room for nmea header
-		while (k < senlen + 13 && bufferlengde > hvor) {
+		while (k < senlen + 13 && bufferlen > hvor) {
 			letter = protodec_henten(hvor, 6, d->rbuffer);
 			// 6bit-to-ascii conversion by IEC
 			if (letter < 40)
@@ -191,8 +215,8 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			hvor += 6;
 			k++;
 		}
-		NMEA_DBG(printf("NMEA: Drop from loop with k:%d hvor:%d senlen:%d bufferlengde\n",
-			k, hvor, senlen, bufferlengde));
+		NMEA_DBG(printf("NMEA: Drop from loop with k:%d hvor:%d senlen:%d bufferlen\n",
+			k, hvor, senlen, bufferlen));
 		//set nmea trailer with 00 checksum (calculate later)
 		d->nmea[k] = 44;
 		d->nmea[k + 1] = 48;
@@ -276,7 +300,8 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	if (skip_type[type])
 		return; // ignored by configuration
 	
-	printf("(ch %c cntr %ld type %d): ", d->chanid, d->cntr, type);
+	printf("ch %c cntr %ld type %d mmsi %09ld: ", d->chanid, d->cntr, type, mmsi);
+	
 	switch (type) {
 	case 1:
 	case 2:
@@ -292,12 +317,11 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
 		navstat = protodec_henten(38, 2, d->rbuffer);
 		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
-		printf("%09ld %10f %10f %5f %5f %5i %5d %5d",
-			mmsi, (float) latitude / 600000.0,
+		printf("lat %.6f lon %.6f course %.0f speed %.1f rateofturn %d navstat %d heading %d",
+			(float) latitude / 600000.0,
 			(float) longitude / 600000.0,
 			(float) course / 10.0, (float) sog / 10.0,
 			rateofturn, navstat, heading);
-		printf("  ( !%s )", d->nmea);
 		
 		if (my)
 			myout_ais_position(my, received_t, mmsi,
@@ -331,10 +355,9 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		if (((latitude >> 26) & 1) == 1)
 			latitude |= 0xf8000000;
 		latit = ((float) latitude) / 10000.0 / 60.0;
-		printf("%09ld %ld %ld %ld %ld %ld %ld %f %f",
-			mmsi, year, month, day, hour, minute,
+		printf("date %ld-%ld-%ld time %ld:%ld:%ld lat %.6f lon %.6f",
+			year, month, day, hour, minute,
 			second, latit, longit);
-		printf("  ( !%s )", d->nmea);
 		
 		if (my)
 			myout_ais_basestation(my, received_t, mmsi,
@@ -397,10 +420,10 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		D = protodec_henten(240 + 9 + 9 + 6, 6, d->rbuffer);
 		draught = protodec_henten(294, 8, d->rbuffer);
 		// printf("Length: %d\nWidth: %d\nDraught: %f\n",A+B,C+D,(float)draught/10);
-		printf("%09ld %s %s %d %d %f", mmsi,
-			name, destination, A + B, C + D,
+		printf("name \"%s\" destination \"%s\" type %d length %d width %d draught %.1f",
+			name, destination, shiptype,
+			A + B, C + D,
 			(float) draught / 10.0);
-		printf("  ( !%s )", d->nmea);
 		
 		if (my)
 			myout_ais_vesseldata(my, received_t, mmsi,
@@ -412,6 +435,11 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			cache_vesseldata(received_t, mmsi, imo, callsign,
 				name, destination, shiptype, A, B, C, D, draught / 10.0);
 		
+		break;
+	
+	case 8: // Binary broadcast message
+		appid = protodec_henten(40, 16, d->rbuffer);
+		printf("appid %d", appid);
 		break;
 
 	case 18: // class B transmitter
@@ -427,12 +455,11 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		rateofturn = 0; //NOT in B
 		navstat = 15;   //NOT in B
 		heading = protodec_henten(124, 9, d->rbuffer);
-		printf("%09ld %10f %10f %5f %5f %5i %5d %5d",
-			mmsi, (float) latitude / 600000.0,
+		printf("lat %.6f lon %.6f course %.0f speed %.1f rateofturn %d navstat %d heading %d",
+			(float) latitude / 600000.0,
 			(float) longitude / 600000.0,
 			(float) course / 10.0, (float) sog / 10.0,
 			rateofturn, navstat, heading);
-		printf("  ( !%s )", d->nmea);
 		
 		if (my)
 			myout_ais_position(my, received_t, mmsi,
@@ -482,7 +509,7 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 	
 		// printf("Length: %d\nWidth: %d\n",A+B,C+D);
 		//printf("%09ld %d %d %f", mmsi, A + B, C + D);
-		printf("  ( !%s )", d->nmea);
+		printf("name \"%s\" type %d length %d  width %d", name, shiptype, A+B, C+D);
 		
 		if (my)
 			myout_ais_vesselname(my, received_t, mmsi, name, destination);
@@ -497,11 +524,8 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		if (cache_positions)
 			cache_vesseldatabb(received_t, mmsi,
 			 shiptype, A, B, C, D);
-		
 
 		break;
-		
-		
 
 	case 24: // class B transmitter
 		/* resolve type 24 frame's part A or B */
@@ -527,6 +551,8 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			 * (same string as ShipPlotter uses)
 			 */
 			strcpy(destination, "CLASS B");
+			
+			printf("name \"%s\"", name);
 			
 			if (my)
 				myout_ais_vesselname(my, received_t, mmsi, name, destination);
@@ -561,7 +587,9 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 			printf("Length: %d\nWidth: %d\n",A+B,C+D);
 			printf("%09ld %d %d", mmsi, A + B, C + D);
 			*/
-			printf("  ( !%s )", d->nmea);
+			
+			printf("callsign \"%s\" type %d length %d width %d",
+				callsign, shiptype, A+B, C+D);
 			
 			if (my)
 				myout_ais_vesseldatab(my, received_t, mmsi,
@@ -574,15 +602,16 @@ void protodec_getdata(int bufferlengde, struct demod_state_t *d)
 		
 		break;
 	
+	case 20:
+		protodec_20(d, bufferlen);
+		break;
+	
 	default:
-		printf("  ( !%s )", d->nmea);
 		break;
 		
 	}
-	printf("\n");
+	printf(" (!%s)\n", d->nmea);
 }
-
-
 
 void protodec_decode(char *in, int count, struct demod_state_t *d)
 {
