@@ -255,7 +255,7 @@ int myout_ais_vesseldatab(struct mysql_state_t *my,
 }
 
 int myout_ais_vesselname(struct mysql_state_t *my,
-	int tid, int mmsi, char *name, char *destination)
+	int tid, int mmsi, const char *name, const char *destination)
 {
 #ifdef HAVE_MYSQL
 	char ins[MAX_SQL_LEN], upd[MAX_SQL_LEN];
@@ -296,5 +296,7 @@ int myout_nmea(struct mysql_state_t *my, int tid, char *nmea)
 	}
 	
 	return 0;
+#else
+	return -1;
 #endif
 }

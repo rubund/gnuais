@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
+#include <string.h>
 
 #ifdef HAVE_CURL
 #define ENABLE_JSONAIS_CURL

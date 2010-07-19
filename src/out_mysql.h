@@ -47,5 +47,11 @@ extern int myout_ais_vesseldata(struct mysql_state_t *my,
 	int tid, int mmsi, char *name, char *destination,
 	float draught, int A, int B, int C, int D);
 
+extern int myout_ais_vesselname(struct mysql_state_t *my,
+	int tid, int mmsi, const char *name, const char *destination);
+	
+extern int myout_ais_vesseldatab(struct mysql_state_t *my,
+	int tid, int mmsi, int A, int B, int C, int D);
+
 extern int myout_nmea(struct mysql_state_t *my, int tid, char *nmea);
 

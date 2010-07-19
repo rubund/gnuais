@@ -332,7 +332,7 @@ int cache_vesseldatabb(int received_t, int mmsi,
 	return 0;
 }
 
-int cache_vesselname(int received_t, int mmsi, char *name, char *destination)
+int cache_vesselname(int received_t, int mmsi, char *name, const char *destination)
 {
 	struct cache_ent *e;
 	

@@ -120,6 +120,258 @@ unsigned long protodec_henten(int from, int size, unsigned char *frame)
 	return tmp;
 }
 
+void protodec_pos(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
+{
+	int longitude, latitude;
+	unsigned short course, sog, heading;
+	char rateofturn, navstat;
+	
+	longitude = protodec_henten(61, 28, d->rbuffer);
+	if (((longitude >> 27) & 1) == 1)
+		longitude |= 0xF0000000;
+		
+	latitude = protodec_henten(38 + 22 + 29, 27, d->rbuffer);
+	if (((latitude >> 26) & 1) == 1)
+		latitude |= 0xf8000000;
+	
+	course = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
+	sog = protodec_henten(50, 10, d->rbuffer);
+	rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
+	navstat = protodec_henten(38, 2, d->rbuffer);
+	heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
+	
+	printf(" lat %.6f lon %.6f course %.0f speed %.1f rateofturn %d navstat %d heading %d",
+		(float) latitude / 600000.0,
+		(float) longitude / 600000.0,
+		(float) course / 10.0, (float) sog / 10.0,
+		rateofturn, navstat, heading);
+	
+	if (my)
+		myout_ais_position(my, received_t, mmsi,
+			(float) latitude / 600000.0,
+			(float) longitude / 600000.0,
+			(float) heading, (float) course / 10.0,
+			(float) sog / 10.0);
+			
+	if (cache_positions)
+		cache_position(received_t, mmsi, navstat,
+			(float) latitude / 600000.0,
+			(float) longitude / 600000.0,
+			heading,
+			(float) course / 10.0,
+			rateofturn,
+			(float) sog / 10.0);
+}
+
+void protodec_4(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
+{
+	unsigned long day, hour, minute, second, year, month;
+	int longitude, latitude;
+	float longit, latit;
+	
+	year = protodec_henten(40, 12, d->rbuffer);
+	month = protodec_henten(52, 4, d->rbuffer);
+	day = protodec_henten(56, 5, d->rbuffer);
+	hour = protodec_henten(61, 5, d->rbuffer);
+	minute = protodec_henten(66, 6, d->rbuffer);
+	second = protodec_henten(72, 6, d->rbuffer);
+	
+	longitude = protodec_henten(79, 28, d->rbuffer);
+	if (((longitude >> 27) & 1) == 1)
+		longitude |= 0xF0000000;
+	longit = ((float) longitude) / 10000.0 / 60.0;
+	
+	latitude = protodec_henten(107, 27, d->rbuffer);
+	if (((latitude >> 26) & 1) == 1)
+		latitude |= 0xf8000000;
+	latit = ((float) latitude) / 10000.0 / 60.0;
+	
+	printf(" date %ld-%ld-%ld time %02ld:%02ld:%02ld lat %.6f lon %.6f",
+		year, month, day, hour, minute,
+		second, latit, longit);
+	
+	if (my)
+		myout_ais_basestation(my, received_t, mmsi,
+			(float) latitude / 600000.0,
+			(float) longitude / 600000.0);
+	
+	if (cache_positions)
+		cache_position(received_t, mmsi, 0,
+			(float) latitude / 600000.0,
+			(float) longitude / 600000.0,
+			0, 0.0, 0, 0.0);
+}
+
+void protodec_5(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
+{
+	int pos;
+	unsigned long imo;
+	char callsign[7];
+	char name[21];
+	char destination[21];
+	unsigned int A, B;
+	unsigned char C, D;
+	unsigned char draught;
+	int k;
+	int letter;
+	unsigned int shiptype;
+	
+	/* get IMO number */
+	imo = protodec_henten(40, 30, d->rbuffer);
+	//printf("--- 5: mmsi %lu imo %lu\n", mmsi, imo);
+	
+	/* get callsign */
+	pos = 70;
+	for (k = 0; k < 6; k++) {
+		letter = protodec_henten(pos, 6, d->rbuffer);
+		protodec_decode_sixbit_ascii(letter, callsign, k);
+		pos += 6;
+	}
+	
+	callsign[6] = 0;
+	remove_trailing_spaces(callsign, 6);
+	
+	/* get name */
+	pos = 112;
+	for (k = 0; k < 20; k++) {
+		letter = protodec_henten(pos, 6, d->rbuffer);
+		protodec_decode_sixbit_ascii(letter, name, k);
+		pos += 6;
+	}
+	name[20] = 0;
+	remove_trailing_spaces(name, 20);
+	
+	/* get destination */
+	pos = 120 + 106 + 68 + 8;
+	for (k = 0; k < 20; k++) {
+		letter = protodec_henten(pos, 6, d->rbuffer);
+		protodec_decode_sixbit_ascii(letter, destination, k);
+		pos += 6;
+	}
+	destination[20] = 0;
+	remove_trailing_spaces(destination, 20);
+	
+	/* type of ship and cargo */
+	shiptype = protodec_henten(232, 8, d->rbuffer);
+	
+	/* dimensions and reference GPS position */
+	A = protodec_henten(240, 9, d->rbuffer);
+	B = protodec_henten(240 + 9, 9, d->rbuffer);
+	C = protodec_henten(240 + 9 + 9, 6, d->rbuffer);
+	D = protodec_henten(240 + 9 + 9 + 6, 6, d->rbuffer);
+	draught = protodec_henten(294, 8, d->rbuffer);
+	// printf("Length: %d\nWidth: %d\nDraught: %f\n",A+B,C+D,(float)draught/10);
+	
+	printf(" name \"%s\" destination \"%s\" type %d length %d width %d draught %.1f",
+		name, destination, shiptype,
+		A + B, C + D,
+		(float) draught / 10.0);
+	
+	if (my)
+		myout_ais_vesseldata(my, received_t, mmsi,
+			name, destination,
+			(float) draught / 10.0,
+			(int) A, (int) B, (int) C, (int) D);
+	
+	if (cache_positions)
+		cache_vesseldata(received_t, mmsi, imo, callsign,
+			name, destination, shiptype, A, B, C, D, draught / 10.0);
+}
+
+void protodec_18(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
+{
+	int longitude, latitude;
+	unsigned short course, sog, heading;
+	char rateofturn, navstat;
+	
+	longitude = protodec_henten(57, 28, d->rbuffer);
+	if (((longitude >> 27) & 1) == 1)
+		longitude |= 0xF0000000;
+	
+	latitude = protodec_henten(85, 27, d->rbuffer);
+	if (((latitude >> 26) & 1) == 1)
+		latitude |= 0xf8000000;
+	
+	course = protodec_henten(112, 12, d->rbuffer);
+	sog = protodec_henten(46, 10, d->rbuffer);
+	
+	rateofturn = 0; //NOT in B
+	navstat = 15;   //NOT in B
+	
+	heading = protodec_henten(124, 9, d->rbuffer);
+	printf(" lat %.6f lon %.6f course %.0f speed %.1f rateofturn %d navstat %d heading %d",
+		(float) latitude / 600000.0,
+		(float) longitude / 600000.0,
+		(float) course / 10.0, (float) sog / 10.0,
+		rateofturn, navstat, heading);
+	
+	if (my)
+		myout_ais_position(my, received_t, mmsi,
+			(float) latitude / 600000.0,
+			(float) longitude / 600000.0,
+			(float) heading, (float) course / 10.0,
+			(float) sog / 10.0);
+	
+	if (cache_positions)
+		cache_position(received_t, mmsi, navstat,
+		(float) latitude / 600000.0,
+		(float) longitude / 600000.0,
+		heading,
+		(float) course / 10.0,
+		rateofturn,
+		(float) sog / 10.0);
+}
+
+void protodec_19(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
+{
+	int pos, k;
+	unsigned int A, B;
+	unsigned char C, D;
+	unsigned int shiptype;
+	int letter;
+	char name[21];
+	/*
+	 * Class B does not have destination, use "CLASS B" instead
+	 * (same as ShipPlotter)
+	 */
+	char destination[21] = "CLASS B";
+	
+	/* get name */
+	pos = 143;
+	for (k = 0; k < 20; k++) {
+		letter = protodec_henten(pos, 6, d->rbuffer);
+		protodec_decode_sixbit_ascii(letter, name, k);
+		pos += 6;
+	}
+	name[20] = 0;
+	remove_trailing_spaces(name, 20);
+	//printf("Name: '%s'\n", name);
+	
+	/* type of ship and cargo */
+	shiptype = protodec_henten(263, 8, d->rbuffer);
+	
+	/* dimensions and reference GPS position */
+	A = protodec_henten(271, 9, d->rbuffer);
+	B = protodec_henten(271 + 9, 9, d->rbuffer);
+	C = protodec_henten(271 + 9 + 9, 6, d->rbuffer);
+	D = protodec_henten(271 + 9 + 9 + 6, 6, d->rbuffer);
+	
+	// printf("Length: %d\nWidth: %d\n",A+B,C+D);
+	//printf("%09ld %d %d %f", mmsi, A + B, C + D);
+	printf(" name \"%s\" type %d length %d  width %d", name, shiptype, A+B, C+D);
+	
+	if (my) {
+		myout_ais_vesselname(my, received_t, mmsi, name, destination);
+		myout_ais_vesseldatab(my, received_t, mmsi,
+			(int) A, (int) B, (int) C, (int) D);
+	}
+	
+	if (cache_positions) {
+		cache_vesselname(received_t, mmsi, name, destination);
+		cache_vesseldatabb(received_t, mmsi, shiptype, A, B, C, D);
+	}
+}
+
 void protodec_20(struct demod_state_t *d, int bufferlen)
 {
 	int ofs, slots, timeout, incr;
@@ -140,6 +392,82 @@ void protodec_20(struct demod_state_t *d, int bufferlen)
 	}
 }
 
+void protodec_24(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
+{
+	int partnr;
+	int pos;
+	int k, letter;
+	unsigned int A, B;
+	unsigned char C, D;
+	unsigned int shiptype;
+	char name[21];
+	char callsign[7];
+	/*
+	 * Class B does not have destination, use "CLASS B" instead
+	 * (same as ShipPlotter)
+	 */
+	const char destination[21] = "CLASS B";
+	
+	/* resolve type 24 frame's part A or B */
+	partnr = protodec_henten(38, 2, d->rbuffer);
+	
+	//printf("(partnr %d type %d): ",partnr, type);
+	if (partnr == 0) {
+		//printf("(Now in name:partnr %d type %d): ",partnr, type);
+		/* get name */
+		pos = 40;
+		for (k = 0; k < 20; k++) {
+			letter = protodec_henten(pos, 6, d->rbuffer);
+			protodec_decode_sixbit_ascii(letter, name, k);
+			pos += 6;
+		}
+		
+		name[20] = 0;
+		remove_trailing_spaces(name, 20);
+		
+		printf(" name \"%s\"", name);
+		
+		if (my)
+			myout_ais_vesselname(my, received_t, mmsi, name, destination);
+		
+		if (cache_positions)
+			cache_vesselname(received_t, mmsi, name, destination);
+	}
+	
+	if (partnr == 1) {
+		//printf("(Now in data:partnr %d type %d): ",partnr, type);
+		/* get callsign */
+		pos = 90; 
+		for (k = 0; k < 6; k++) {
+			letter = protodec_henten(pos, 6, d->rbuffer);
+			protodec_decode_sixbit_ascii(letter, callsign, k);
+			pos += 6;
+		}
+		callsign[6] = 0;
+		remove_trailing_spaces(callsign, 6);
+		
+		/* type of ship and cargo */
+		shiptype = protodec_henten(40, 8, d->rbuffer);
+		
+		/* dimensions and reference GPS position */
+		A = protodec_henten(132, 9, d->rbuffer);
+		B = protodec_henten(132 + 9, 9, d->rbuffer);
+		C = protodec_henten(132 + 9 + 9, 6, d->rbuffer);
+		D = protodec_henten(132 + 9 + 9 + 6, 6, d->rbuffer);
+		
+		printf(" callsign \"%s\" type %d length %d width %d",
+			callsign, shiptype, A+B, C+D);
+		
+		if (my)
+			myout_ais_vesseldatab(my, received_t, mmsi,
+				(int) A, (int) B, (int) C, (int) D);
+		
+		if (cache_positions)
+			cache_vesseldatab(received_t, mmsi, callsign,
+				shiptype, A, B, C, D);
+	}
+}
+
 
 #define NCHK_LEN 3
 
@@ -151,25 +479,12 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 	if (type < 1 || type > MAX_AIS_PACKET_TYPE /* 9 */)
 		return;
 	unsigned long mmsi = protodec_henten(8, 30, d->rbuffer);
-	unsigned long imo;
-	unsigned int shiptype;
-	unsigned long day, hour, minute, second, year, month;
-	int longitude, latitude;
-	unsigned short course, sog, heading;
-	char callsign[7];
-	char name[21];
-	char destination[21];
-	char rateofturn, navstat;
-	unsigned int A, B;
-	unsigned char C, D;
-	unsigned char draught;
 	unsigned short appid;
 	int m;
-	unsigned char sentences, sentencenum, nmeachk, partnr;
+	unsigned char sentences, sentencenum, nmeachk;
 	int senlen;
 	unsigned char fillbits = 0;
-	float longit, latit;
-	int k, hvor, letter;
+	int k, pos, letter;
 	char nchk[NCHK_LEN];
 	time_t received_t;
 	time(&received_t);
@@ -199,22 +514,22 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 	};
 	NMEA_DBG(printf("NMEA: %d sentences with max data of %d ascii chrs\n", sentences, senlen));
 	sentencenum = 0;
-	hvor = 0;
+	pos = 0;
 	do {
 		k = 13;		//leave room for nmea header
-		while (k < senlen + 13 && bufferlen > hvor) {
-			letter = protodec_henten(hvor, 6, d->rbuffer);
+		while (k < senlen + 13 && bufferlen > pos) {
+			letter = protodec_henten(pos, 6, d->rbuffer);
 			// 6bit-to-ascii conversion by IEC
 			if (letter < 40)
 				letter = letter + 48;
 			else
 				letter = letter + 56;
 			d->nmea[k] = letter;
-			hvor += 6;
+			pos += 6;
 			k++;
 		}
-		NMEA_DBG(printf("NMEA: Drop from loop with k:%d hvor:%d senlen:%d bufferlen\n",
-			k, hvor, senlen, bufferlen));
+		NMEA_DBG(printf("NMEA: Drop from loop with k:%d pos:%d senlen:%d bufferlen\n",
+			k, pos, senlen, bufferlen));
 		//set nmea trailer with 00 checksum (calculate later)
 		d->nmea[k] = 44;
 		d->nmea[k + 1] = 48;
@@ -301,303 +616,35 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 	printf("ch %c cntr %ld type %d mmsi %09ld:", d->chanid, d->cntr, type, mmsi);
 	
 	switch (type) {
-	case 1:
+	case 1: /* position packets */
 	case 2:
 	case 3:
-		longitude = protodec_henten(61, 28, d->rbuffer);
-		if (((longitude >> 27) & 1) == 1)
-			longitude |= 0xF0000000;
-		latitude = protodec_henten(38 + 22 + 29, 27, d->rbuffer);
-		if (((latitude >> 26) & 1) == 1)
-			latitude |= 0xf8000000;
-		course = protodec_henten(38 + 22 + 28 + 28, 12, d->rbuffer);
-		sog = protodec_henten(50, 10, d->rbuffer);
-		rateofturn = protodec_henten(38 + 2, 8, d->rbuffer);
-		navstat = protodec_henten(38, 2, d->rbuffer);
-		heading = protodec_henten(38 + 22 + 28 + 28 + 12, 9, d->rbuffer);
-		printf(" lat %.6f lon %.6f course %.0f speed %.1f rateofturn %d navstat %d heading %d",
-			(float) latitude / 600000.0,
-			(float) longitude / 600000.0,
-			(float) course / 10.0, (float) sog / 10.0,
-			rateofturn, navstat, heading);
-		
-		if (my)
-			myout_ais_position(my, received_t, mmsi,
-				(float) latitude / 600000.0,
-				(float) longitude / 600000.0,
-				(float) heading, (float) course / 10.0,
-				(float) sog / 10.0);
-		
-		if (cache_positions)
-			cache_position(received_t, mmsi, navstat,
-				(float) latitude / 600000.0,
-				(float) longitude / 600000.0,
-				heading,
-				(float) course / 10.0,
-				rateofturn,
-				(float) sog / 10.0);
+		protodec_pos(d, bufferlen, received_t, mmsi);
 		break;
 		
-	case 4:
-		year = protodec_henten(40, 12, d->rbuffer);
-		month = protodec_henten(52, 4, d->rbuffer);
-		day = protodec_henten(56, 5, d->rbuffer);
-		hour = protodec_henten(61, 5, d->rbuffer);
-		minute = protodec_henten(66, 6, d->rbuffer);
-		second = protodec_henten(72, 6, d->rbuffer);
-		longitude = protodec_henten(79, 28, d->rbuffer);
-		if (((longitude >> 27) & 1) == 1)
-			longitude |= 0xF0000000;
-		longit = ((float) longitude) / 10000.0 / 60.0;
-		latitude = protodec_henten(107, 27, d->rbuffer);
-		if (((latitude >> 26) & 1) == 1)
-			latitude |= 0xf8000000;
-		latit = ((float) latitude) / 10000.0 / 60.0;
-		printf(" date %ld-%ld-%ld time %ld:%ld:%ld lat %.6f lon %.6f",
-			year, month, day, hour, minute,
-			second, latit, longit);
-		
-		if (my)
-			myout_ais_basestation(my, received_t, mmsi,
-				(float) latitude / 600000.0,
-				(float) longitude / 600000.0);
-		
-		if (cache_positions)
-			cache_position(received_t, mmsi, 0,
-				(float) latitude / 600000.0,
-				(float) longitude / 600000.0,
-				0, 0.0, 0, 0.0);
-		
+	case 4: /* base station position */
+		protodec_4(d, bufferlen, received_t, mmsi);
 		break;
 		
-	case 5:
-		/* get IMO number */
-		imo = protodec_henten(40, 30, d->rbuffer);
-		//printf("--- 5: mmsi %lu imo %lu\n", mmsi, imo);
-		
-		/* get callsign */
-		hvor = 70;
-		for (k = 0; k < 6; k++) {
-			letter = protodec_henten(hvor, 6, d->rbuffer);
-			protodec_decode_sixbit_ascii(letter, callsign, k);
-			hvor += 6;
-		}
-		callsign[6] = 0;
-		remove_trailing_spaces(callsign, 6);
-		//printf("Callsign: '%s'\n", callsign);
-		
-		/* get name */
-		hvor = 112;
-		for (k = 0; k < 20; k++) {
-			letter = protodec_henten(hvor, 6, d->rbuffer);
-			protodec_decode_sixbit_ascii(letter, name, k);
-			hvor += 6;
-		}
-		name[20] = 0;
-		remove_trailing_spaces(name, 20);
-		//printf("Name: '%s'\n", name);
-		
-		/* get destination */
-		hvor = 120 + 106 + 68 + 8;
-		for (k = 0; k < 20; k++) {
-			letter = protodec_henten(hvor, 6, d->rbuffer);
-			protodec_decode_sixbit_ascii(letter, destination, k);
-			hvor += 6;
-		}
-		destination[20] = 0;
-		remove_trailing_spaces(destination, 20);
-		//printf("Destination: '%s'\n",destination);
-		
-		/* type of ship and cargo */
-		shiptype = protodec_henten(232, 8, d->rbuffer);
-		
-		/* dimensions and reference GPS position */
-		A = protodec_henten(240, 9, d->rbuffer);
-		B = protodec_henten(240 + 9, 9, d->rbuffer);
-		C = protodec_henten(240 + 9 + 9, 6, d->rbuffer);
-		D = protodec_henten(240 + 9 + 9 + 6, 6, d->rbuffer);
-		draught = protodec_henten(294, 8, d->rbuffer);
-		// printf("Length: %d\nWidth: %d\nDraught: %f\n",A+B,C+D,(float)draught/10);
-		printf(" name \"%s\" destination \"%s\" type %d length %d width %d draught %.1f",
-			name, destination, shiptype,
-			A + B, C + D,
-			(float) draught / 10.0);
-		
-		if (my)
-			myout_ais_vesseldata(my, received_t, mmsi,
-				name, destination,
-				(float) draught / 10.0,
-				(int) A, (int) B, (int) C, (int) D);
-		
-		if (cache_positions)
-			cache_vesseldata(received_t, mmsi, imo, callsign,
-				name, destination, shiptype, A, B, C, D, draught / 10.0);
-		
+	case 5: /* vessel info */
+		protodec_5(d, bufferlen, received_t, mmsi);
 		break;
 	
-	case 8: // Binary broadcast message
+	case 8: /* Binary broadcast message */
 		appid = protodec_henten(40, 16, d->rbuffer);
 		printf(" appid %d", appid);
 		break;
 
-	case 18: // class B transmitter
-		longitude = protodec_henten(57, 28, d->rbuffer);
-		if (((longitude >> 27) & 1) == 1)
-			longitude |= 0xF0000000;
-		latitude = protodec_henten(85, 27, d->rbuffer);
-		if (((latitude >> 26) & 1) == 1)
-			latitude |= 0xf8000000;
-		course = protodec_henten(112, 12, d->rbuffer);
-		sog = protodec_henten(46, 10, d->rbuffer);
-
-		rateofturn = 0; //NOT in B
-		navstat = 15;   //NOT in B
-		heading = protodec_henten(124, 9, d->rbuffer);
-		printf(" lat %.6f lon %.6f course %.0f speed %.1f rateofturn %d navstat %d heading %d",
-			(float) latitude / 600000.0,
-			(float) longitude / 600000.0,
-			(float) course / 10.0, (float) sog / 10.0,
-			rateofturn, navstat, heading);
-		
-		if (my)
-			myout_ais_position(my, received_t, mmsi,
-				(float) latitude / 600000.0,
-				(float) longitude / 600000.0,
-				(float) heading, (float) course / 10.0,
-				(float) sog / 10.0);
-		
-		if (cache_positions)
-			cache_position(received_t, mmsi, navstat,
-				(float) latitude / 600000.0,
-				(float) longitude / 600000.0,
-				heading,
-				(float) course / 10.0,
-				rateofturn,
-				(float) sog / 10.0);
-
+	case 18: /* class B transmitter position report */
+		protodec_18(d, bufferlen, received_t, mmsi);
 		break;
 
-	case 19: // class B transmitter
-		
-		/* get name */
-		hvor = 143;
-		for (k = 0; k < 20; k++) {
-			letter = protodec_henten(hvor, 6, d->rbuffer);
-			protodec_decode_sixbit_ascii(letter, name, k);
-			hvor += 6;
-		}
-		name[20] = 0;
-		remove_trailing_spaces(name, 20);
-		//printf("Name: '%s'\n", name);
-		
-		/*
-		 * Class B does not have destination, use "CLASS B" instead
-		 * (same as ShipPlotter)
-		 */
-		strcpy(destination, "CLASS B");
-		
-		/* type of ship and cargo */
-		shiptype = protodec_henten(263, 8, d->rbuffer);
-		
-		/* dimensions and reference GPS position */
-		A = protodec_henten(271, 9, d->rbuffer);
-		B = protodec_henten(271 + 9, 9, d->rbuffer);
-		C = protodec_henten(271 + 9 + 9, 6, d->rbuffer);
-		D = protodec_henten(271 + 9 + 9 + 6, 6, d->rbuffer);
-	
-		// printf("Length: %d\nWidth: %d\n",A+B,C+D);
-		//printf("%09ld %d %d %f", mmsi, A + B, C + D);
-		printf(" name \"%s\" type %d length %d  width %d", name, shiptype, A+B, C+D);
-		
-		if (my)
-			myout_ais_vesselname(my, received_t, mmsi, name, destination);
-
-		if (cache_positions)
-			cache_vesselname(received_t, mmsi, name, destination);
-		
-		if (my)
-			myout_ais_vesseldatab(my, received_t, mmsi,
-				(int) A, (int) B, (int) C, (int) D);
-		
-		if (cache_positions)
-			cache_vesseldatabb(received_t, mmsi,
-			 shiptype, A, B, C, D);
-
+	case 19: /* class B transmitter vessel info */
+		protodec_19(d, bufferlen, received_t, mmsi);
 		break;
 
-	case 24: // class B transmitter
-		/* resolve type 24 frame's part A or B */
-		partnr = protodec_henten(38, 2, d->rbuffer);
-		
-		//printf("(partnr %d type %d): ",partnr, type);
-		if (partnr == 0) {
-			//printf("(Now in name:partnr %d type %d): ",partnr, type);
-			/* get name */
-			hvor = 40;
-			for (k = 0; k < 20; k++) {
-				letter = protodec_henten(hvor, 6, d->rbuffer);
-				protodec_decode_sixbit_ascii(letter, name, k);
-				hvor += 6;
-			}
-			
-			name[20] = 0;
-			remove_trailing_spaces(name, 20);
-			//printf("Name: '%s'\n", name);
-			
-			/*
-			 * Class B does not have destination, use "CLASS B TX" instead
-			 * (same string as ShipPlotter uses)
-			 */
-			strcpy(destination, "CLASS B");
-			
-			printf(" name \"%s\"", name);
-			
-			if (my)
-				myout_ais_vesselname(my, received_t, mmsi, name, destination);
-			
-			if (cache_positions)
-				cache_vesselname(received_t, mmsi, name, destination);
-		}
-		
-		if (partnr == 1) {
-			//printf("(Now in data:partnr %d type %d): ",partnr, type);
-			/* get callsign */
-			hvor = 90; 
-			for (k = 0; k < 6; k++) {
-				letter = protodec_henten(hvor, 6, d->rbuffer);
-				protodec_decode_sixbit_ascii(letter, callsign, k);
-				hvor += 6;
-			}
-			callsign[6] = 0;
-			remove_trailing_spaces(callsign, 6);
-			//printf("Callsign: '%s'\n", callsign);
-			
-			/* type of ship and cargo */
-			shiptype = protodec_henten(40, 8, d->rbuffer);
-			
-			/* dimensions and reference GPS position */
-			A = protodec_henten(132, 9, d->rbuffer);
-			B = protodec_henten(132 + 9, 9, d->rbuffer);
-			C = protodec_henten(132 + 9 + 9, 6, d->rbuffer);
-			D = protodec_henten(132 + 9 + 9 + 6, 6, d->rbuffer);
-			
-			/*
-			printf("Length: %d\nWidth: %d\n",A+B,C+D);
-			printf("%09ld %d %d", mmsi, A + B, C + D);
-			*/
-			
-			printf(" callsign \"%s\" type %d length %d width %d",
-				callsign, shiptype, A+B, C+D);
-			
-			if (my)
-				myout_ais_vesseldatab(my, received_t, mmsi,
-					(int) A, (int) B, (int) C, (int) D);
-			
-			if (cache_positions)
-				cache_vesseldatab(received_t, mmsi, callsign,
-					shiptype, A, B, C, D);
-		}
-		
+	case 24: /* class B transmitter info */
+		protodec_24(d, bufferlen, received_t, mmsi);
 		break;
 	
 	case 20:
@@ -606,8 +653,8 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 	
 	default:
 		break;
-		
 	}
+	
 	printf(" (!%s)\n", d->nmea);
 }
 

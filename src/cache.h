@@ -70,3 +70,11 @@ extern int cache_vesseldata(
 	char *callsign, char *name, char *destination,
 	int shiptype, int A, int B, int C, int D, float draught);
 
+extern int cache_vesselname(int received_t, int mmsi, char *name, const char *destination);
+
+extern int cache_vesseldatab(int received_t, int mmsi,
+	char *callsign,
+	int shiptype, int A, int B, int C, int D);
+	
+extern int cache_vesseldatabb(int received_t, int mmsi,
+        int shiptype, int A, int B, int C, int D);
