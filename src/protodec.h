@@ -49,7 +49,5 @@ void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial,
 void protodec_reset(struct demod_state_t *d);
 void protodec_getdata(int bufferlengde, struct demod_state_t *d);
 void protodec_decode(char *in, int count, struct demod_state_t *d);
-unsigned short protodec_sdlc_crc(unsigned char *data, unsigned len);
-int protodec_calculate_crc(int lengde, struct demod_state_t *d);
 
 #endif

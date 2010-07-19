@@ -74,6 +74,73 @@ void protodec_reset(struct demod_state_t *d)
 }
 
 /*
+ * Calculates CRC-checksum
+ */
+ 
+unsigned short protodec_sdlc_crc(const unsigned char *data, unsigned len)
+{
+	unsigned short c, crc = 0xffff;
+
+	while (len--)
+		for (c = 0x100 + *data++; c > 1; c >>= 1)
+			if ((crc ^ c) & 1)
+				crc = (crc >> 1) ^ 0x8408;
+			else
+				crc >>= 1;
+	return ~crc;
+
+}
+
+int protodec_calculate_crc(int length_bits, struct demod_state_t *d)
+{
+	int length_bytes;
+	unsigned char *buf;
+	int buflen;
+	int i, j, x;
+	unsigned char tmp;
+	
+	if (length_bits <= 0) {
+		hlog(LOG_ERR, "protodec_calculate_crc: length_bits <= 0!");
+		return 0;
+	}
+	
+	length_bytes = length_bits / 8;
+	buflen = length_bytes + 2;
+	
+	/* what is this? */
+	buf = (unsigned char *) hmalloc(sizeof(*buf) * buflen);
+	for (j = 0; j < buflen; j++) {
+		tmp = 0;
+		for (i = 0; i < 8; i++)
+			tmp |= (((d->buffer[i + 8 * j]) << (i)));
+		buf[j] = tmp;
+	}
+	
+	/* ok, here's the actual CRC calculation */
+	unsigned short crc = protodec_sdlc_crc(buf, buflen);
+	//DBG(printf("CRC: %04x\n",crc));
+	
+	/* what is this? */
+	memset(d->rbuffer, 0, sizeof(d->rbuffer));
+	for (j = 0; j < length_bytes; j++) {
+		for (i = 0; i < 8; i++) {
+			x = j * 8 + i;
+			if (x >= DEMOD_BUFFER_LEN) {
+				hlog(LOG_ERR, "protodec_calculate_crc: would run over rbuffer length");
+				hfree(buf);
+				return 0;
+			} else {
+				d->rbuffer[x] = (buf[j] >> (7 - i)) & 1;
+			}
+		}
+	}
+	
+	hfree(buf);
+	
+	return (crc == 0x0f47);
+}
+
+/*
  *	Mark trailing spaces as NULL bytes in a string
  */
 
@@ -800,69 +867,5 @@ void protodec_decode(char *in, int count, struct demod_state_t *d)
 		d->last = in[i];
 		i++;
 	}
-}
-
-
-unsigned short protodec_sdlc_crc(unsigned char *data, unsigned len)	// Calculates CRC-checksum
-{
-	unsigned short c, crc = 0xffff;
-
-	while (len--)
-		for (c = 0x100 + *data++; c > 1; c >>= 1)
-			if ((crc ^ c) & 1)
-				crc = (crc >> 1) ^ 0x8408;
-			else
-				crc >>= 1;
-	return ~crc;
-
-}
-
-int protodec_calculate_crc(int length_bits, struct demod_state_t *d)
-{
-	int length_bytes;
-	unsigned char *buf;
-	int buflen;
-	int i, j, x;
-	unsigned char tmp;
-	
-	if (length_bits <= 0) {
-		hlog(LOG_ERR, "protodec_calculate_crc: length_bits <= 0!");
-		return 0;
-	}
-	
-	length_bytes = length_bits / 8;
-	buflen = length_bytes + 2;
-	
-	/* what is this? */
-	buf = (unsigned char *) hmalloc(sizeof(*buf) * buflen);
-	for (j = 0; j < buflen; j++) {
-		tmp = 0;
-		for (i = 0; i < 8; i++)
-			tmp |= (((d->buffer[i + 8 * j]) << (i)));
-		buf[j] = tmp;
-	}
-	
-	/* ok, here's the actual CRC calculation */
-	unsigned short crc = protodec_sdlc_crc(buf, buflen);
-	//DBG(printf("CRC: %04x\n",crc));
-	
-	/* what is this? */
-	memset(d->rbuffer, 0, sizeof(d->rbuffer));
-	for (j = 0; j < length_bytes; j++) {
-		for (i = 0; i < 8; i++) {
-			x = j * 8 + i;
-			if (x >= DEMOD_BUFFER_LEN) {
-				hlog(LOG_ERR, "protodec_calculate_crc: would run over rbuffer length");
-				hfree(buf);
-				return 0;
-			} else {
-				d->rbuffer[x] = (buf[j] >> (7 - i)) & 1;
-			}
-		}
-	}
-	
-	hfree(buf);
-	
-	return (crc == 0x0f47);
 }
 
