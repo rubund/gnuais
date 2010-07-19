@@ -17,6 +17,7 @@ struct receiver {
 	unsigned int pllinc;
 	struct demod_state_t *decoder;
 	int prev;
+	time_t last_levellog;
 };
 
 extern struct receiver *init_receiver(char name, int num_ch, int ch_ofs);
