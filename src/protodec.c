@@ -349,6 +349,48 @@ void protodec_5(struct demod_state_t *d, int bufferlen, time_t received_t, unsig
 			name, destination, shiptype, A, B, C, D, draught / 10.0);
 }
 
+/*
+ *	6: addressed binary message
+ */
+ 
+void protodec_6(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
+{
+	int sequence = protodec_henten(38, 2, d->rbuffer);
+	unsigned long dst_mmsi = protodec_henten(40, 30, d->rbuffer);
+	int retransmitted = protodec_henten(70, 1, d->rbuffer);
+	int appid = protodec_henten(72, 16, d->rbuffer);
+	int appid_dac = protodec_henten(72, 10, d->rbuffer);
+	int appid_func = protodec_henten(82, 6, d->rbuffer);
+	
+	printf(" dst_mmsi %09ld seq %d retransmitted %d appid %d app_dac %d app_func %d",
+		dst_mmsi, sequence, retransmitted, appid, appid_dac, appid_func);
+}
+
+/*
+ *	7: Binary acknowledge
+ *	13: Safety related acknowledge
+ */
+ 
+void protodec_7_13(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
+{
+	unsigned long dst_mmsi;
+	int sequence;
+	int i;
+	int pos;
+	
+	pos = 40;
+	
+	printf(" buflen %d pos+32 %d", bufferlen, pos + 32);
+	for (i = 0; i < 4 && pos + 32 <= bufferlen; pos += 32) {
+		dst_mmsi = protodec_henten(pos, 30, d->rbuffer);
+		sequence = protodec_henten(pos + 30, 2, d->rbuffer);
+		
+		printf(" ack %d (to %09ld seq %d)",
+			i+1, dst_mmsi, sequence);
+		i++;
+	}
+}
+
 void protodec_18(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
 {
 	int longitude, latitude;
@@ -707,6 +749,15 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 		
 	case 5: /* vessel info */
 		protodec_5(d, bufferlen, received_t, mmsi);
+		break;
+	
+	case 6: /* Addressed binary message */
+		protodec_6(d, bufferlen, received_t, mmsi);
+		break;
+	
+	case 7: /* Binary acknowledge */
+	case 13: /* Safety related acknowledge */
+		protodec_7_13(d, bufferlen, received_t, mmsi);
 		break;
 	
 	case 8: /* Binary broadcast message */
