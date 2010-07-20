@@ -187,6 +187,10 @@ unsigned long protodec_henten(int from, int size, unsigned char *frame)
 	return tmp;
 }
 
+/*
+ *	decode position packets (types 1,2,3)
+ */
+
 void protodec_pos(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
 {
 	int longitude, latitude;
@@ -453,8 +457,8 @@ void protodec_20(struct demod_state_t *d, int bufferlen)
 		timeout = protodec_henten(pos + 12 + 4, 3, d->rbuffer);
 		incr = protodec_henten(pos + 12 + 4 + 3, 11, d->rbuffer);
 		
-		printf(" reserve %d (pos %d ofs %d slots %d timeout %d incr %d)",
-			i, pos, ofs, slots, timeout, incr);
+		printf(" reserve %d (ofs %d slots %d timeout %d incr %d)",
+			i+1, ofs, slots, timeout, incr);
 		i++;
 	}
 }
