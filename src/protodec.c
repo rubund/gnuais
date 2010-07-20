@@ -188,6 +188,141 @@ unsigned long protodec_henten(int from, int size, unsigned char *frame)
 }
 
 /*
+ *	binary message types
+ */
+
+const char *appid_ifm(int i)
+{
+	switch (i) {
+	case 0:
+		return "text-telegram";
+	case 1:
+		return "application-ack";
+	case 2:
+		return "iai-fi-capab-interrogation";
+	case 3:
+		return "iai-capabi-interrogation";
+	case 4:
+		return "capability-reply";
+	case 11:
+		return "tide-weather";
+	case 16:
+		return "vts-targets";
+	case 17:
+		return "ship-waypoints";
+	case 18:
+		return "advice-of-waypoints";
+	case 19:
+		return "extended-ship-data";
+	case 20:
+		return "berthing-data";
+	case 21:
+		return "weather-obs-report";
+	case 22:
+		return "area-notice-bc";
+	case 23:
+		return "area-notice-addr";
+	case 24:
+		return "extended-ship-static";
+	case 25:
+		return "dangerous-cargo-info";
+	case 26:
+		return "environmental";
+	case 27:
+		return "route-info-bc";
+	case 28:
+		return "route-info-addr";
+	case 29:
+		return "text-description-bc";
+	case 30:
+		return "text-description-addr";
+	case 40:
+		return "persons-on-board";
+	default:
+		return "unknown";
+	}
+	
+	return "unknown";
+}
+
+/*
+ *	binary message decoding
+ */
+
+void protodec_msg_40(unsigned char *buffer, int bufferlen, int msg_start, time_t received_t, unsigned long mmsi)
+{
+	int people_on_board = protodec_henten(msg_start, 13, buffer);
+	printf(" persons-on-board %d", people_on_board);
+}
+
+void protodec_msg_11(unsigned char *buffer, int bufferlen, int msg_start, time_t received_t, unsigned long mmsi)
+{
+	int latitude = protodec_henten(msg_start, 24, buffer);
+	int longitude = protodec_henten(msg_start += 24, 25, buffer);
+	int datetime = protodec_henten(msg_start += 25, 16, buffer);
+	int wind_speed = protodec_henten(msg_start += 16, 7, buffer);
+	int wind_gust = protodec_henten(msg_start += 7, 7, buffer);
+	int wind_dir = protodec_henten(msg_start += 7, 9, buffer);
+	int wind_gust_dir = protodec_henten(msg_start += 9, 9, buffer);
+	int air_temp = protodec_henten(msg_start += 9, 11, buffer);
+	int rel_humid = protodec_henten(msg_start += 11, 7, buffer);
+	int dew_point = protodec_henten(msg_start += 7, 10, buffer);
+	int air_press = protodec_henten(msg_start += 10, 9, buffer) + 800;
+	int air_press_tend = protodec_henten(msg_start += 9, 2, buffer);
+	int horiz_visib_nm = protodec_henten(msg_start += 2, 8, buffer);
+	int water_level = protodec_henten(msg_start += 8, 9, buffer);
+	int water_trend = protodec_henten(msg_start += 9, 2, buffer);
+	int surface_current_speed = protodec_henten(msg_start += 2, 8, buffer);
+	int surface_current_dir = protodec_henten(msg_start += 8, 9, buffer);
+	int d1_current_speed = protodec_henten(msg_start += 9, 8, buffer);
+	int d1_current_dir = protodec_henten(msg_start += 8, 9, buffer);
+	int d1_current_depth = protodec_henten(msg_start += 9, 5, buffer);
+	int d2_current_speed = protodec_henten(msg_start += 5, 8, buffer);
+	int d2_current_dir = protodec_henten(msg_start += 8, 9, buffer);
+	int d2_current_depth = protodec_henten(msg_start += 9, 5, buffer);
+	int wave_height_significant = protodec_henten(msg_start += 5, 8, buffer);
+	int wave_period = protodec_henten(msg_start += 8, 6, buffer);
+	int wave_dir = protodec_henten(msg_start += 6, 9, buffer);
+	int swell_height = protodec_henten(msg_start += 9, 8, buffer);
+	int swell_period = protodec_henten(msg_start += 8, 6, buffer);
+	int swell_dir = protodec_henten(msg_start += 6, 9, buffer);
+	int sea_state = protodec_henten(msg_start += 9, 4, buffer);
+	int water_temp = protodec_henten(msg_start += 4, 10, buffer);
+	
+	printf(" lat %.6f lon %.6f wind_speed %dkt wind_gust %dkt wind_dir %d wind_gust_dir %d air_temp %.1fC rel_humid %d%% dew_point %.1fC pressure %d pressure_tend %d visib %.1fNM water_level %.1fm wave_height %.1fm water_temp %.1fC",
+		(float)latitude / 60000.0,
+		(float)longitude / 60000.0,
+		wind_speed,
+		wind_gust,
+		wind_dir,
+		wind_gust_dir,
+		(float)air_temp / 10.0 - 60.0,
+		rel_humid,
+		(float)dew_point / 10.0 - 20.0,
+		air_press,
+		air_press_tend,
+		(float)horiz_visib_nm / 10.0,
+		(float)water_level / 10.0 - 10.0,
+		(float)wave_height_significant / 10.0,
+		(float)water_temp / 10.0 - 10.0);
+}
+
+void protodec_msg_bin(unsigned char *buffer, int bufferlen, int appid_fi, int msg_start, time_t received_t, unsigned long mmsi)
+{
+	switch (appid_fi) {
+	case 11: // weather
+		protodec_msg_11(buffer, bufferlen, msg_start, received_t, mmsi);
+		break;
+	case 40: // number of persons on board
+		protodec_msg_40(buffer, bufferlen, msg_start, received_t, mmsi);
+		break;
+	default:
+		break;
+	}
+}
+
+
+/*
  *	decode position packets (types 1,2,3)
  */
 
@@ -352,7 +487,7 @@ void protodec_5(struct demod_state_t *d, int bufferlen, time_t received_t, unsig
 /*
  *	6: addressed binary message
  */
- 
+
 void protodec_6(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
 {
 	int sequence = protodec_henten(38, 2, d->rbuffer);
@@ -360,10 +495,15 @@ void protodec_6(struct demod_state_t *d, int bufferlen, time_t received_t, unsig
 	int retransmitted = protodec_henten(70, 1, d->rbuffer);
 	int appid = protodec_henten(72, 16, d->rbuffer);
 	int appid_dac = protodec_henten(72, 10, d->rbuffer);
-	int appid_func = protodec_henten(82, 6, d->rbuffer);
+	int appid_fi = protodec_henten(82, 6, d->rbuffer);
 	
-	printf(" dst_mmsi %09ld seq %d retransmitted %d appid %d app_dac %d app_func %d",
-		dst_mmsi, sequence, retransmitted, appid, appid_dac, appid_func);
+	printf(" dst_mmsi %09ld seq %d retransmitted %d appid %d app_dac %d app_fi %d",
+		dst_mmsi, sequence, retransmitted, appid, appid_dac, appid_fi);
+		
+	if (appid_dac == 1) {
+		printf("(%s)", appid_ifm(appid_fi));
+		protodec_msg_bin(d->rbuffer, bufferlen, appid_fi, 88, received_t, mmsi);
+	}
 }
 
 /*
@@ -388,6 +528,23 @@ void protodec_7_13(struct demod_state_t *d, int bufferlen, time_t received_t, un
 		printf(" ack %d (to %09ld seq %d)",
 			i+1, dst_mmsi, sequence);
 		i++;
+	}
+}
+
+/*
+ *	8: Binary broadcast
+ */
+
+void protodec_8(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
+{
+	int appid = protodec_henten(40, 16, d->rbuffer);
+	int appid_dac = protodec_henten(40, 10, d->rbuffer);
+	int appid_fi = protodec_henten(50, 6, d->rbuffer);
+	
+	printf(" appid %d app_dac %d app_fi %d", appid, appid_dac, appid_fi);
+	if (appid_dac == 1) {
+		printf("(%s)", appid_ifm(appid_fi));
+		protodec_msg_bin(d->rbuffer, bufferlen, appid_fi, 56, received_t, mmsi);
 	}
 }
 
@@ -761,8 +918,7 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 		break;
 	
 	case 8: /* Binary broadcast message */
-		appid = protodec_henten(40, 16, d->rbuffer);
-		printf(" appid %d", appid);
+		protodec_8(d, bufferlen, received_t, mmsi);
 		break;
 
 	case 18: /* class B transmitter position report */
@@ -786,6 +942,7 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 	}
 	
 	printf(" (!%s)\n", d->nmea);
+	fflush(stdout);
 }
 
 void protodec_decode(char *in, int count, struct demod_state_t *d)
