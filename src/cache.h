@@ -50,6 +50,10 @@ struct cache_ent {
 	int C;
 	int D;
 	float draught;
+	
+	/* persons on board */
+	time_t received_persons_on_board;
+	int persons_on_board;
 };
 
 extern int cache_positions;
@@ -69,6 +73,8 @@ extern int cache_vesseldata(
 	int received_t, int mmsi, int imo,
 	char *callsign, char *name, char *destination,
 	int shiptype, int A, int B, int C, int D, float draught);
+
+extern int cache_vessel_persons(int received_t, int mmsi, int persons_on_board);
 
 extern int cache_vesselname(int received_t, int mmsi, char *name, const char *destination);
 

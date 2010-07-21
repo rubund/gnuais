@@ -296,6 +296,17 @@ static void jsonout_export(void)
 			exported++;
 		}
 		
+		if (e->persons_on_board >= 0) {
+			hlog(LOG_DEBUG, "jsonout: exporting MMSI %d persons_on_board %d", e->mmsi, e->persons_on_board);
+			time_jsonais(&e->received_persons_on_board, tbuf, TBUF_LEN);
+			json = str_append(json,
+				"%s{\"msgtype\": 8, \"mmsi\": %d, \"persons_on_board\": %d, \"rxtime\": \"%s\"}",
+				(exported == 0) ? "" : ",\n",
+				e->mmsi, e->persons_on_board, tbuf
+				);
+			exported++;
+		}
+		
 		cache_free_entry(e);
 		
 		sp_delete(x, sp);

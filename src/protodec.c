@@ -253,6 +253,8 @@ void protodec_msg_40(unsigned char *buffer, int bufferlen, int msg_start, time_t
 {
 	int people_on_board = protodec_henten(msg_start, 13, buffer);
 	printf(" persons-on-board %d", people_on_board);
+	if (cache_positions)
+		cache_vessel_persons(received_t, mmsi, people_on_board);
 }
 
 void protodec_msg_11(unsigned char *buffer, int bufferlen, int msg_start, time_t received_t, unsigned long mmsi)

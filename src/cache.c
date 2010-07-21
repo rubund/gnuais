@@ -191,6 +191,7 @@ static struct cache_ent *cache_get(int mmsi)
 		e->imo = -1;
 		e->navstat = -1;
 		e->A = e->B = e->C = e->D = -1;
+		e->persons_on_board = -1;
 	}
 	
 	return e;
@@ -356,6 +357,26 @@ int cache_vesselname(int received_t, int mmsi, char *name, const char *destinati
 			hfree(e->destination);
 		e->destination = hstrdup(destination);
 	}
+	
+	pthread_mutex_unlock(&cache_spt_mut);
+	
+	return 0;
+}
+
+int cache_vessel_persons(int received_t, int mmsi, int persons_on_board)
+{
+	struct cache_ent *e;
+	
+	CACHE_DBG(hlog(LOG_DEBUG, "cache_vessel_persons %d: %d t %d", mmsi, persons_on_board, received_t));
+	
+	pthread_mutex_lock(&cache_spt_mut);
+	
+	e = cache_get(mmsi);
+	
+	e->mmsi = mmsi;
+	e->received_persons_on_board = received_t;
+	e->persons_on_board = persons_on_board;
+
 	pthread_mutex_unlock(&cache_spt_mut);
 	
 	return 0;
