@@ -70,6 +70,7 @@ static int jsonout_post_single(struct curl_httppost *post, const char *url)
 {
 	CURL *ch;
 	CURLcode r;
+	struct curl_slist *headers = NULL;
 	long retcode = 200;
 	
 	if (!(ch = curl_easy_init())) {
@@ -78,6 +79,12 @@ static int jsonout_post_single(struct curl_httppost *post, const char *url)
 	}
 	
 	do {
+		headers = curl_slist_append(NULL, "Expect:");
+		if (!headers) {
+			hlog(LOG_ERR, "curl_slist_append for Expect header failed");
+			break;
+		}
+		
 		if ((r = curl_easy_setopt(ch, CURLOPT_HTTPPOST, post))) {
 			hlog(LOG_ERR, "curl_easy_setopt(CURLOPT_HTTPPOST) failed: %s", curl_easy_strerror(r));
 			break;
@@ -85,6 +92,11 @@ static int jsonout_post_single(struct curl_httppost *post, const char *url)
 		
 		if ((r = curl_easy_setopt(ch, CURLOPT_URL, url))) {
 			hlog(LOG_ERR, "curl_easy_setopt(CURLOPT_URL) failed: %s (%s)", curl_easy_strerror(r), url);
+			break;
+		}
+		
+		if ((r = curl_easy_setopt(ch, CURLOPT_HTTPHEADER, headers))) {
+			hlog(LOG_ERR, "curl_easy_setopt(CURLOPT_HEADER) failed: %s (%s)", curl_easy_strerror(r), url);
 			break;
 		}
 		
@@ -114,6 +126,9 @@ static int jsonout_post_single(struct curl_httppost *post, const char *url)
 	} while (0);
 	
 	curl_easy_cleanup(ch);
+	
+	if (headers)
+		curl_slist_free_all(headers);
 	
 	if (retcode != 200) {
 		hlog(LOG_ERR, "JSON AIS export: server for %s returned %ld\n", url, retcode);
