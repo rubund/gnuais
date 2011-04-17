@@ -271,7 +271,7 @@ int read_cfgfile(char *f, struct cfgcmd *cmds)
 	int ret, n = 0;
 	
 	if ((fp = fopen(f, "r")) == NULL) {
-		fprintf(stderr, "Cannot open %s: %s\n", f, strerror(errno));
+		fprintf(stderr, "\nYOU WILL NEED TO CREATE A %s CONFIGURATION FILE IN YOUR CURRENT DIRECTORY.\nSEE THE EXAMPLE gnuais.conf-example IN THE SOURCE TREE\n\n",f);//\nYou will have to make a gnuais.conf configuration file. The\n simples solution is to copy the ''gnuais.conf-example'' file from\n the source tree to ''gnuais.conf'' in your current directory.\n\n", f, strerror(errno));
 		return 1;
 	}
 	

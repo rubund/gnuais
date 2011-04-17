@@ -1,9 +1,11 @@
 
 
-If you want to save to a mysql database you will have to make a file called gnuais.conf
-in your /etc-folder.
-An example can be found in this folder (gnuais.conf-example).
-You will also have to create a table in the database:
+You will have to make a gnuais.conf configuration file and store it in the folder you
+run gnuais from - or specify its location with the -c option. Simply copy and edit
+the file: ''gnuais.conf-example''. It is explained in that file how you will have to
+edit it in order to fullfill your wishes.
+
+You will also have to create a table in the database if the mysql option is desired:
 
 
 Make new database (if needed) with command:

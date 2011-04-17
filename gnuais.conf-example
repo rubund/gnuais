@@ -6,8 +6,8 @@ MyCall GNUAIS
 # My email address
 MyEmail gnuais@example.com
 
-# Directory, where logs will be written
-LogDir logs
+# Directory, where logs will be written. Defaults to current directory.
+#LogDir logs
 
 # ALSA sound device name, either the name of the card (default for the
 # first / default card), or a device name, for example: hw:2,0 for the first

@@ -318,11 +318,14 @@ int read_config(void)
 	/* these parameters will only be used when reading the configuration
 	 * for the first time.
 	 */
-	if (!logdir) {
-		hlog(LOG_CRIT, "Config: logdir not defined.");
-		failed = 1;
+	if(log_dir){	/* Check if logdir passed from command line. In that case config file parameter should be ignored*/
+		logdir = hstrdup(log_dir);	
 	}
-	
+	else if(!logdir) { /* Using current directory as default if not given neither in config file or command line */
+		hlog(LOG_WARNING, "Config: logdir not defined. Using . as log directory");
+		logdir = hstrdup(".");
+	}
+
 	/* mycall is only applied when running for the first time. */
 	if (!mycall) {
 		hlog(LOG_CRIT, "Config: mycall is not defined.");

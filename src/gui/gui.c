@@ -92,7 +92,7 @@ void type1(char *r_buffer, int lengde, shipdata * data)
 	char rateofturn = pickone(r_buffer, 40, 8);
 
 	printf
-	    ("MMSI: %09d  Latitude: %.7f  Longitude: %.7f  Speed:%f  Coarse:%.5f  Heading: %f  Rateofturn: %d\n",
+	    ("MMSI: %09d  Latitude: %.7f  Longitude: %.7f  Speed:%f  Course:%.5f  Heading: %f  Rateofturn: %d\n",
 	     mmsi, (float) latitude / 600000, (float) longitude / 600000,
 	     (float) sog / 10, (float) course / 10, (float) heading,
 	     rateofturn);
