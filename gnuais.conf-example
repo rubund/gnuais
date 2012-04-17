@@ -58,4 +58,5 @@ SoundLevelLog 1
 # AIS receiver connected to a serial port.
 #serial_port /dev/ttyS0
 
-
+# Use test file as input instead of the audio device input
+#SoundInFile testmessages/gnuais-stereo-2rx.raw

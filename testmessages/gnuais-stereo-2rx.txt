@@ -5,7 +5,7 @@ When making changes to the DSP code, please try to decode this file
 and make sure that the amount of properly decoded packets goes up,
 not down. To decode the file, use the following configuration:
 
-SoundInFile testmessages/gnuais-stereo-2rx.txt
+SoundInFile testmessages/gnuais-stereo-2rx.raw
 SoundChannels both
 
 Since svn revision 55 (2008-12-15) gnuais has been stable when
