@@ -24,15 +24,21 @@ Please make a note here after the decoded packet counts change
 in a certain revision.
 ----------------
 
-r60:
-2008/12/18 23:59:05.303105 gnuais[17555:3078211280] INFO: A: Received
-correctly: 88 packets, wrong CRC: 45 packets, wrong size: 14 packets
-2008/12/18 23:59:05.303120 gnuais[17555:3078211280] INFO: B: Received
-correctly: 21 packets, wrong CRC: 45 packets, wrong size: 9 packets
+r95:
+2012/04/17 18:07:50.064232 gnuais[5659:3075139264] INFO: A: Received
+correctly: 153 packets, wrong CRC: 49 packets, wrong size: 4 packets
+2012/04/17 18:07:50.064237 gnuais[5659:3075139264] INFO: B: Received
+correctly: 52 packets, wrong CRC: 65 packets, wrong size: 10 packets
 
 r62:
 2008/12/18 23:58:10.458591 gnuais[17552:3077805776] INFO: A: Received
 correctly: 144 packets, wrong CRC: 47 packets, wrong size: 6 packets
 2008/12/18 23:58:10.458605 gnuais[17552:3077805776] INFO: B: Received
 correctly: 46 packets, wrong CRC: 53 packets, wrong size: 5 packets
+
+r60:
+2008/12/18 23:59:05.303105 gnuais[17555:3078211280] INFO: A: Received
+correctly: 88 packets, wrong CRC: 45 packets, wrong size: 14 packets
+2008/12/18 23:59:05.303120 gnuais[17555:3078211280] INFO: B: Received
+correctly: 21 packets, wrong CRC: 45 packets, wrong size: 9 packets
 
