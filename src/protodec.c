@@ -5,7 +5,7 @@
 #include <string.h>		/* String function definitions */
 
 #if HAVE_CONFIG_H
-#include "config.h"
+#include "../config.h"
 #endif
 #include "protodec.h"
 #include "ais.h"

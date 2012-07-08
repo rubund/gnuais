@@ -1,5 +1,5 @@
 #if HAVE_CONFIG_H
-#include "config.h"
+#include "../config.h"
 #endif
 
 #include <stdio.h>
@@ -16,7 +16,6 @@
 #include "out_json.h"
 #include "cache.h"
 
-#include "config.h"
 
 #ifdef DMALLOC
 #include <dmalloc.h>

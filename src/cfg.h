@@ -20,7 +20,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "config.h"
+#include "../config.h"
 
 #define PROGNAME PACKAGE
 #define VERSTR  PROGNAME " v" VERSION

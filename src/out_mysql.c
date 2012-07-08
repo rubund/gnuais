@@ -23,7 +23,7 @@
  */
 
 
-#include "config.h"
+#include "../config.h"
 #include "out_mysql.h"
 #include "hlog.h"
 #include "hmalloc.h"
