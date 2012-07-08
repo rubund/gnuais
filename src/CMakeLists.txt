@@ -12,4 +12,6 @@ endif(HAVE_CURL)
 
 install(TARGETS gnuais DESTINATION bin)
 
-
+if(HAVE_GTK)
+    add_subdirectory(gui)
+endif(HAVE_GTK)
