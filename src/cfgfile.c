@@ -270,8 +270,18 @@ int read_cfgfile(char *f, struct cfgcmd *cmds)
 	char line[CFGLINE_LEN];
 	int ret, n = 0;
 	
-	if ((fp = fopen(f, "r")) == NULL) {
-		fprintf(stderr, "\nYOU WILL NEED TO CREATE A %s CONFIGURATION FILE IN YOUR CURRENT DIRECTORY.\nSEE THE EXAMPLE gnuais.conf-example IN THE SOURCE TREE\n\n",f);//\nYou will have to make a gnuais.conf configuration file. The\n simples solution is to copy the ''gnuais.conf-example'' file from\n the source tree to ''gnuais.conf'' in your current directory.\n\n", f, strerror(errno));
+	fp = fopen(f, "r");
+    if(fp == NULL){
+        fp = fopen("/usr/local/etc/gnuais.conf","r");
+    }
+    if(fp == NULL){
+        fp = fopen("/usr/etc/gnuais.conf","r");
+    }
+    if(fp == NULL){
+        fp = fopen("/etc/gnuais.conf","r");
+    }
+    if(fp == NULL){
+		fprintf(stderr, "\nYOU WILL NEED TO CREATE A %s CONFIGURATION FILE.\nSEE THE EXAMPLE gnuais.conf-example IN THE SOURCE TREE. IT CAN BE PLACED IN /usr/local/etc/, /usr/etc/, /etc, THE WORKING DIRECTORY OR THE FILENAME CAN BE SPECIFIED WITH THE -c OPTION\n\n",f);//\nYou will have to make a gnuais.conf configuration file. The\n simples solution is to copy the ''gnuais.conf-example'' file from\n the source tree to ''gnuais.conf'' in your current directory.\n\n", f, strerror(errno));
 		return 1;
 	}
 	
