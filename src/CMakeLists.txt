@@ -11,7 +11,7 @@ if(HAVE_CURL)
 endif(HAVE_CURL)
 
 install(TARGETS gnuais DESTINATION bin)
-install (FILES gnuais.conf DESTINATION etc)
+install (FILES gnuais.conf DESTINATION /etc)
 
 if(HAVE_GTK)
     add_subdirectory(gui)
