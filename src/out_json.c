@@ -46,8 +46,10 @@
 #include <dmalloc.h>
 #endif
 
+#ifdef HAVE_CURL
 static pthread_t jsonout_th;
 static int jsonout_die = 0;
+#endif
 
 #ifdef ENABLE_JSONAIS_CURL
 
