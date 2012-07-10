@@ -261,7 +261,7 @@ void protodec_msg_11(unsigned char *buffer, int bufferlen, int msg_start, time_t
 {
 	int latitude = protodec_henten(msg_start, 24, buffer);
 	int longitude = protodec_henten(msg_start += 24, 25, buffer);
-	int datetime = protodec_henten(msg_start += 25, 16, buffer);
+	//int datetime = protodec_henten(msg_start += 25, 16, buffer);
 	int wind_speed = protodec_henten(msg_start += 16, 7, buffer);
 	int wind_gust = protodec_henten(msg_start += 7, 7, buffer);
 	int wind_dir = protodec_henten(msg_start += 7, 9, buffer);
@@ -273,22 +273,22 @@ void protodec_msg_11(unsigned char *buffer, int bufferlen, int msg_start, time_t
 	int air_press_tend = protodec_henten(msg_start += 9, 2, buffer);
 	int horiz_visib_nm = protodec_henten(msg_start += 2, 8, buffer);
 	int water_level = protodec_henten(msg_start += 8, 9, buffer);
-	int water_trend = protodec_henten(msg_start += 9, 2, buffer);
-	int surface_current_speed = protodec_henten(msg_start += 2, 8, buffer);
-	int surface_current_dir = protodec_henten(msg_start += 8, 9, buffer);
-	int d1_current_speed = protodec_henten(msg_start += 9, 8, buffer);
-	int d1_current_dir = protodec_henten(msg_start += 8, 9, buffer);
-	int d1_current_depth = protodec_henten(msg_start += 9, 5, buffer);
-	int d2_current_speed = protodec_henten(msg_start += 5, 8, buffer);
-	int d2_current_dir = protodec_henten(msg_start += 8, 9, buffer);
-	int d2_current_depth = protodec_henten(msg_start += 9, 5, buffer);
+	//int water_trend = protodec_henten(msg_start += 9, 2, buffer);
+	//int surface_current_speed = protodec_henten(msg_start += 2, 8, buffer);
+	//int surface_current_dir = protodec_henten(msg_start += 8, 9, buffer);
+	//int d1_current_speed = protodec_henten(msg_start += 9, 8, buffer);
+	//int d1_current_dir = protodec_henten(msg_start += 8, 9, buffer);
+	//int d1_current_depth = protodec_henten(msg_start += 9, 5, buffer);
+	//int d2_current_speed = protodec_henten(msg_start += 5, 8, buffer);
+	//int d2_current_dir = protodec_henten(msg_start += 8, 9, buffer);
+	//int d2_current_depth = protodec_henten(msg_start += 9, 5, buffer);
 	int wave_height_significant = protodec_henten(msg_start += 5, 8, buffer);
-	int wave_period = protodec_henten(msg_start += 8, 6, buffer);
-	int wave_dir = protodec_henten(msg_start += 6, 9, buffer);
-	int swell_height = protodec_henten(msg_start += 9, 8, buffer);
-	int swell_period = protodec_henten(msg_start += 8, 6, buffer);
-	int swell_dir = protodec_henten(msg_start += 6, 9, buffer);
-	int sea_state = protodec_henten(msg_start += 9, 4, buffer);
+	//int wave_period = protodec_henten(msg_start += 8, 6, buffer);
+	//int wave_dir = protodec_henten(msg_start += 6, 9, buffer);
+	//int swell_height = protodec_henten(msg_start += 9, 8, buffer);
+	//int swell_period = protodec_henten(msg_start += 8, 6, buffer);
+	//int swell_dir = protodec_henten(msg_start += 6, 9, buffer);
+	//int sea_state = protodec_henten(msg_start += 9, 4, buffer);
 	int water_temp = protodec_henten(msg_start += 4, 10, buffer);
 	
 	printf(" lat %.6f lon %.6f wind_speed %dkt wind_gust %dkt wind_dir %d wind_gust_dir %d air_temp %.1fC rel_humid %d%% dew_point %.1fC pressure %d pressure_tend %d visib %.1fNM water_level %.1fm wave_height %.1fm water_temp %.1fC",
@@ -860,7 +860,6 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 	if (type < 1 || type > MAX_AIS_PACKET_TYPE /* 9 */)
 		return;
 	unsigned long mmsi = protodec_henten(8, 30, d->rbuffer);
-	unsigned short appid;
 	int fillbits = 0;
 	int k;
 	time_t received_t;

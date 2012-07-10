@@ -225,8 +225,8 @@ char *argstr(int arg, int argc, char **argv)
 	s[0] = '\0';
 	
 	for (i = arg; i < argc; i++) {
-		strncat(s, argv[i], CFGLINE_LEN);
-		strncat(s, " ", CFGLINE_LEN);
+		strncat(s, argv[i], sizeof(s)-strlen(s)-1);
+		strncat(s, " ", sizeof(s)-strlen(s)-1);
 	}
 	
 	if ((i = strlen(s)) > 0)

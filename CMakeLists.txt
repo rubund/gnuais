@@ -6,6 +6,7 @@ INCLUDE(CheckIncludeFiles)
 CHECK_INCLUDE_FILES(alsa/asoundlib.h HAVE_ALSA)
 CHECK_INCLUDE_FILES(mysql/mysql.h HAVE_MYSQL)
 CHECK_INCLUDE_FILES(curl/curl.h HAVE_CURL)
+set(CMAKE_C_FLAGS "-g -Wall -Werror -O2")
 
 if(NOT HAVE_ALSA)
     MESSAGE(FATAL_ERROR "The development files for ALSA are required - libasound-dev")
