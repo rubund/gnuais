@@ -1,5 +1,5 @@
-gnuais (0.2.4-1) unstable; urgency=low
+gnuais (0.2.5-1) unstable; urgency=low
 
-  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+  * Initial release
 
- -- unknown <ruben@beebeetle.com>  Tue, 10 Jul 2012 09:59:31 +0200
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Tue, 10 Jul 2012 11:48:31 +0200

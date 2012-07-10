@@ -1,6 +1,6 @@
 This work was packaged for Debian by:
 
-    unknown <ruben@beebeetle.com> on Tue, 10 Jul 2012 09:59:31 +0200
+    Ruben Undheim <ruben.undheim@gmail.com> on Tue, 10 Jul 2012 11:49:31 +0200
 
 It was downloaded from <url://example.com>
 
@@ -11,16 +11,15 @@ Upstream Author(s):
 
 Copyright:
 
-    <Copyright (C) YYYY Name OfAuthor>
-    <likewise for another author>
+    <Copyright (C) 2012 Ruben Undheim> 
 
 License:
 
-    <Put the license of the package here indented by 4 spaces>
+    GNU GENERAL PUBLIC LICENSE 2, Version 2, June 1991
 
 The Debian packaging is:
 
-    Copyright (C) 2012 unknown <ruben@beebeetle.com>
+    Copyright (C) 2012 Ruben Undheim <ruben.undheim@gmail.com>
 
 # Please chose a license for your packaging work. If the program you package
 # uses a mainstream license, using the same license is the safest choice.

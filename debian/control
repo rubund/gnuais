@@ -1,5 +1,5 @@
 Source: gnuais
-Section: unknown
+Section: universe/science
 Priority: extra
 Maintainer: Ruben Undheim <ruben.undheim@gmail.com>
 Build-Depends: debhelper (>= 7), cmake
