@@ -1,0 +1,13 @@
+Source: gnuais
+Section: unknown
+Priority: extra
+Maintainer: unknown <ruben@beebeetle.com>
+Build-Depends: debhelper (>= 7), cmake
+Standards-Version: 3.8.3
+Homepage: <insert the upstream URL, if relevant>
+
+Package: gnuais
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
