@@ -8,5 +8,5 @@ mkdir createdeb/$PACKAGENAME-$VERSION
 git archive ubuntu | tar -x -C createdeb/$PACKAGENAME-$VERSION
 cd createdeb/$PACKAGENAME-$VERSION
 cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .
-dh_make --createorig
+dh_make --createorig -s
 debuild -i -us -uc -b
