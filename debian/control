@@ -9,5 +9,4 @@ Homepage: http://gnuais.sourceforge.net/
 Package: gnuais
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- A tool for demodulation and decoding of AIS messages using the sound card. 
+Description: A tool for demodulation and decoding of AIS messages using the sound card. 
