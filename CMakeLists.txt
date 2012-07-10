@@ -13,6 +13,5 @@ endif(NOT HAVE_ALSA)
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
-install (FILES src/gnuais.conf DESTINATION "/usr/local/etc")
 
 add_subdirectory(src)
