@@ -1,7 +1,7 @@
 Source: gnuais
 Section: unknown
 Priority: extra
-Maintainer: unknown <ruben@beebeetle.com>
+Maintainer: unknown <ruben.undheim@gmail.com>
 Build-Depends: debhelper (>= 7), cmake
 Standards-Version: 3.8.3
 Homepage: <insert the upstream URL, if relevant>
