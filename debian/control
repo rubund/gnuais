@@ -9,4 +9,8 @@ Homepage: http://gnuais.sourceforge.net/
 Package: gnuais
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: A tool for demodulation and decoding of AIS messages using the sound card. 
+Description: GNU Automatic Identification System receiver
+ A tool for demodulating and decoding AIS messages using the line input of the sound card.
+ AIS messages are transmitted by marine vessels and contain their position, velocity and other
+ interesting information. The messages may be saved to an mysql-database, forwarded as NMEA
+ packets or uploaded to an AIS web service. 
