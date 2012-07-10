@@ -1,13 +1,13 @@
 Source: gnuais
 Section: unknown
 Priority: extra
-Maintainer: unknown <ruben.undheim@gmail.com>
+Maintainer: Ruben Undheim <ruben.undheim@gmail.com>
 Build-Depends: debhelper (>= 7), cmake
 Standards-Version: 3.8.3
-Homepage: <insert the upstream URL, if relevant>
+Homepage: http://gnuais.sourceforge.net/ 
 
 Package: gnuais
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+ A tool for demodulation and decoding of AIS messages using the sound card. 
