@@ -1,3 +1,10 @@
+gnuais (0.2.6alpha-1) unstable; urgency=low
+
+  * Enabled optimization
+  * Added -Wall and -Werror, and got rid of warnings 
+
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Tue, 10 Jul 2012 17:05:31 +0200
+
 gnuais (0.2.5-1) unstable; urgency=low
 
   * Initial release
