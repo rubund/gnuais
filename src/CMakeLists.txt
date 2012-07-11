@@ -4,11 +4,15 @@ target_link_libraries(gnuais pthread asound)
 
 if(HAVE_MYSQL)
     target_link_libraries(gnuais mysqlclient)
-endif(HAVE_MYSQL)
+else() 
+    message(WARNING "You do not have development files for mysql. Mysql functionality will therefore be disabled")
+endif()
 
 if(HAVE_CURL)
     target_link_libraries(gnuais curl)
-endif(HAVE_CURL)
+else()
+    message(WARNING "You do not have the development files for curl. Functionaly using curl will therefore be disabled")
+endif()
 
 install(TARGETS gnuais DESTINATION bin)
 install (FILES gnuais.conf DESTINATION /etc)
