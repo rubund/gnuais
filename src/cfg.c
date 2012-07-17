@@ -62,8 +62,6 @@ char *sound_out_file;
 int sound_channels = SOUND_CHANNELS_MONO;
 int sound_levellog = 0;
 
-char *pulseaudio;
-
 char *mysql_host;
 char *mysql_db;
 char *mysql_user;
@@ -110,7 +108,6 @@ static struct cfgcmd cfg_cmds[] = {
 	{ "mysql_keepsmall",	_CFUNC_ do_toggle,	&mysql_keepsmall	},
 	{ "mysql_oldlimit",	_CFUNC_ do_int,		&mysql_oldlimit		},
 	
-	{ "pulseaudio",  	_CFUNC_ do_string,	&pulseaudio		},
 	{ "sounddevice",	_CFUNC_ do_string,	&sound_device		},
 	{ "soundinfile",	_CFUNC_ do_string,	&sound_in_file		},
 	{ "soundoutfile",	_CFUNC_ do_string,	&sound_out_file		},

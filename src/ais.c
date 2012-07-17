@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 		channels = 1;
 	}
 #ifdef HAVE_PULSEAUDIO
-    if(pulseaudio != NULL){
+    if((strcmp("pulse",sound_device) == 0) || (strcmp("pulseaudio",sound_device) == 0)){
         if((pa_dev = pulseaudio_initialize()) == NULL){
                 hlog(LOG_CRIT, "Error opening pulseaudio device");
                 return -1;
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 				done = 1;
 		} 
 #ifdef HAVE_PULSEAUDIO
-        else if (pulseaudio){
+        else if (pa_dev){
             buffer_read = pulseaudio_read(pa_dev, buffer, buffer_l);
         }
 #endif
@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
 		fclose(sound_in_fd);
     }
 #ifdef HAVE_PULSEAUDIO
-    else if (pulseaudio) {
+    else if (pa_dev) {
         pulseaudio_cleanup(pa_dev);
     }
 #endif
