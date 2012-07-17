@@ -53,6 +53,8 @@ extern int verbose;
 extern char *mycall;
 extern char *myemail;
 
+extern char *pulseaudio;
+
 extern char *sound_device;
 extern char *sound_in_file;
 extern char *sound_out_file;

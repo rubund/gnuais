@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <pulse/pulseaudio.h>
+//#include <pulse/pulseaudio.h>
 #include <pulse/simple.h>
 #include <pulse/error.h>
 #include "pulseaudio.h"
@@ -25,4 +25,12 @@ void pulseaudio_cleanup(pa_simple *s){
 
     pa_simple_free(s);
 
+}
+
+int pulseaudio_read(pa_simple *s, short *buffer, int count){
+    int number_read;
+    number_read = pa_simple_read(s,buffer,(size_t)(count * sizeof(short) * 2) ,NULL);
+    if(number_read < 0)
+        return -1;
+    return count; 
 }

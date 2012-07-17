@@ -104,12 +104,17 @@ int main(int argc, char *argv[])
 	} else {
 		channels = 1;
 	}
-    if((pa_dev = pulseaudio_initialize()) == NULL){
-			hlog(LOG_CRIT, "Error opening pulseaudio device");
-			return -1;
-    }
-	
-	if (sound_device) {
+    if(pulseaudio != NULL){
+        if((pa_dev = pulseaudio_initialize()) == NULL){
+                hlog(LOG_CRIT, "Error opening pulseaudio device");
+                return -1;
+        }
+		buffer_l = 1024;
+		int extra = buffer_l % 5;
+		buffer_l -= extra;
+		buffer = (short *) hmalloc(buffer_l * sizeof(short) * channels);
+	}
+	else if (sound_device) {
 		if ((err = snd_pcm_open(&handle, sound_device, SND_PCM_STREAM_CAPTURE, 0)) < 0) {
 			hlog(LOG_CRIT, "Error opening sound device (%s)", sound_device);
 			return -1;
@@ -164,7 +169,11 @@ int main(int argc, char *argv[])
 			buffer_read = fread(buffer, channels * sizeof(short), buffer_l, sound_in_fd);
 			if (buffer_read <= 0)
 				done = 1;
-		} else {
+		} 
+        else if (pulseaudio){
+            buffer_read = pulseaudio_read(pa_dev, buffer, buffer_l);
+        }
+        else {
 			buffer_read = input_read(handle, buffer, buffer_l);
 			//printf("read %d\n", buffer_read);
 		}
@@ -195,6 +204,9 @@ int main(int argc, char *argv[])
 	}
 	
 	hlog(LOG_NOTICE, "Closing down...");
+    if (pulseaudio) {
+        pulseaudio_cleanup(pa_dev);
+    }
 	if (sound_in_fd) {
 		fclose(sound_in_fd);
 	} else {
@@ -202,7 +214,6 @@ int main(int argc, char *argv[])
 		handle = NULL;
 	}
 
-    pulseaudio_cleanup(pa_dev);
 	
 	if (sound_out_fd)
 		fclose(sound_out_fd);
