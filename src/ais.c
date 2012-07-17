@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
     if (pulseaudio) {
         pulseaudio_cleanup(pa_dev);
     }
-	if (sound_in_fd) {
+	else if (sound_in_fd) {
 		fclose(sound_in_fd);
 	} else {
 		input_cleanup(handle);
