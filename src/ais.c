@@ -15,7 +15,9 @@
 #include "out_mysql.h"
 #include "out_json.h"
 #include "cache.h"
+#ifdef HAVE_PULSEAUDIO
 #include "pulseaudio.h"
+#endif
 
 
 #ifdef DMALLOC
@@ -44,7 +46,9 @@ int main(int argc, char *argv[])
 	struct serial_state_t *serial = NULL;
 	struct receiver *rx_a = NULL;
 	struct receiver *rx_b = NULL;
+#ifdef HAVE_PULSEAUDIO
     pa_simple *pa_dev = NULL;
+#endif
 	
 	/* command line */
 	parse_cmdline(argc, argv);
@@ -104,6 +108,7 @@ int main(int argc, char *argv[])
 	} else {
 		channels = 1;
 	}
+#ifdef HAVE_PULSEAUDIO
     if(pulseaudio != NULL){
         if((pa_dev = pulseaudio_initialize()) == NULL){
                 hlog(LOG_CRIT, "Error opening pulseaudio device");
@@ -114,7 +119,11 @@ int main(int argc, char *argv[])
 		buffer_l -= extra;
 		buffer = (short *) hmalloc(buffer_l * sizeof(short) * channels);
 	}
-	else if (sound_device) {
+	else if (sound_device){
+#else
+    if (sound_device){
+#endif
+
 		if ((err = snd_pcm_open(&handle, sound_device, SND_PCM_STREAM_CAPTURE, 0)) < 0) {
 			hlog(LOG_CRIT, "Error opening sound device (%s)", sound_device);
 			return -1;
@@ -170,9 +179,11 @@ int main(int argc, char *argv[])
 			if (buffer_read <= 0)
 				done = 1;
 		} 
+#ifdef HAVE_PULSEAUDIO
         else if (pulseaudio){
             buffer_read = pulseaudio_read(pa_dev, buffer, buffer_l);
         }
+#endif
         else {
 			buffer_read = input_read(handle, buffer, buffer_l);
 			//printf("read %d\n", buffer_read);
@@ -204,12 +215,15 @@ int main(int argc, char *argv[])
 	}
 	
 	hlog(LOG_NOTICE, "Closing down...");
-    if (pulseaudio) {
+	if (sound_in_fd) {
+		fclose(sound_in_fd);
+    }
+#ifdef HAVE_PULSEAUDIO
+    else if (pulseaudio) {
         pulseaudio_cleanup(pa_dev);
     }
-	else if (sound_in_fd) {
-		fclose(sound_in_fd);
-	} else {
+#endif
+	else {
 		input_cleanup(handle);
 		handle = NULL;
 	}

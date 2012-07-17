@@ -6,6 +6,8 @@
 
 #cmakedefine HAVE_MYSQL
 
+#cmakedefine HAVE_PULSEAUDIO
+
 /* Name of package */
 #define PACKAGE "gnuais"
 
