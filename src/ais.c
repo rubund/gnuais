@@ -15,6 +15,7 @@
 #include "out_mysql.h"
 #include "out_json.h"
 #include "cache.h"
+#include "pulseaudio.h"
 
 
 #ifdef DMALLOC
@@ -43,6 +44,7 @@ int main(int argc, char *argv[])
 	struct serial_state_t *serial = NULL;
 	struct receiver *rx_a = NULL;
 	struct receiver *rx_b = NULL;
+    pa_simple *pa_dev = NULL;
 	
 	/* command line */
 	parse_cmdline(argc, argv);
@@ -102,6 +104,10 @@ int main(int argc, char *argv[])
 	} else {
 		channels = 1;
 	}
+    if((pa_dev = pulseaudio_initialize()) == NULL){
+			hlog(LOG_CRIT, "Error opening pulseaudio device");
+			return -1;
+    }
 	
 	if (sound_device) {
 		if ((err = snd_pcm_open(&handle, sound_device, SND_PCM_STREAM_CAPTURE, 0)) < 0) {
@@ -195,6 +201,8 @@ int main(int argc, char *argv[])
 		input_cleanup(handle);
 		handle = NULL;
 	}
+
+    pulseaudio_cleanup(pa_dev);
 	
 	if (sound_out_fd)
 		fclose(sound_out_fd);
