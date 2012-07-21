@@ -111,7 +111,8 @@ int main(int argc, char *argv[])
 		channels = 1;
 	}
 #ifdef HAVE_PULSEAUDIO
-    if((strcmp("pulse",sound_device) == 0) || (strcmp("pulseaudio",sound_device) == 0)){
+    if(sound_device != NULL && ((strcmp("pulse",sound_device) == 0) || (strcmp("pulseaudio",sound_device) == 0))){
+        printf("hsdkj\n");
         if((pa_dev = pulseaudio_initialize()) == NULL){
                 hlog(LOG_CRIT, "Error opening pulseaudio device");
                 return -1;
