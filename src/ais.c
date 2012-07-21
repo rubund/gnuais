@@ -99,13 +99,15 @@ int main(int argc, char *argv[])
 		serial = serial_init();
 	
 	/* initialize the AIS decoders */
-	hlog(LOG_DEBUG, "Initializing demodulator A");
-	rx_a = init_receiver('A', 2, 0);
 	if (sound_channels != SOUND_CHANNELS_MONO) {
+        hlog(LOG_DEBUG, "Initializing demodulator A");
+        rx_a = init_receiver('A', 2, 0);
 		hlog(LOG_DEBUG, "Initializing demodulator B");
 		rx_b = init_receiver('B', 2, 1);
 		channels = 2;
 	} else {
+        hlog(LOG_DEBUG, "Initializing demodulator A");
+        rx_a = init_receiver('A', 1, 0);
 		channels = 1;
 	}
 #ifdef HAVE_PULSEAUDIO
@@ -188,7 +190,6 @@ int main(int argc, char *argv[])
 			buffer_read = input_read(handle, buffer, buffer_l);
 			//printf("read %d\n", buffer_read);
 		}
-		
 		if (buffer_read <= 0)
 			continue;
 		
@@ -197,10 +198,7 @@ int main(int argc, char *argv[])
 		}
 		
 		if (sound_channels == SOUND_CHANNELS_MONO) {
-			//signal_filter(buffer, 1, 0, buffer_l, buff_f);
-			//signal_clockrecovery(buff_f, buffer_l, buff_fs);
-			//signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit_a);
-			//protodec_decode(buff_b, buffer_l, demod_state_a);
+			receiver_run(rx_a, buffer, buffer_l);
 		}
 		if (sound_channels == SOUND_CHANNELS_BOTH
 		    || sound_channels == SOUND_CHANNELS_RIGHT) {
