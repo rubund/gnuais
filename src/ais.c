@@ -15,6 +15,9 @@
 #include "out_mysql.h"
 #include "out_json.h"
 #include "cache.h"
+#ifdef HAVE_PULSEAUDIO
+#include "pulseaudio.h"
+#endif
 
 
 #ifdef DMALLOC
@@ -43,6 +46,9 @@ int main(int argc, char *argv[])
 	struct serial_state_t *serial = NULL;
 	struct receiver *rx_a = NULL;
 	struct receiver *rx_b = NULL;
+#ifdef HAVE_PULSEAUDIO
+    pa_simple *pa_dev = NULL;
+#endif
 	
 	/* command line */
 	parse_cmdline(argc, argv);
@@ -93,17 +99,34 @@ int main(int argc, char *argv[])
 		serial = serial_init();
 	
 	/* initialize the AIS decoders */
-	hlog(LOG_DEBUG, "Initializing demodulator A");
-	rx_a = init_receiver('A', 2, 0);
 	if (sound_channels != SOUND_CHANNELS_MONO) {
+        hlog(LOG_DEBUG, "Initializing demodulator A");
+        rx_a = init_receiver('A', 2, 0);
 		hlog(LOG_DEBUG, "Initializing demodulator B");
 		rx_b = init_receiver('B', 2, 1);
 		channels = 2;
 	} else {
+        hlog(LOG_DEBUG, "Initializing demodulator A");
+        rx_a = init_receiver('A', 1, 0);
 		channels = 1;
 	}
-	
-	if (sound_device) {
+#ifdef HAVE_PULSEAUDIO
+    if(sound_device != NULL && ((strcmp("pulse",sound_device) == 0) || (strcmp("pulseaudio",sound_device) == 0))){
+        printf("hsdkj\n");
+        if((pa_dev = pulseaudio_initialize()) == NULL){
+                hlog(LOG_CRIT, "Error opening pulseaudio device");
+                return -1;
+        }
+		buffer_l = 1024;
+		int extra = buffer_l % 5;
+		buffer_l -= extra;
+		buffer = (short *) hmalloc(buffer_l * sizeof(short) * channels);
+	}
+	else if (sound_device){
+#else
+    if (sound_device){
+#endif
+
 		if ((err = snd_pcm_open(&handle, sound_device, SND_PCM_STREAM_CAPTURE, 0)) < 0) {
 			hlog(LOG_CRIT, "Error opening sound device (%s)", sound_device);
 			return -1;
@@ -158,11 +181,16 @@ int main(int argc, char *argv[])
 			buffer_read = fread(buffer, channels * sizeof(short), buffer_l, sound_in_fd);
 			if (buffer_read <= 0)
 				done = 1;
-		} else {
+		} 
+#ifdef HAVE_PULSEAUDIO
+        else if (pa_dev){
+            buffer_read = pulseaudio_read(pa_dev, buffer, buffer_l);
+        }
+#endif
+        else {
 			buffer_read = input_read(handle, buffer, buffer_l);
 			//printf("read %d\n", buffer_read);
 		}
-		
 		if (buffer_read <= 0)
 			continue;
 		
@@ -171,10 +199,7 @@ int main(int argc, char *argv[])
 		}
 		
 		if (sound_channels == SOUND_CHANNELS_MONO) {
-			//signal_filter(buffer, 1, 0, buffer_l, buff_f);
-			//signal_clockrecovery(buff_f, buffer_l, buff_fs);
-			//signal_bitslice(buff_fs, buffer_l, buff_b, &lastbit_a);
-			//protodec_decode(buff_b, buffer_l, demod_state_a);
+			receiver_run(rx_a, buffer, buffer_l);
 		}
 		if (sound_channels == SOUND_CHANNELS_BOTH
 		    || sound_channels == SOUND_CHANNELS_RIGHT) {
@@ -191,10 +216,17 @@ int main(int argc, char *argv[])
 	hlog(LOG_NOTICE, "Closing down...");
 	if (sound_in_fd) {
 		fclose(sound_in_fd);
-	} else {
+    }
+#ifdef HAVE_PULSEAUDIO
+    else if (pa_dev) {
+        pulseaudio_cleanup(pa_dev);
+    }
+#endif
+	else {
 		input_cleanup(handle);
 		handle = NULL;
 	}
+
 	
 	if (sound_out_fd)
 		fclose(sound_out_fd);
