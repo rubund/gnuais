@@ -9,7 +9,8 @@ MyEmail gnuais@example.com
 # Directory, where logs will be written. Defaults to current directory.
 #LogDir logs
 
-# ALSA sound device name, either the name of the card (default for the
+# ALSA sound device name or "pulse" for pulseaudio,
+# If alsa is used: either the name of the card (default for the
 # first / default card), or a device name, for example: hw:2,0 for the first
 # input of the third card.
 SoundDevice default
@@ -59,4 +60,4 @@ SoundLevelLog 1
 #serial_port /dev/ttyS0
 
 # Use test file as input instead of the audio device input
-#SoundInFile testmessages/gnuais-stereo-2rx.raw
+#SoundInFile ../testmessages/gnuais-stereo-2rx.raw
