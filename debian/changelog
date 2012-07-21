@@ -1,3 +1,9 @@
+gnuais (0.2.7alpha) unstable; urgency=low
+
+  * Added pulseaudio support
+
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Tue, 21 Jul 2012 23:00:31 +0200
+
 gnuais (0.2.6) unstable; urgency=low
 
   * Enabled optimization
