@@ -19,7 +19,7 @@ else()
 endif()
 
 if(HAVE_PULSEAUDIO)
-    target_link_libraries(gnuais pulse pulse-simple)
+    target_link_libraries(gnuais pulse-simple)
 else()
     message(WARNING "You do not have the development files for pulseaudio. Support for pulseaudio will therefore not be included")
 endif()
