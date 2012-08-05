@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 	struct receiver *rx_a = NULL;
 	struct receiver *rx_b = NULL;
 #ifdef HAVE_PULSEAUDIO
-    pa_simple *pa_dev = NULL;
+	pa_simple *pa_dev = NULL;
 #endif
 	
 	/* command line */
@@ -100,23 +100,23 @@ int main(int argc, char *argv[])
 	
 	/* initialize the AIS decoders */
 	if (sound_channels != SOUND_CHANNELS_MONO) {
-        hlog(LOG_DEBUG, "Initializing demodulator A");
-        rx_a = init_receiver('A', 2, 0);
+		hlog(LOG_DEBUG, "Initializing demodulator A");
+		rx_a = init_receiver('A', 2, 0);
 		hlog(LOG_DEBUG, "Initializing demodulator B");
 		rx_b = init_receiver('B', 2, 1);
 		channels = 2;
 	} else {
-        hlog(LOG_DEBUG, "Initializing demodulator A");
-        rx_a = init_receiver('A', 1, 0);
+		hlog(LOG_DEBUG, "Initializing demodulator A");
+		rx_a = init_receiver('A', 1, 0);
 		channels = 1;
 	}
 #ifdef HAVE_PULSEAUDIO
-    if(sound_device != NULL && ((strcmp("pulse",sound_device) == 0) || (strcmp("pulseaudio",sound_device) == 0))){
-        printf("hsdkj\n");
-        if((pa_dev = pulseaudio_initialize()) == NULL){
-                hlog(LOG_CRIT, "Error opening pulseaudio device");
-                return -1;
-        }
+	if(sound_device != NULL && ((strcmp("pulse",sound_device) == 0) || (strcmp("pulseaudio",sound_device) == 0))){
+		printf("hsdkj\n");
+		if((pa_dev = pulseaudio_initialize()) == NULL){
+			hlog(LOG_CRIT, "Error opening pulseaudio device");
+			return -1;
+		}
 		buffer_l = 1024;
 		int extra = buffer_l % 5;
 		buffer_l -= extra;
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 	}
 	else if (sound_device){
 #else
-    if (sound_device){
+	if (sound_device){
 #endif
 
 		if ((err = snd_pcm_open(&handle, sound_device, SND_PCM_STREAM_CAPTURE, 0)) < 0) {
@@ -183,11 +183,11 @@ int main(int argc, char *argv[])
 				done = 1;
 		} 
 #ifdef HAVE_PULSEAUDIO
-        else if (pa_dev){
-            buffer_read = pulseaudio_read(pa_dev, buffer, buffer_l);
-        }
+		else if (pa_dev){
+			buffer_read = pulseaudio_read(pa_dev, buffer, buffer_l);
+		}
 #endif
-        else {
+		else {
 			buffer_read = input_read(handle, buffer, buffer_l);
 			//printf("read %d\n", buffer_read);
 		}
@@ -216,11 +216,11 @@ int main(int argc, char *argv[])
 	hlog(LOG_NOTICE, "Closing down...");
 	if (sound_in_fd) {
 		fclose(sound_in_fd);
-    }
+	}
 #ifdef HAVE_PULSEAUDIO
-    else if (pa_dev) {
-        pulseaudio_cleanup(pa_dev);
-    }
+	else if (pa_dev) {
+		pulseaudio_cleanup(pa_dev);
+	}
 #endif
 	else {
 		input_cleanup(handle);
