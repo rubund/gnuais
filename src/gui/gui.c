@@ -86,6 +86,8 @@ void type1(char *r_buffer, int lengde, shipdata * data)
 	if (((longitude >> 27) & 1) == 1)
 		longitude |= 0xF0000000;
 	int latitude = pickone(r_buffer, 89, 27);
+	if (((latitude >> 26) & 1) == 1)
+		latitude |= 0xf8000000;
 	unsigned int course = pickone(r_buffer, 116, 12);
 	unsigned int heading = pickone(r_buffer, 128, 9);
 	unsigned int sog = pickone(r_buffer, 50, 10);
@@ -93,13 +95,13 @@ void type1(char *r_buffer, int lengde, shipdata * data)
 
 	printf
 	    ("MMSI: %09d  Latitude: %.7f  Longitude: %.7f  Speed:%f  Course:%.5f  Heading: %f  Rateofturn: %d\n",
-	     mmsi, (float) latitude / 600000, (float) longitude / 600000,
+	     mmsi, (float) latitude / 600000.0, (float) longitude / 600000.0,
 	     (float) sog / 10, (float) course / 10, (float) heading,
 	     rateofturn);
 	data->type = 1;
 	data->mmsi = mmsi;
-	data->latitude = (float) latitude / 600000;
-	data->longitude = (float) longitude / 600000;
+	data->latitude = (float) latitude / 600000.0;
+	data->longitude = (float) longitude / 600000.0;
 	data->speed = (float) sog / 10;
 	data->heading = (float) heading;
 	data->course = (float) course / 10;
@@ -182,7 +184,7 @@ void aisdecode(char *nmea, shipdata * data)
 
 		if (bokstav == ',')
 			break;
-		if (bokstav < 87)
+		if (bokstav <= 87)
 			bokstav = bokstav - 48;
 		else
 			bokstav = bokstav - 56;
@@ -243,34 +245,35 @@ void hello(GtkWidget * widget, gpointer data)
 
 int initserial(const char *dev)
 {
+	//int fd = fopen(dev,"r");
 	int fd = open(dev, O_RDWR | O_NOCTTY | O_NDELAY);
 	if (fd == -1) {		// Could not open the port.
 		perror("open_port: Unable to open serial port");
 	} else {
-		//printf("serial opened. My_fd is:%d\n",fd);
-		fcntl(fd, F_SETFL, 0);
+	//	//printf("serial opened. My_fd is:%d\n",fd);
+	//	fcntl(fd, F_SETFL, 0);
 
-		struct termios options;
-		/* get the current options */
-		tcgetattr(fd, &options);
+	//	struct termios options;
+	//	/* get the current options */
+	//	tcgetattr(fd, &options);
 
-		//set speed 4800
-		cfsetispeed(&options, B4800);
-		cfsetospeed(&options, B4800);
-		/* set raw input, 1 second timeout */
-		options.c_cflag |= (CLOCAL | CREAD);
-		options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-		options.c_oflag &= ~OPOST;
-		options.c_cc[VMIN] = 0;
-		options.c_cc[VTIME] = 10;
+	//	//set speed 4800
+	//	cfsetispeed(&options, B4800);
+	//	cfsetospeed(&options, B4800);
+	//	/* set raw input, 1 second timeout */
+	//	options.c_cflag |= (CLOCAL | CREAD);
+	//	options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+	//	options.c_oflag &= ~OPOST;
+	//	options.c_cc[VMIN] = 0;
+	//	options.c_cc[VTIME] = 10;
 
-		//No parity 8N1
-		options.c_cflag &= ~PARENB;
-		options.c_cflag &= ~CSTOPB;
-		options.c_cflag &= ~CSIZE;
-		options.c_cflag |= CS8;
-		/* set the options */
-		tcsetattr(fd, TCSANOW, &options);
+	//	//No parity 8N1
+	//	options.c_cflag &= ~PARENB;
+	//	options.c_cflag &= ~CSTOPB;
+	//	options.c_cflag &= ~CSIZE;
+	//	options.c_cflag |= CS8;
+	//	/* set the options */
+	//	tcsetattr(fd, TCSANOW, &options);
 	}
 	return fd;
 }
