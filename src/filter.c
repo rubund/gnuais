@@ -79,12 +79,14 @@ void filter_free(struct filter *f)
 
 /* ---------------------------------------------------------------------- */
 
-int filter_run(struct filter *f, float in, float *out)
+void filter_run(struct filter *f, float in, float *out)
 {
 	float *ptr = f->buffer + f->pointer++;
 
 	*ptr = in;
-
+	
+	// TODO: optimize: pass filter length as constant to enable
+	// using optimized __mac_c and fix the number of rounds there!
 	*out = mac(ptr - f->length, f->taps, f->length);
 	//*out = mac(ptr - f->length, f->taps, 53);
 
@@ -94,8 +96,30 @@ int filter_run(struct filter *f, float in, float *out)
 		       f->length * sizeof(float));
 		f->pointer = f->length;
 	}
+}
 
-	return 1;
+void filter_run_buf(struct filter *f, short *in, float *out, int step, int len)
+{
+	float *ptr;
+	int id = 0;
+	int od = 0;
+	
+	while (od < len) {
+		ptr = f->buffer + f->pointer++;
+		*ptr = in[id];
+		out[od] = mac(ptr - f->length, f->taps, f->length);
+		
+		/* todo: move out of loop */
+		if (f->pointer == BufferLen) {
+			memcpy(f->buffer, 
+			       f->buffer + BufferLen - f->length,
+			       f->length * sizeof(float));
+			f->pointer = f->length;
+		}
+		
+		id += step;
+		od++;
+	}
 }
 
 /* ---------------------------------------------------------------------- */

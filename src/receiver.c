@@ -59,6 +59,7 @@ void free_receiver(struct receiver *rx)
 }
 
 #define	INC	16
+#define FILTERED_LEN 4096
 
 void receiver_run(struct receiver *rx, short *buf, int len)
 {
@@ -68,29 +69,35 @@ void receiver_run(struct receiver *rx, short *buf, int len)
 	short maxval = 0;
 	int level_distance;
 	float level;
-
-	len = (len * rx->num_ch) - rx->ch_ofs;
+	int rx_num_ch = rx->num_ch;
+	float filtered[FILTERED_LEN];
+	int i;
+	
+	/* len is number of samples available in buffer for each
+	 * channels - something like 1024, regardless of number of channels */
+	
 	buf += rx->ch_ofs;
+	
+	if (len > FILTERED_LEN)
+		abort();
 
-	while (len > 0) {
-		static int u = 0;
-
-		rx->decoder->cntr++;
-		
+	filter_run_buf(rx->filter, buf, filtered, rx_num_ch, len);
+	
+	for (i = 0; i < len; i++) {
 		// look for peak volume
+		/*
 		if (*buf > maxval)
 			maxval = *buf;
+		*/
+		
+		out = filtered[i];
 
-		filter_run(rx->filter, *buf / 32768.0, &out);
-
-		curr = (out > 0);
+		curr = (filtered[i] > 0);
 		if ((curr ^ rx->prev) == 1) {
 			if (rx->pll < (0x10000 / 2)) {
 				rx->pll += rx->pllinc / INC;
-				u += rx->pllinc / INC;
 			} else {
 				rx->pll -= rx->pllinc / INC;
-				u -= rx->pllinc / INC;
 			}
 		}
 		rx->prev = curr;
@@ -108,9 +115,6 @@ void receiver_run(struct receiver *rx, short *buf, int len)
 			rx->lastbit = bit;
 			rx->pll &= 0xffff;
 		}
-
-		buf += rx->num_ch;
-		len -= rx->num_ch;
 	}
 	
 	/* calculate level, and log it */
