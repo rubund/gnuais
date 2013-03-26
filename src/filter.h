@@ -65,7 +65,7 @@ extern struct filter *filter_init(int len, float *taps);
 extern void filter_free(struct filter *f);
 
 extern void filter_run(struct filter *f, float in, float *out);
-extern void filter_run_buf(struct filter *f, short *in, float *out, int step, int len);
+extern short filter_run_buf(struct filter *f, short *in, float *out, int step, int len);
 
 /* ---------------------------------------------------------------------- */
 #endif				/* _FILTER_H */

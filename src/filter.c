@@ -98,15 +98,21 @@ void filter_run(struct filter *f, float in, float *out)
 	}
 }
 
-void filter_run_buf(struct filter *f, short *in, float *out, int step, int len)
+short filter_run_buf(struct filter *f, short *in, float *out, int step, int len)
 {
 	float *ptr;
 	int id = 0;
 	int od = 0;
+	short maxval = 0;
 	
 	while (od < len) {
 		ptr = f->buffer + f->pointer++;
 		*ptr = in[id];
+		
+		// look for peak volume
+		if (in[id] > maxval)
+			maxval = in[id];
+		
 		out[od] = mac(ptr - f->length, f->taps, f->length);
 		
 		/* todo: move out of loop */
@@ -120,6 +126,8 @@ void filter_run_buf(struct filter *f, short *in, float *out, int step, int len)
 		id += step;
 		od++;
 	}
+	
+	return maxval;
 }
 
 /* ---------------------------------------------------------------------- */

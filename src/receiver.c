@@ -81,15 +81,9 @@ void receiver_run(struct receiver *rx, short *buf, int len)
 	if (len > FILTERED_LEN)
 		abort();
 
-	filter_run_buf(rx->filter, buf, filtered, rx_num_ch, len);
+	maxval = filter_run_buf(rx->filter, buf, filtered, rx_num_ch, len);
 	
 	for (i = 0; i < len; i++) {
-		// look for peak volume
-		/*
-		if (*buf > maxval)
-			maxval = *buf;
-		*/
-		
 		out = filtered[i];
 		curr = (out > 0);
 		
