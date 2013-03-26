@@ -43,7 +43,7 @@ spkey_t symbol(const void *s)
 spkey_t symbol_lookup_db_mem(const void *s, const int slen, struct sptree *spt)
 {
 	register spkey_t key;
-	register struct syment *se, *pe;
+	register struct syment *se;
 	struct spblk *spl;
 
 	if (s == NULL)
@@ -54,7 +54,6 @@ spkey_t symbol_lookup_db_mem(const void *s, const int slen, struct sptree *spt)
 	/* Ok, time for the hard work.  Lets see if we have this key
 	   in the symtab splay tree */
 
-	pe = NULL;
 	spl = sp_lookup(key, spt);
 	if (spl != NULL) {
 		/* Got it !  Now see that we really have it, and
@@ -67,7 +66,6 @@ spkey_t symbol_lookup_db_mem(const void *s, const int slen, struct sptree *spt)
 				/* Really found it! */
 				return (spkey_t)se;
 			}
-			pe = se;
 			se = se->next;
 		} while (se != NULL);
 	}
