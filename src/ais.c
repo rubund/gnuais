@@ -25,7 +25,6 @@
 #endif
 
 int done;
-long int cntr;
 
 void closedown(int sig)
 {
@@ -177,7 +176,6 @@ int main(int argc, char *argv[])
 	
 	while (!done) {
 		if (sound_in_fd) {
-			cntr += buffer_l;
 			buffer_read = fread(buffer, channels * sizeof(short), buffer_l, sound_in_fd);
 			if (buffer_read <= 0)
 				done = 1;
@@ -198,6 +196,7 @@ int main(int argc, char *argv[])
 			fwrite(buffer, channels * sizeof(short), buffer_read, sound_out_fd);
 		}
 		
+		/* BUG: we're processing the length of buffer (buffer_l), not the bytes read (buffer_read)! */
 		if (sound_channels == SOUND_CHANNELS_MONO) {
 			receiver_run(rx_a, buffer, buffer_l);
 		}
