@@ -91,8 +91,8 @@ void receiver_run(struct receiver *rx, short *buf, int len)
 		*/
 		
 		out = filtered[i];
-
-		curr = (filtered[i] > 0);
+		curr = (out > 0);
+		
 		if ((curr ^ rx->prev) == 1) {
 			if (rx->pll < (0x10000 / 2)) {
 				rx->pll += rx->pllinc / INC;
