@@ -43,7 +43,7 @@ extern __inline__ float mac(const float *a, const float *b, int size)
 	int i;
 
 	for (i = 0; i < size; i++)
-		sum += (*a++) * (*b++);
+		sum += a[i] * b[i];
 		
 	return sum;
 }
