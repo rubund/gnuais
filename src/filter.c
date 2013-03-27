@@ -100,32 +100,35 @@ void filter_run(struct filter *f, float in, float *out)
 
 short filter_run_buf(struct filter *f, short *in, float *out, int step, int len)
 {
-	float *ptr;
 	int id = 0;
 	int od = 0;
 	short maxval = 0;
+	int pointer = f->pointer;
+	float *buffer = f->buffer;
 	
 	while (od < len) {
-		ptr = f->buffer + f->pointer++;
-		*ptr = in[id];
+	        buffer[pointer] = in[id];
 		
 		// look for peak volume
 		if (in[id] > maxval)
 			maxval = in[id];
 		
-		out[od] = mac(ptr - f->length, f->taps, f->length);
+		out[od] = mac(&buffer[pointer - f->length], f->taps, f->length);
+		pointer++;
 		
-		/* todo: move out of loop */
-		if (f->pointer == BufferLen) {
-			memcpy(f->buffer, 
-			       f->buffer + BufferLen - f->length,
+		/* the buffer is much smaller than the incoming chunks */
+		if (pointer == BufferLen) {
+			memcpy(buffer, 
+			       buffer + BufferLen - f->length,
 			       f->length * sizeof(float));
-			f->pointer = f->length;
+			pointer = f->length;
 		}
 		
 		id += step;
 		od++;
 	}
+	
+	f->pointer = pointer;
 	
 	return maxval;
 }
