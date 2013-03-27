@@ -40,13 +40,14 @@
  * This gets used when not optimising
  */
 #ifndef	__OPTIMIZE__
-float mac(const float *a, const float *b, int len)
+float mac(const float *a, const float *b, int size)
 { 
 	float sum = 0;
 	int i;
 
-	for (i = 0; i < len; i++)
-		sum += (*a++) * (*b++);
+	for (i = 0; i < size; i++)
+		sum += a[i] * b[i];
+		
 	return sum;
 }
 #endif
