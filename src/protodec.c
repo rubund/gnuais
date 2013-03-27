@@ -892,7 +892,7 @@ void protodec_getdata(int bufferlen, struct demod_state_t *d)
 	if (skip_type[type])
 		return; // ignored by configuration
 	
-	printf("ch %c cntr %ld type %d mmsi %09ld:", d->chanid, d->cntr, type, mmsi);
+	printf("ch %c type %d mmsi %09ld:", d->chanid, type, mmsi);
 	
 	switch (type) {
 	case 1: /* position packets */

@@ -25,7 +25,6 @@
 #endif
 
 int done;
-long int cntr;
 
 void closedown(int sig)
 {
@@ -177,7 +176,6 @@ int main(int argc, char *argv[])
 	
 	while (!done) {
 		if (sound_in_fd) {
-			cntr += buffer_l;
 			buffer_read = fread(buffer, channels * sizeof(short), buffer_l, sound_in_fd);
 			if (buffer_read <= 0)
 				done = 1;
@@ -199,17 +197,17 @@ int main(int argc, char *argv[])
 		}
 		
 		if (sound_channels == SOUND_CHANNELS_MONO) {
-			receiver_run(rx_a, buffer, buffer_l);
+			receiver_run(rx_a, buffer, buffer_read);
 		}
 		if (sound_channels == SOUND_CHANNELS_BOTH
 		    || sound_channels == SOUND_CHANNELS_RIGHT) {
 			/* ch a/0/right */
-			receiver_run(rx_a, buffer, buffer_l);
+			receiver_run(rx_a, buffer, buffer_read);
 		}
 		if (sound_channels == SOUND_CHANNELS_BOTH
 		    || sound_channels == SOUND_CHANNELS_LEFT) {	
 			/* ch b/1/left */
-			receiver_run(rx_b, buffer, buffer_l);
+			receiver_run(rx_b, buffer, buffer_read);
 		}
 	}
 	

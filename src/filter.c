@@ -79,12 +79,14 @@ void filter_free(struct filter *f)
 
 /* ---------------------------------------------------------------------- */
 
-int filter_run(struct filter *f, float in, float *out)
+void filter_run(struct filter *f, float in, float *out)
 {
 	float *ptr = f->buffer + f->pointer++;
 
 	*ptr = in;
-
+	
+	// TODO: optimize: pass filter length as constant to enable
+	// using optimized __mac_c and fix the number of rounds there!
 	*out = mac(ptr - f->length, f->taps, f->length);
 	//*out = mac(ptr - f->length, f->taps, 53);
 
@@ -94,8 +96,41 @@ int filter_run(struct filter *f, float in, float *out)
 		       f->length * sizeof(float));
 		f->pointer = f->length;
 	}
+}
 
-	return 1;
+short filter_run_buf(struct filter *f, short *in, float *out, int step, int len)
+{
+	int id = 0;
+	int od = 0;
+	short maxval = 0;
+	int pointer = f->pointer;
+	float *buffer = f->buffer;
+	
+	while (od < len) {
+	        buffer[pointer] = in[id];
+		
+		// look for peak volume
+		if (in[id] > maxval)
+			maxval = in[id];
+		
+		out[od] = mac(&buffer[pointer - f->length], f->taps, f->length);
+		pointer++;
+		
+		/* the buffer is much smaller than the incoming chunks */
+		if (pointer == BufferLen) {
+			memcpy(buffer, 
+			       buffer + BufferLen - f->length,
+			       f->length * sizeof(float));
+			pointer = f->length;
+		}
+		
+		id += step;
+		od++;
+	}
+	
+	f->pointer = pointer;
+	
+	return maxval;
 }
 
 /* ---------------------------------------------------------------------- */

@@ -44,6 +44,7 @@ extern __inline__ float mac(const float *a, const float *b, int size)
 
 	for (i = 0; i < size; i++)
 		sum += (*a++) * (*b++);
+		
 	return sum;
 }
 #endif				/* __HAVE_ARCH_MAC */
@@ -63,7 +64,8 @@ struct filter {
 extern struct filter *filter_init(int len, float *taps);
 extern void filter_free(struct filter *f);
 
-extern int filter_run(struct filter *f, float in, float *out);
+extern void filter_run(struct filter *f, float in, float *out);
+extern short filter_run_buf(struct filter *f, short *in, float *out, int step, int len);
 
 /* ---------------------------------------------------------------------- */
 #endif				/* _FILTER_H */
