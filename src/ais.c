@@ -196,19 +196,18 @@ int main(int argc, char *argv[])
 			fwrite(buffer, channels * sizeof(short), buffer_read, sound_out_fd);
 		}
 		
-		/* BUG: we're processing the length of buffer (buffer_l), not the bytes read (buffer_read)! */
 		if (sound_channels == SOUND_CHANNELS_MONO) {
-			receiver_run(rx_a, buffer, buffer_l);
+			receiver_run(rx_a, buffer, buffer_read);
 		}
 		if (sound_channels == SOUND_CHANNELS_BOTH
 		    || sound_channels == SOUND_CHANNELS_RIGHT) {
 			/* ch a/0/right */
-			receiver_run(rx_a, buffer, buffer_l);
+			receiver_run(rx_a, buffer, buffer_read);
 		}
 		if (sound_channels == SOUND_CHANNELS_BOTH
 		    || sound_channels == SOUND_CHANNELS_LEFT) {	
 			/* ch b/1/left */
-			receiver_run(rx_b, buffer, buffer_l);
+			receiver_run(rx_b, buffer, buffer_read);
 		}
 	}
 	
