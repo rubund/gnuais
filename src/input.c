@@ -95,7 +95,7 @@ int input_read(snd_pcm_t * handle, short *buffer, int count)
 	} else if (err < 0) {
 		hlog(LOG_ERR, LOGPREFIX "Read error");
 	} else if (err != count) {
-		hlog(LOG_ERR, LOGPREFIX "Short read, read %d frames", err);
+		hlog(LOG_INFO, LOGPREFIX "Short read, read %d frames", err);
 	} else {
 		/*hlog(LOG_DEBUG, LOGPREFIX "Read %d samples", err); */
 	}
