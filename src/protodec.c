@@ -121,7 +121,7 @@ int protodec_calculate_crc(int length_bits, struct demod_state_t *d)
 	//DBG(printf("CRC: %04x\n",crc));
 	
 	/* what is this? */
-	memset(d->rbuffer, 0, sizeof(d->rbuffer));
+	memset(d->rbuffer, 0, DEMOD_BUFFER_LEN);
 	for (j = 0; j < length_bytes; j++) {
 		for (i = 0; i < 8; i++) {
 			x = j * 8 + i;
@@ -1041,7 +1041,7 @@ void protodec_decode(char *in, int count, struct demod_state_t *d)
 					d->state = ST_DATA;
 					d->nstartsign = 0;
 					d->antallenner = 0;
-					memset(d->buffer, 0, sizeof(d->buffer));
+					memset(d->buffer, 0, DEMOD_BUFFER_LEN);
 					d->bufferpos = 0;
 				} else {
 					protodec_reset(d);
