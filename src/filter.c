@@ -40,7 +40,7 @@
  * This gets used when not optimising
  */
 #ifndef	__OPTIMIZE__
-float mac(const float *a, const float *b, int size)
+float filter_mac(const float *a, const float *b, int size)
 { 
 	float sum = 0;
 	int i;
@@ -88,8 +88,8 @@ void filter_run(struct filter *f, float in, float *out)
 	
 	// TODO: optimize: pass filter length as constant to enable
 	// using optimized __mac_c and fix the number of rounds there!
-	*out = mac(ptr - f->length, f->taps, f->length);
-	//*out = mac(ptr - f->length, f->taps, 53);
+	*out = filter_mac(ptr - f->length, f->taps, f->length);
+	//*out = filter_mac(ptr - f->length, f->taps, 53);
 
 	if (f->pointer == BufferLen) {
 		memcpy(f->buffer, 
@@ -114,7 +114,7 @@ short filter_run_buf(struct filter *f, short *in, float *out, int step, int len)
 		if (in[id] > maxval)
 			maxval = in[id];
 		
-		out[od] = mac(&buffer[pointer - f->length], f->taps, f->length);
+		out[od] = filter_mac(&buffer[pointer - f->length], f->taps, f->length);
 		pointer++;
 		
 		/* the buffer is much smaller than the incoming chunks */

@@ -37,7 +37,7 @@
 
 
 #ifndef __HAVE_ARCH_MAC
-extern __inline__ float mac(const float *a, const float *b, int size)
+static __inline__ float filter_mac(const float *a, const float *b, int size)
 {
 	float sum = 0;
 	int i;
