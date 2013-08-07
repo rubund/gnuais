@@ -1,34 +1,33 @@
-This work was packaged for Debian by:
+Format: http://dep.debian.net/deps/dep5
+Upstream-Name: gnuais
+Source: https://github.com/rubund/gnuais/ 
 
-    Ruben Undheim <ruben.undheim@gmail.com> on Tue, 10 Jul 2012 11:49:31 +0200
+Files: *
+Copyright: 2012 Ruben Undheim <ruben.undheim@gmail.com>
+           2012 Heikki Hannikainen <hessu@hes.iki.fi>
 
-It was downloaded from <url://example.com>
+License: GPL-2.0+
 
-Upstream Author(s):
+Files: debian/*
+Copyright: 2012 Ruben Undheim <ruben@undheim@gmail.com>
+License: GPL-2.0+
 
-    <put author's name and email here>
-    <likewise for another author>
-
-Copyright:
-
-    <Copyright (C) 2012 Ruben Undheim> 
-
-License:
-
-    GNU GENERAL PUBLIC LICENSE 2, Version 2, June 1991
-
-The Debian packaging is:
-
-    Copyright (C) 2012 Ruben Undheim <ruben.undheim@gmail.com>
-
-# Please chose a license for your packaging work. If the program you package
-# uses a mainstream license, using the same license is the safest choice.
-# Please avoid to pick license terms that are more restrictive than the
-# packaged work, as it may make Debian's contributions unacceptable upstream.
-# If you just want it to be GPL version 3, leave the following lines in.
-
-and is licensed under the GPL version 3, 
-see `/usr/share/common-licenses/GPL-3'.
+License: GPL-2.0+
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <http://www.gnu.org/licenses/>
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
 
 # Please also look if there are files or directories which have a
 # different copyright/license attached and list them here.

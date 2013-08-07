@@ -2,8 +2,8 @@ Source: gnuais
 Section: universe/science
 Priority: extra
 Maintainer: Ruben Undheim <ruben.undheim@gmail.com>
-Build-Depends: debhelper (>= 7), cmake, libasound2-dev, libmysqlclient-dev, libpulse-dev, libcurl4-openssl-dev
-Standards-Version: 3.8.3
+Build-Depends: debhelper (>= 9), cmake, libasound2-dev, libmysqlclient-dev, libpulse-dev, libcurl4-openssl-dev
+Standards-Version: 3.9.2
 Homepage: http://gnuais.sourceforge.net/ 
 
 Package: gnuais

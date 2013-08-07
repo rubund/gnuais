@@ -1,0 +1,2 @@
+?package(gnuais):needs="text" section="Applications/Science/Geoscience"\
+  title="gnuais" command="/usr/bin/gnuais"
