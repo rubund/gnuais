@@ -69,6 +69,10 @@ int main(int argc, char *argv[])
 			exit(1);
 		} else if (i == 0) {
 			/* child */
+			/* write pid file, now that we have our final pid... might fail, which is critical */
+			hlog(LOG_DEBUG, "Writing pid...");
+			if (!writepid(pidfile))
+				exit(1);
 		} else {
 			/* parent, quitting */
 			hlog(LOG_DEBUG, "Forked daemon process %d, parent quitting", i);
@@ -76,10 +80,6 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	/* write pid file, now that we have our final pid... might fail, which is critical */
-	hlog(LOG_DEBUG, "Writing pid...");
-	if (!writepid(pidfile))
-		exit(1);
 	
 	signal(SIGINT, closedown);
 	
