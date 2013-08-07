@@ -88,7 +88,7 @@ void filter_run(struct filter *f, float in, float *out)
 	
 	// TODO: optimize: pass filter length as constant to enable
 	// using optimized __mac_c and fix the number of rounds there!
-	#ifndef	__OPTIMIZE__
+	#ifndef	__HAVE_ARCH_MAC
 	*out = filter_mac(ptr - f->length, f->taps, f->length);
 	#else
 	*out = mac(ptr - f->length, f->taps, f->length);
@@ -118,7 +118,7 @@ short filter_run_buf(struct filter *f, short *in, float *out, int step, int len)
 		if (in[id] > maxval)
 			maxval = in[id];
 		
-		#ifndef	__OPTIMIZE__
+		#ifndef __HAVE_ARCH_MAC	
 		out[od] = filter_mac(&buffer[pointer - f->length], f->taps, f->length);
 		#else
 		out[od] = mac(&buffer[pointer - f->length], f->taps, f->length);
