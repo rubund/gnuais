@@ -6,9 +6,10 @@ rm -rf createdeb/
 mkdir createdeb
 mkdir createdeb/$PACKAGENAME-$VERSION
 git archive master | tar -x -C createdeb/$PACKAGENAME-$VERSION
-cp -r -v debian createdeb/$PACKAGENAME-$VERSION/
-cd createdeb/$PACKAGENAME-$VERSION
-dh_make --createorig -s
+cd createdeb
+tar -czvf $PACKAGENAME\_$VERSION.orig.tar.gz $PACKAGENAME-$VERSION
+cp -r -v ../debian $PACKAGENAME-$VERSION/
+cd $PACKAGENAME-$VERSION
 dpkg-buildpackage -us -uc
 #cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .
 #debuild -i -us -uc -b
