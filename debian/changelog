@@ -4,7 +4,7 @@ gnuais (0.2.8) unstable; urgency=low
   * Only write pid to file when forking to background
   * Improved support for creating deb package
 
- -- Ruben <ruben@flodsvin>  Wed, 07 Aug 2013 21:37:22 +0200
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Wed, 07 Aug 2013 21:37:22 +0200
 
 gnuais (0.2.7alpha) unstable; urgency=low
 

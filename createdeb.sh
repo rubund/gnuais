@@ -10,6 +10,6 @@ cd createdeb
 tar -czvf $PACKAGENAME\_$VERSION.orig.tar.gz $PACKAGENAME-$VERSION
 cp -r -v ../debian $PACKAGENAME-$VERSION/
 cd $PACKAGENAME-$VERSION
-dpkg-buildpackage -us -uc
+dpkg-buildpackage
 #cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .
-#debuild -i -us -uc -b
+#debuild
