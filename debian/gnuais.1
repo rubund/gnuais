@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH GNUAIS SECTION "July 10, 2012"
+.TH GNUAIS SECTION "August 07, 2013"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -16,44 +16,52 @@
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-gnuais \- program to do something
+gnuais \- GNU Automatic Identification System receiver
 .SH SYNOPSIS
 .B gnuais
-.RI [ options ] " files" ...
-.br
-.B bar
-.RI [ options ] " files" ...
+.RI [ options ] 
 .SH DESCRIPTION
 This manual page documents briefly the
 .B gnuais
-and
-.B bar
-commands.
+command.
 .PP
+\fBgnuais\fP is a tool for demodulating and decoding AIS messages using the line/mic input of the sound card.
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics,
 .\" respectively.
-\fBgnuais\fP is a program that...
 .SH OPTIONS
-These programs follow the usual GNU command line syntax, with long
-options starting with two dashes (`-').
 A summary of options is included below.
-For a complete description, see the Info files.
 .TP
-.B \-h, \-\-help
-Show summary of options.
+.B \-c
+Specify config file to use. If not specified, it looks for gnuais.conf in the current folder, then /etc/gnuais.conf, /usr/local/etc/gnuais.conf and /usr/etc/gnuais.conf.
 .TP
-.B \-v, \-\-version
-Show version of program.
-.SH SEE ALSO
-.BR bar (1),
-.BR baz (1).
-.br
-The programs are documented fully by
-.IR "The Rise and Fall of a Fooish Bar" ,
-available via the Info system.
+.B \-f
+Runs
+.B gnuais
+in the background.
+.TP
+.B \-h
+Shows the short command use info.
+.TP
+.B \-l
+Runs with raw audio data from file
+.TP
+.B \-s
+Saves raw audio data to file
+.TP
+.B \-e
+Log level
+.TP
+.B \-o
+Specifies log destination: file,stdout
+.TP
+.B \-r
+Specifies log directory
+.TP
+.B \-n
+Specifies the name of the log
 .SH AUTHOR
-gnuais was written by <upstream author>.
+gnuais was written by <ruben.undheim@gmail.com>.
 .PP
-This manual page was written by unknown <ruben@beebeetle.com>,
+This manual page was written by Ruben Undheim <ruben.undheim@gmail.com>,
 for the Debian project (and may be used by others).
