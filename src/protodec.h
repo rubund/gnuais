@@ -21,7 +21,6 @@
 
 struct demod_state_t {
 	char chanid;
-	unsigned long cntr;
 	int state;
 	unsigned int offset;
 	int nskurr, npreamble, nstartsign, ndata, nstopsign;

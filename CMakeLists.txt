@@ -10,7 +10,7 @@ CHECK_INCLUDE_FILES(pulse/pulseaudio.h HAVE_PULSEAUDIO)
 set(CMAKE_C_FLAGS "-g -Wall -O2")
 
 if(NOT HAVE_ALSA)
-    MESSAGE(FATAL_ERROR "The development files for ALSA are required - libasound-dev")
+	MESSAGE(FATAL_ERROR "The development files for ALSA are required - libasound-dev")
 endif(NOT HAVE_ALSA)
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
