@@ -447,9 +447,9 @@ static gboolean configure_event(GtkWidget * widget,
 			   widget->allocation.width,
 			   widget->allocation.height);
 
-	gdk_draw_rgb_image(pixmap, widget->style->fg_gc[GTK_STATE_NORMAL],
-			   0, 0, mapcoords.mapwidth, mapcoords.mapheight,
-			   GDK_RGB_DITHER_NORMAL, pixels, rowstride);
+	//gdk_draw_rgb_image(pixmap, widget->style->fg_gc[GTK_STATE_NORMAL],
+	//		   0, 0, mapcoords.mapwidth, mapcoords.mapheight,
+	//		   GDK_RGB_DITHER_NORMAL, pixels, rowstride);
 
 	drawboats(widget);
 
@@ -605,37 +605,37 @@ int main(int argc, char **argv)
 	    (threadwidgets *) malloc(sizeof(threadwidgets));
 
 	g_type_init();
-	map = gdk_pixbuf_new_from_file(mapfilename, 0);
-	if (!map) {
-		printf
-		    ("Can't open mapfile. Please stay in a directory with a image file called map.png\n");
-		exit(-1);
-	}
-	mapcoords.mapwidth = gdk_pixbuf_get_width(map);
-	mapcoords.mapheight = gdk_pixbuf_get_height(map);
+	//map = gdk_pixbuf_new_from_file(mapfilename, 0);
+	//if (!map) {
+	//	printf
+	//	    ("Can't open mapfile. Please stay in a directory with a image file called map.png\n");
+	//	exit(-1);
+	//}
+	//mapcoords.mapwidth = gdk_pixbuf_get_width(map);
+	//mapcoords.mapheight = gdk_pixbuf_get_height(map);
 
-	int strl = strlen(mapfilename);
-	strncpy(cbrfilename, mapfilename, strl - 3);
-	cbrfilename[strl - 3] = 'c';
-	cbrfilename[strl - 2] = 'b';
-	cbrfilename[strl - 1] = 'r';
-	cbrfilename[strl] = 0;
-	FILE *cbrfile = fopen(cbrfilename, "r");
-	if (cbrfile == NULL) {
-		printf
-		    ("Could not find calibrate file for map!!! You should make a file called %s in the same folder as the map.\n",
-		     cbrfilename);
-		mapcoords.topleftlon = 0;
-		mapcoords.topleftlat = 1;
-		mapcoords.botrightlon = 1;
-		mapcoords.botrightlat = 0;
-	} else {
-		fscanf(cbrfile, "%lf", &mapcoords.topleftlon);
-		fscanf(cbrfile, "%lf", &mapcoords.topleftlat);
-		fscanf(cbrfile, "%lf", &mapcoords.botrightlon);
-		fscanf(cbrfile, "%lf", &mapcoords.botrightlat);
-		fclose(cbrfile);
-	}
+	//int strl = strlen(mapfilename);
+	//strncpy(cbrfilename, mapfilename, strl - 3);
+	//cbrfilename[strl - 3] = 'c';
+	//cbrfilename[strl - 2] = 'b';
+	//cbrfilename[strl - 1] = 'r';
+	//cbrfilename[strl] = 0;
+	//FILE *cbrfile = fopen(cbrfilename, "r");
+	//if (cbrfile == NULL) {
+	//	printf
+	//	    ("Could not find calibrate file for map!!! You should make a file called %s in the same folder as the map.\n",
+	//	     cbrfilename);
+	//	mapcoords.topleftlon = 0;
+	//	mapcoords.topleftlat = 1;
+	//	mapcoords.botrightlon = 1;
+	//	mapcoords.botrightlat = 0;
+	//} else {
+	//	fscanf(cbrfile, "%lf", &mapcoords.topleftlon);
+	//	fscanf(cbrfile, "%lf", &mapcoords.topleftlat);
+	//	fscanf(cbrfile, "%lf", &mapcoords.botrightlon);
+	//	fscanf(cbrfile, "%lf", &mapcoords.botrightlat);
+	//	fclose(cbrfile);
+	//}
 	g_thread_init(NULL);
 	gdk_threads_init();
 	gdk_threads_enter();
@@ -656,9 +656,9 @@ int main(int argc, char **argv)
 	button2 = gtk_button_new_with_label("Tull");
 
 	drawing_area = gtk_drawing_area_new();
-	gtk_widget_set_size_request(GTK_WIDGET(drawing_area),
-				    mapcoords.mapwidth,
-				    mapcoords.mapheight);
+	//gtk_widget_set_size_request(GTK_WIDGET(drawing_area),
+	//			    mapcoords.mapwidth,
+	//			    mapcoords.mapheight);
 	g_signal_connect(G_OBJECT(drawing_area), "expose_event",
 			 G_CALLBACK(expose_event), NULL);
 	g_signal_connect(G_OBJECT(drawing_area), "configure_event",
