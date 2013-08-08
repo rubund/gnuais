@@ -26,6 +26,7 @@
 #include <time.h>
 #include <math.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <osm-gps-map.h>
 
 
 #include <string.h>		/* String function definitions */
@@ -596,6 +597,7 @@ int main(int argc, char **argv)
 	GtkWidget *label4;
 	GtkWidget *frame;
 	GtkWidget *vboxmenu;
+	GtkWidget *osmmap;
 
 
 
@@ -671,9 +673,17 @@ int main(int argc, char **argv)
 				       (scrolled_window),
 				       GTK_POLICY_AUTOMATIC,
 				       GTK_POLICY_AUTOMATIC);
+	//gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW
+	//				      (scrolled_window),
+	//				      drawing_area);
+	osmmap = osm_gps_map_new ();
+	int tmp;
+	tmp = osm_gps_map_source_is_valid(OSM_GPS_MAP_SOURCE_OPENSTREETMAP);
+
+	
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW
 					      (scrolled_window),
-					      drawing_area);
+					      osmmap);
 
 	button = gtk_button_new_with_label("Change map");
 	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(hello),
@@ -735,6 +745,7 @@ int main(int argc, char **argv)
 	gtk_widget_show(vboxmenu);
 	gtk_widget_show(hbox);
 	gtk_widget_show(window);
+	gtk_widget_show(osmmap);
 
 	twidgets->drawing = drawing_area;
 	twidgets->textframe = NULL;
