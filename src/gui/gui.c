@@ -1,3 +1,23 @@
+/*
+ *	ais.c
+ *
+ *	(c) Ruben Undheim 2008
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <pthread.h>
@@ -6,6 +26,7 @@
 #include <time.h>
 #include <math.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <osm-gps-map.h>
 
 
 #include <string.h>		/* String function definitions */
@@ -576,6 +597,7 @@ int main(int argc, char **argv)
 	GtkWidget *label4;
 	GtkWidget *frame;
 	GtkWidget *vboxmenu;
+	GtkWidget *osmmap;
 
 
 
@@ -651,9 +673,17 @@ int main(int argc, char **argv)
 				       (scrolled_window),
 				       GTK_POLICY_AUTOMATIC,
 				       GTK_POLICY_AUTOMATIC);
+	//gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW
+	//				      (scrolled_window),
+	//				      drawing_area);
+	osmmap = osm_gps_map_new ();
+	int tmp;
+	tmp = osm_gps_map_source_is_valid(OSM_GPS_MAP_SOURCE_OPENSTREETMAP);
+
+	
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW
 					      (scrolled_window),
-					      drawing_area);
+					      osmmap);
 
 	button = gtk_button_new_with_label("Change map");
 	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(hello),
@@ -715,6 +745,7 @@ int main(int argc, char **argv)
 	gtk_widget_show(vboxmenu);
 	gtk_widget_show(hbox);
 	gtk_widget_show(window);
+	gtk_widget_show(osmmap);
 
 	twidgets->drawing = drawing_area;
 	twidgets->textframe = NULL;
