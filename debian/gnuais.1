@@ -25,14 +25,14 @@ This manual page documents briefly the
 .B gnuais
 command.
 .PP
-\fBgnuais\fP is a tool for demodulating and decoding AIS messages using the line/mic input of the sound card.
+\fBgnuais\fP is a tool for demodulating and decoding AIS messages using the line/mic input of the sound card. Connect the discriminator output of a VHF receiver tuned to either 161.975 MHz or 162.075 MHz to the line/mic input. Then run gnuais with no options or with some of the options described below. 
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics,
 .\" respectively.
 .SH OPTIONS
 A summary of options is included below.
 .TP
-.B \-c
+.B \-c <filename>
 Specify config file to use. If not specified, it looks for gnuais.conf in the current folder, then /etc/gnuais.conf, /usr/local/etc/gnuais.conf and /usr/etc/gnuais.conf.
 .TP
 .B \-f
@@ -43,23 +43,23 @@ in the background.
 .B \-h
 Shows the short command use info.
 .TP
-.B \-l
+.B \-l <filename>
 Runs with raw audio data from file
 .TP
-.B \-s
+.B \-s <filename>
 Saves raw audio data to file
 .TP
-.B \-e
-Log level
+.B \-e <level>
+Log level: INFO, DEBUG, NOTICE, WARNING, ERR, CRIT, ALERT, EMERG
 .TP
-.B \-o
-Specifies log destination: file,stdout
+.B \-o <dest>
+Log destination: none, file, stderr, syslog.
 .TP
-.B \-r
-Specifies log directory
+.B \-r <dir>
+Log directory
 .TP
-.B \-n
-Specifies the name of the log
+.B \-n <name>
+Name of the log
 .SH AUTHOR
 gnuais was written by <ruben.undheim@gmail.com>.
 .PP
