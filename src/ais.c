@@ -38,6 +38,7 @@
 #include "out_mysql.h"
 #include "out_json.h"
 #include "cache.h"
+#include "ipc.h"
 #ifdef HAVE_PULSEAUDIO
 #include "pulseaudio.h"
 #endif
@@ -193,6 +194,10 @@ int main(int argc, char *argv[])
 			hlog(LOG_DEBUG, "Deleting data older than %d seconds", mysql_oldlimit);
 	}
 #endif
+
+	if(gnuais_ipc_init() != 0){
+		hlog(LOG_ERR, "Could not open Unix Domain Socket");
+	}
 	
 	hlog(LOG_NOTICE, "Started");
 	
@@ -252,6 +257,8 @@ int main(int argc, char *argv[])
 		fclose(sound_out_fd);
 	
 	hfree(buffer);
+
+	gnuais_ipc_deinit();
 	
 	if (serial)
 		serial_close(serial);
