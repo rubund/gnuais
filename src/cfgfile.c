@@ -394,6 +394,8 @@ int read_cfgfile(char *f, struct cfgcmd *cmds)
 				}
 			}
 		}
+		hfree(conf_home_folder_name);
+		hfree(conf_home_folder);
 	}
     if(fp == NULL){
 		hlog(LOG_ERR, "No configuration file found! Running with the default configuration. You should create a file ~/.gnuais/config. There should be an example to use in the source archive called gnuais.conf-example");
