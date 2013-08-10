@@ -27,10 +27,75 @@
 
 #include "cfgfile.h"
 #include "hmalloc.h"
+#include "hlog.h"
 
 #ifdef DMALLOC
 #include <dmalloc.h>
 #endif
+
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+
+int cpfile(const char *to, const char *from)
+{
+	int fd_to, fd_from;
+	char buf[4096];
+	ssize_t nread;
+	int saved_errno;
+
+	fd_from = open(from, O_RDONLY);
+	if (fd_from < 0)
+		return -1;
+
+	fd_to = open(to, O_WRONLY | O_CREAT | O_EXCL, 0666);
+	if (fd_to < 0)
+		goto out_error;
+
+	while (nread = read(fd_from, buf, sizeof buf), nread > 0)
+	{
+	  char *out_ptr = buf;
+	  ssize_t nwritten;
+
+	  do {
+		  nwritten = write(fd_to, out_ptr, nread);
+
+		  if (nwritten >= 0)
+		  {
+		  nread -= nwritten;
+		  out_ptr += nwritten;
+	  }
+		  else if (errno != EINTR)
+		  {
+		  goto out_error;
+	  }
+	  } while (nread > 0);
+  }
+
+	if (nread == 0)
+	{
+	  if (close(fd_to) < 0)
+	  {
+		fd_to = -1;
+		goto out_error;
+	}
+	  close(fd_from);
+
+	  /* Success! */
+	  return 0;
+  }
+
+out_error:
+	saved_errno = errno;
+
+	close(fd_from);
+	if (fd_to >= 0)
+		close(fd_to);
+
+	errno = saved_errno;
+	return -1;
+}
 
  /* ***************************************************************** */
 
@@ -267,34 +332,70 @@ int cmdparse(struct cfgcmd *cmds, char *cmdline)
 int read_cfgfile(char *f, struct cfgcmd *cmds)
 {
 	FILE *fp;
+	FILE *tmp_file;
 	char line[CFGLINE_LEN];
 	int ret, n = 0;
-	
+	char *conf_home_folder;
+
 	fp = fopen(f, "r");
     if(fp == NULL){
-        fp = fopen("/etc/gnuais.conf","r");
-    }
-    if(fp == NULL){
-        fp = fopen("/usr/local/etc/gnuais.conf","r");
-    }
-    if(fp == NULL){
-        fp = fopen("/usr/etc/gnuais.conf","r");
-    }
-    if(fp == NULL){
-		fprintf(stderr, "\nYOU WILL NEED TO CREATE A %s CONFIGURATION FILE.\nSEE THE EXAMPLE gnuais.conf-example IN THE SOURCE TREE. IT CAN BE PLACED IN /usr/local/etc/, /usr/etc/, /etc, THE WORKING DIRECTORY OR THE FILENAME CAN BE SPECIFIED WITH THE -c OPTION\n\n",f);//\nYou will have to make a gnuais.conf configuration file. The\n simples solution is to copy the ''gnuais.conf-example'' file from\n the source tree to ''gnuais.conf'' in your current directory.\n\n", f, strerror(errno));
-		return 1;
-	}
-	
-	while (fgets(line, CFGLINE_LEN, fp) != NULL) {
-		n++;
-		ret = cmdparse(cmds, line);
-		if (ret < 0) {
-			fprintf(stderr, "Problem in %s at line %d: %s\n", f, n, line);
-			fclose(fp);
-			return 2;
+		conf_home_folder = hstrdup(getenv("HOME"));	
+		conf_home_folder = str_append(conf_home_folder,"/.gnuais.conf");
+		fp = fopen(conf_home_folder,"r");
+		ret = 0;
+		if(fp == NULL){
+			tmp_file = fopen("/etc/gnuais.conf","r");	
+			if(tmp_file == NULL){
+				tmp_file = fopen("/usr/local/share/doc/gnuais/gnuais.conf-example","r");	
+				if(tmp_file == NULL){
+					tmp_file = fopen("/usr/share/doc/gnuais/gnuais.conf-example","r");	
+					if(tmp_file == NULL){
+						hlog(LOG_ERR,"No gnuais.conf-example found to be copied to ~/.gnuais.conf");
+					}
+					else {
+						hlog(LOG_NOTICE, "Using gnuais.conf-example as a starting point for ~/.gnuais.conf...");
+						ret = cpfile(conf_home_folder,"/usr/share/doc/gnuais/gnuais.conf-example");
+						if(ret == -1) hlog(LOG_ERR, "Could not copy configuration file to the home folder");
+						else hlog(LOG_NOTICE, "DONE creating configuration file (~/.gnuais.conf)");
+					}
+				}
+				else {
+					hlog(LOG_NOTICE, "Using gnuais.conf-example as a starting point for ~/.gnuais.conf...");
+					ret = cpfile(conf_home_folder,"/usr/local/share/doc/gnuais/gnuais.conf-example");
+					if(ret == -1) hlog(LOG_ERR, "Could not copy configuration file to the home folder");
+					else hlog(LOG_NOTICE, "DONE creating configuration file (~/.gnuais.conf)");
+				}
+			}
+			else {
+				hlog(LOG_WARNING, "gnuais does not use the configuration file /etc/gnuais.conf anymore");
+				hlog(LOG_WARNING, "It will be copied to your home directory ~/.gnuais.conf...");
+				ret = cpfile(conf_home_folder,"/etc/gnuais.conf");
+				if(ret == -1) hlog(LOG_ERR, "Could not copy configuration file from /etc/gnuais.conf to the home folder");
+				else hlog(LOG_NOTICE, "DONE");
+			}
+			if(ret != -1) {
+				fp = fopen(conf_home_folder,"r");
+				if(fp == NULL){
+					hlog(LOG_ERR, "Could not open configuration file after copying it to the home directory");
+				}
+			}
 		}
 	}
-	fclose(fp);
+    if(fp == NULL){
+		hlog(LOG_ERR, "No configuration file found! Running with the default configuration. You should create a file ~/.gnuais.conf. There should be an example to use in the source archive called gnuais.conf-example");
+	}
+	else {
+		while (fgets(line, CFGLINE_LEN, fp) != NULL) {
+			n++;
+			ret = cmdparse(cmds, line);
+			if (ret < 0) {
+				fprintf(stderr, "Problem in %s at line %d: %s\n", f, n, line);
+				fclose(fp);
+				return 2;
+			}
+		}
+		fclose(fp);
+	}
 	
 	return 0;
 }

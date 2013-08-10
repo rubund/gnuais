@@ -134,7 +134,6 @@ int main(int argc, char *argv[])
 	}
 #ifdef HAVE_PULSEAUDIO
 	if(sound_device != NULL && ((strcmp("pulse",sound_device) == 0) || (strcmp("pulseaudio",sound_device) == 0))){
-		printf("hsdkj\n");
 		if((pa_dev = pulseaudio_initialize()) == NULL){
 			hlog(LOG_CRIT, "Error opening pulseaudio device");
 			return -1;
