@@ -25,7 +25,6 @@ else()
 endif()
 
 install(TARGETS gnuais DESTINATION bin)
-install (FILES gnuais.conf DESTINATION /etc)
 
 #if(HAVE_GTK)
 add_subdirectory(gui)

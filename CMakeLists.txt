@@ -17,5 +17,6 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
+install(FILES gnuais.conf-example DESTINATION share/doc/gnuais)
 
 add_subdirectory(src)
