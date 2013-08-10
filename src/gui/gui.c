@@ -591,6 +591,7 @@ int main(int argc, char **argv)
 	GtkWidget *overviewframe;
 	GtkWidget *nmeaframe;
 	GtkWidget *settingsframe;
+	GtkWidget *mapframe;
 	GtkWidget *label;
 	GtkWidget *label2;
 	GtkWidget *label3;
@@ -667,12 +668,12 @@ int main(int argc, char **argv)
 			 G_CALLBACK(button_press_event), NULL);
 	gtk_widget_set_events(drawing_area, GDK_BUTTON_PRESS_MASK);
 
-	scrolled_window = gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_set_border_width(GTK_CONTAINER(scrolled_window), 10);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW
-				       (scrolled_window),
-				       GTK_POLICY_AUTOMATIC,
-				       GTK_POLICY_AUTOMATIC);
+	//scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+	//gtk_container_set_border_width(GTK_CONTAINER(scrolled_window), 10);
+	//gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW
+	//			       (scrolled_window),
+	//			       GTK_POLICY_AUTOMATIC,
+	//			       GTK_POLICY_AUTOMATIC);
 	//gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW
 	//				      (scrolled_window),
 	//				      drawing_area);
@@ -681,9 +682,9 @@ int main(int argc, char **argv)
 	tmp = osm_gps_map_source_is_valid(OSM_GPS_MAP_SOURCE_OPENSTREETMAP);
 
 	
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW
-					      (scrolled_window),
-					      osmmap);
+	//gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW
+	//				      (scrolled_window),
+	//				      osmmap);
 
 	button = gtk_button_new_with_label("Change map");
 	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(hello),
@@ -695,6 +696,8 @@ int main(int argc, char **argv)
 
 	settingsframe = gtk_frame_new(NULL);
 
+	mapframe = gtk_frame_new(NULL);
+
 	label = gtk_label_new("Map");
 
 	label2 = gtk_label_new("Overview");
@@ -703,9 +706,10 @@ int main(int argc, char **argv)
 
 	label4 = gtk_label_new("Settings");
 
+	gtk_container_set_border_width(GTK_CONTAINER(mapframe), 4);
 	notebook = gtk_notebook_new();
 	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(notebook), GTK_POS_TOP);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), scrolled_window,
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), mapframe,
 				 label);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), overviewframe,
 				 label2);
@@ -729,6 +733,10 @@ int main(int argc, char **argv)
 	gtk_container_add(GTK_CONTAINER(frame), vboxmenu);
 	gtk_box_pack_start(GTK_BOX(vboxmenu), button, 0, 1, 0);
 
+	gtk_container_add(GTK_CONTAINER(mapframe), osmmap);
+
+	gtk_widget_show(osmmap);
+	gtk_widget_show(mapframe);
 	gtk_widget_show(button);
 	gtk_widget_show(frame);
 	gtk_widget_show(drawing_area);
@@ -741,11 +749,10 @@ int main(int argc, char **argv)
 	gtk_widget_show(label2);
 	gtk_widget_show(label3);
 	gtk_widget_show(label4);
-	gtk_widget_show(scrolled_window);
+	//gtk_widget_show(scrolled_window);
 	gtk_widget_show(vboxmenu);
 	gtk_widget_show(hbox);
 	gtk_widget_show(window);
-	gtk_widget_show(osmmap);
 
 	twidgets->drawing = drawing_area;
 	twidgets->textframe = NULL;
