@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <osm-gps-map.h>
 
@@ -35,6 +37,7 @@
 #include <errno.h>		/* Error number definitions */
 #include <termios.h>		/* POSIX terminal control definitions */
 
+#define UNIX_PATH_MAX 100
 #define DBG(x)
 #define MAXSHIPS 1000
 
@@ -356,7 +359,7 @@ void *threaden(void *args)
 	shipdata shipd;
 	GtkWidget *widget = GTK_WIDGET(t->drawing);
 	GtkWidget *nmeatext = GTK_WIDGET(t->textframe);
-	int fd = initserial("/tmp/gnuaispipe");
+	//int fd = initserial("/tmp/gnuaispipe");
 	char nmeabuffer[201];
 	int lettersread;
 	int previoussentence = 0;
@@ -370,60 +373,85 @@ void *threaden(void *args)
 	int r = 0;
 	int m = 0;
 
+	struct sockaddr_un address;
+	int socket_fd, nbytes;
+	char buffer[256];
+
+	socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
+	if(socket_fd < 0) {
+		printf("socket() failed\n");
+		return;
+	}
+
+	memset(&address, 0, sizeof(struct sockaddr_un));
+
+	address.sun_family = AF_UNIX;
+	
+	snprintf(address.sun_path, UNIX_PATH_MAX,"/tmp/gnuais.socket");
+
+	if(connect(socket_fd,(struct sockaddr *) &address, sizeof(struct sockaddr_un)) != 0){
+		printf("connect() failed\n");
+		return;
+	}
+	
+
 	while (1) {
-		usleep(500000);
-		m = 0;
-		r = read(fd, nmeabuffer, 200);
-		nmeabuffer[r] = 0;
-		DBG(printf("<---- lest   %s  -------->\n", nmeabuffer));
-		tmp = 0;
+		nbytes = read(socket_fd, buffer, 256);
+		buffer[nbytes] = 0;
+		printf("Message from server: %s\n",buffer);
+	//	usleep(500000);
+	//	m = 0;
+	//	r = read(fd, nmeabuffer, 200);
+	//	nmeabuffer[r] = 0;
+	//	DBG(printf("<---- lest   %s  -------->\n", nmeabuffer));
+	//	tmp = 0;
 
-		while (nmeabuffer[m++] != '!') {
-			if (m > (r - 1)) {
-				break;
-			}
-		}
-		if (m > (r - 1))
-			continue;
-		m--;
+	//	while (nmeabuffer[m++] != '!') {
+	//		if (m > (r - 1)) {
+	//			break;
+	//		}
+	//	}
+	//	if (m > (r - 1))
+	//		continue;
+	//	m--;
 
-		if (nmeabuffer[m] != '!' || nmeabuffer[m + 1] != 'A' || nmeabuffer[m + 5] != 'M') {
-			continue;
-		}
-		kommas = 0;
-		for (k = 0; k < 20; k++) {
-			if (nmeabuffer[k + m] == ',')
-				kommas++;
-			if (kommas == 5)
-				break;
-		}
-		start = k + 1;
-		sentences = nmeabuffer[m + 7] - 0x30;
-		sentencenumb = nmeabuffer[m + 9] - 0x30;
-		if ((sentencenumb > 1)
-		    && ((previoussentence) != (sentencenumb - 1)))
-			continue;
-		if (sentencenumb == 1)
-			lettersread = 0;
-		for (j = 0; j < (r - start - m); j++) {
-			if (nmeabuffer[m + j + start] == ',')
-				break;
-			aisline[lettersread] = nmeabuffer[m + j + start];
-			lettersread++;
-		}
+	//	if (nmeabuffer[m] != '!' || nmeabuffer[m + 1] != 'A' || nmeabuffer[m + 5] != 'M') {
+	//		continue;
+	//	}
+	//	kommas = 0;
+	//	for (k = 0; k < 20; k++) {
+	//		if (nmeabuffer[k + m] == ',')
+	//			kommas++;
+	//		if (kommas == 5)
+	//			break;
+	//	}
+	//	start = k + 1;
+	//	sentences = nmeabuffer[m + 7] - 0x30;
+	//	sentencenumb = nmeabuffer[m + 9] - 0x30;
+	//	if ((sentencenumb > 1)
+	//	    && ((previoussentence) != (sentencenumb - 1)))
+	//		continue;
+	//	if (sentencenumb == 1)
+	//		lettersread = 0;
+	//	for (j = 0; j < (r - start - m); j++) {
+	//		if (nmeabuffer[m + j + start] == ',')
+	//			break;
+	//		aisline[lettersread] = nmeabuffer[m + j + start];
+	//		lettersread++;
+	//	}
 
-		if (sentencenumb >= sentences) {
-			aisline[lettersread] = 0;
-			aisdecode(aisline, &shipd);
-		}
+	//	if (sentencenumb >= sentences) {
+	//		aisline[lettersread] = 0;
+	//		aisdecode(aisline, &shipd);
+	//	}
 
-		previoussentence = sentencenumb;
-		if (shipd.type != 1 && shipd.type != 2 && shipd.type != 3
-		    && shipd.type != 4)
-			continue;
+	//	previoussentence = sentencenumb;
+	//	if (shipd.type != 1 && shipd.type != 2 && shipd.type != 3
+	//	    && shipd.type != 4)
+	//		continue;
 
-		updateship(shipd.mmsi, shipd.longitude, shipd.latitude,
-			   shipd.heading, shipd.course, shipd.type);
+	//	updateship(shipd.mmsi, shipd.longitude, shipd.latitude,
+	//		   shipd.heading, shipd.course, shipd.type);
 
 		gdk_threads_enter();
 		configure_event(widget, NULL);	// redraw map    

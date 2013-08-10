@@ -28,6 +28,8 @@ if (GTK2_FOUND AND GTHREAD_FOUND AND OSMGPSMAP_FOUND)
 	target_link_libraries(gnuaisgui ${GTHREAD_LIBRARIES})
 	target_link_libraries(gnuaisgui osmgpsmap)
 
+	target_link_libraries(gnuaisgui pthread)
+
 	include_directories(${GTK2_INCLUDE_DIRS} /usr/include/osmgpsmap)
 
 	install(TARGETS gnuaisgui DESTINATION bin)
