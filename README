@@ -1,8 +1,7 @@
 
-The configuration can be found in the file gnuais.conf. GNU AIS looks for this file
-first in the working directory, then /etc/gnuais.conf and then /usr/local/etc/gnuais.conf.
+The first time GNU AIS is started, a configuration file is created in ~/.gnuais/config.
 An alternative configuration file can be specified with the command line argument -c <filename>.
-It is explained in gnuais.conf how you will have to edit it in order to fullfill your wishes.
+It is explained in ~/.gnuais/config how you will have to edit it in order to fullfill your wishes.
 
 You will also have to create a table in the database if the mysql option is desired:
 
