@@ -1,0 +1,2 @@
+?package(gnuaisgui):needs="X11" section="Applications/Science/Geoscience"\
+  title="gnuaisgui" command="/usr/bin/gnuaisgui"

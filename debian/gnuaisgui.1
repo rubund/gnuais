@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH GNUAIS SECTION "August 07, 2013"
+.TH GNUAISGUI SECTION "August 10, 2013"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -16,52 +16,22 @@
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-gnuais \- GNU Automatic Identification System receiver
+gnuaisgui \- GUI for gnuais 
 .SH SYNOPSIS
-.B gnuais
-.RI [ options ] 
+.B gnuaisgui
 .SH DESCRIPTION
 This manual page documents briefly the
-.B gnuais
-command.
+.B gnuaisgui
+program.
 .PP
-\fBgnuais\fP is a tool for demodulating and decoding AIS messages using the line/mic input of the sound card. Connect the discriminator output of a VHF receiver tuned to either 161.975 MHz or 162.075 MHz to the line/mic input. Then run gnuais with no options or with some of the options described below. 
+\fBgnuais\fP is a tool for demodulating and decoding AIS messages using the line/mic input of the sound card. This GUI plots the vessels on a map from OpenStreetMap. 
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics,
 .\" respectively.
 .SH OPTIONS
-A summary of options is included below.
-.TP
-.B \-c <filename>
-Specify config file to use. If not specified, it looks for gnuais.conf in the current folder, then /etc/gnuais.conf, /usr/local/etc/gnuais.conf and /usr/etc/gnuais.conf.
-.TP
-.B \-f
-Runs
-.B gnuais
-in the background.
-.TP
-.B \-h
-Shows the short command use info.
-.TP
-.B \-l <filename>
-Runs with raw audio data from file
-.TP
-.B \-s <filename>
-Saves raw audio data to file
-.TP
-.B \-e <level>
-Log level: INFO, DEBUG, NOTICE, WARNING, ERR, CRIT, ALERT, EMERG
-.TP
-.B \-o <dest>
-Log destination: none, file, stderr, syslog.
-.TP
-.B \-r <dir>
-Log directory
-.TP
-.B \-n <name>
-Name of the log
+There are no command line options.
 .SH SEE ALSO
-.BR gnuaisgui (1),
+.BR gnuais (1),
 .br
 .SH AUTHOR
 gnuais was written by <ruben.undheim@gmail.com>.
