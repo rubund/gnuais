@@ -37,11 +37,15 @@ struct sockaddr_un address;
 static pthread_t ipc_th;
 
 static void gnuais_ipc_socketlistener(void *asdf){
-	int connection_fd;
+	int connection_fd, nbytes;
+	char buffer[256];
 	socklen_t address_length;
 	hlog(LOG_INFO,"IPC thread started");
 	while((connection_fd = accept(socket_fd, (struct sockaddr *) &address, &address_length)) > - 1){
 		hlog(LOG_INFO,"Client connected to IPC socket");
+		nbytes = snprintf(buffer,256, "Hello from server");
+		buffer[nbytes] = 0;
+		nbytes = write(connection_fd, buffer, nbytes);
 	}
 	hlog(LOG_INFO,"Done in IPC thread");
 }
@@ -61,8 +65,6 @@ void gnuais_ipc_deinit(){
 }
 
 int gnuais_ipc_init(){
-	int connection_fd;
-	pid_t child;
 
 	socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
 	if(socket_fd < 0){
