@@ -330,7 +330,7 @@ int read_config(void)
 	/* mycall is only applied when running for the first time. */
 	if (!mycall) {
 		mycall = hstrdup("NOCALLDEFINED"); 
-		//hlog(LOG_CRIT, "Config: mycall is not defined.");
+		hlog(LOG_WARNING, "Config: mycall is not defined - using: %s.",mycall);
 		//failed = 1;
 	} else if (!valid_aprsis_call(mycall)) {
 		hlog(LOG_CRIT, "Config: mycall '%s' is not valid.", mycall);
@@ -338,8 +338,8 @@ int read_config(void)
 	}
 	
 	if (!myemail) {
-		mycall = hstrdup("notdefined@notdefined"); 
-		//hlog(LOG_WARNING, "Config: myemail is not defined.");
+		myemail = hstrdup("notdefined@notdefined"); 
+		hlog(LOG_WARNING, "Config: myemail is not defined - using: %s.",myemail);
 		//failed = 1;
 	}
 	

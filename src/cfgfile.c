@@ -382,7 +382,7 @@ int read_cfgfile(char *f, struct cfgcmd *cmds)
 		}
 	}
     if(fp == NULL){
-		hlog(LOG_ERR, "No configuration file found! Running with the default configuration. You should create a file ~/.gnuais.conf. There should be an example to use in the source archive");
+		hlog(LOG_ERR, "No configuration file found! Running with the default configuration. You should create a file ~/.gnuais.conf. There should be an example to use in the source archive called gnuais.conf-example");
 	}
 	else {
 		while (fgets(line, CFGLINE_LEN, fp) != NULL) {
