@@ -342,8 +342,9 @@ int read_cfgfile(char *f, struct cfgcmd *cmds)
 		conf_home_folder = hstrdup(getenv("HOME"));	
 		conf_home_folder = str_append(conf_home_folder,"/.gnuais.conf");
 		fp = fopen(conf_home_folder,"r");
+		ret = 0;
 		if(fp == NULL){
-			tmp_file = fopen("/usr/local/share/doc/gnuais/gnuais.conf-example","r");	
+			tmp_file = fopen("/etc/gnuais.conf","r");	
 			if(tmp_file == NULL){
 				tmp_file = fopen("/usr/local/share/doc/gnuais/gnuais.conf-example","r");	
 				if(tmp_file == NULL){
@@ -352,14 +353,14 @@ int read_cfgfile(char *f, struct cfgcmd *cmds)
 						hlog(LOG_ERR,"No gnuais.conf-example found to be copied to ~/.gnuais.conf");
 					}
 					else {
-						hlog(LOG_NOTICE, "Using gnuais.conf-example as a starting poing for ~/.gnuais.conf...");
+						hlog(LOG_NOTICE, "Using gnuais.conf-example as a starting point for ~/.gnuais.conf...");
 						ret = cpfile(conf_home_folder,"/usr/share/doc/gnuais/gnuais.conf-example");
 						if(ret == -1) hlog(LOG_ERR, "Could not copy configuration file to the home folder");
 						else hlog(LOG_NOTICE, "DONE creating configuration file (~/.gnuais.conf)");
 					}
 				}
 				else {
-					hlog(LOG_NOTICE, "Using gnuais.conf-example as a starting poing for ~/.gnuais.conf...");
+					hlog(LOG_NOTICE, "Using gnuais.conf-example as a starting point for ~/.gnuais.conf...");
 					ret = cpfile(conf_home_folder,"/usr/local/share/doc/gnuais/gnuais.conf-example");
 					if(ret == -1) hlog(LOG_ERR, "Could not copy configuration file to the home folder");
 					else hlog(LOG_NOTICE, "DONE creating configuration file (~/.gnuais.conf)");
@@ -367,15 +368,17 @@ int read_cfgfile(char *f, struct cfgcmd *cmds)
 			}
 			else {
 				hlog(LOG_WARNING, "gnuais does not use the configuration file /etc/gnuais.conf anymore");
-				hlog(LOG_WARNING, "It will be copied to your home folder ~/.gnuais.conf...");
+				hlog(LOG_WARNING, "It will be copied to your home directory ~/.gnuais.conf...");
 				ret = cpfile(conf_home_folder,"/etc/gnuais.conf");
 				if(ret == -1) hlog(LOG_ERR, "Could not copy configuration file from /etc/gnuais.conf to the home folder");
 				else hlog(LOG_NOTICE, "DONE");
 			}
-		fp = fopen(conf_home_folder,"r");
-		if(fp == NULL){
-			hlog(LOG_ERR, "Could not open configuration file after copying it to the home folder");
-		}
+			if(ret != -1) {
+				fp = fopen(conf_home_folder,"r");
+				if(fp == NULL){
+					hlog(LOG_ERR, "Could not open configuration file after copying it to the home directory");
+				}
+			}
 		}
 	}
     if(fp == NULL){
