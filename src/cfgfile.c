@@ -24,6 +24,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 #include "cfgfile.h"
 #include "hmalloc.h"
@@ -336,44 +337,52 @@ int read_cfgfile(char *f, struct cfgcmd *cmds)
 	char line[CFGLINE_LEN];
 	int ret, n = 0;
 	char *conf_home_folder;
+	char *conf_home_folder_name;
 
 	tmp_file = fopen("/etc/gnuais.conf","r");	
 	if(tmp_file != NULL){
-		hlog(LOG_WARNING, "gnuais does not use the configuration file /etc/gnuais.conf anymore. It is now in your home directory as .gnuais.conf. /etc/gnuais.conf should be deleted to avoid confusion");
+		hlog(LOG_WARNING, "gnuais does not use the configuration file /etc/gnuais.conf anymore. It is now in your home directory as .gnuais/config. /etc/gnuais.conf should be deleted to avoid confusion");
 		fclose(tmp_file);
 	}
 	fp = fopen(f, "r");
     if(fp == NULL){
-		conf_home_folder = hstrdup(getenv("HOME"));	
-		conf_home_folder = str_append(conf_home_folder,"/.gnuais.conf");
+		conf_home_folder_name = hstrdup(getenv("HOME"));	
+		conf_home_folder_name = str_append(conf_home_folder_name,"/.gnuais");
+		conf_home_folder = hstrdup(conf_home_folder_name);
+		conf_home_folder = str_append(conf_home_folder,"/config");
 		fp = fopen(conf_home_folder,"r");
-		ret = 0;
 		if(fp == NULL){
+			hlog(LOG_INFO,"Creating directory: ~/.gnuais/");
+			ret = mkdir(conf_home_folder_name, 0777); 
+			if(ret != 0){
+				hlog(LOG_INFO,"~/.gnuais/ already exists");
+			}
 			tmp_file = fopen("/etc/gnuais.conf","r");	
+			ret = 0;
 			if(tmp_file == NULL){
 				tmp_file = fopen("/usr/local/share/doc/gnuais/gnuais.conf-example","r");	
 				if(tmp_file == NULL){
 					tmp_file = fopen("/usr/share/doc/gnuais/gnuais.conf-example","r");	
 					if(tmp_file == NULL){
-						hlog(LOG_ERR,"No gnuais.conf-example found to be copied to ~/.gnuais.conf");
+						hlog(LOG_ERR,"No gnuais.conf-example found to be copied to ~/.gnuais/config");
 					}
 					else {
-						hlog(LOG_NOTICE, "Using gnuais.conf-example as a starting point for ~/.gnuais.conf...");
+						hlog(LOG_NOTICE, "Using gnuais.conf-example as a starting point for ~/.gnuais/config...");
 						ret = cpfile(conf_home_folder,"/usr/share/doc/gnuais/gnuais.conf-example");
 						if(ret == -1) hlog(LOG_ERR, "Could not copy configuration file to the home folder");
-						else hlog(LOG_NOTICE, "DONE creating configuration file (~/.gnuais.conf). You should edit this file manually!");
+						else hlog(LOG_NOTICE, "DONE creating configuration file (~/.gnuais/config). You should edit this file manually!");
 					}
 				}
 				else {
-					hlog(LOG_NOTICE, "Using gnuais.conf-example as a starting point for ~/.gnuais.conf...");
+					hlog(LOG_NOTICE, "Using gnuais.conf-example as a starting point for ~/.gnuais/config...");
 					ret = cpfile(conf_home_folder,"/usr/local/share/doc/gnuais/gnuais.conf-example");
 					if(ret == -1) hlog(LOG_ERR, "Could not copy configuration file to the home folder");
-					else hlog(LOG_NOTICE, "DONE creating configuration file (~/.gnuais.conf). You should edit this file manually!");
+					else hlog(LOG_NOTICE, "DONE creating configuration file (~/.gnuais/config). You should edit this file manually!");
 				}
 			}
 			else {
-				hlog(LOG_WARNING, "/etc/gnuais.conf found, but no ~/.gnuais.conf found.");
-				hlog(LOG_WARNING, "It will be copied to your home directory (~/.gnuais.conf)...");
+				hlog(LOG_WARNING, "/etc/gnuais.conf found, but no ~/.gnuais/config found.");
+				hlog(LOG_WARNING, "It will be copied to your home directory (~/.gnuais/config)...");
 				ret = cpfile(conf_home_folder,"/etc/gnuais.conf");
 				if(ret == -1) hlog(LOG_ERR, "Could not copy configuration file from /etc/gnuais.conf to your home directory");
 				else hlog(LOG_NOTICE, "DONE");
@@ -387,7 +396,7 @@ int read_cfgfile(char *f, struct cfgcmd *cmds)
 		}
 	}
     if(fp == NULL){
-		hlog(LOG_ERR, "No configuration file found! Running with the default configuration. You should create a file ~/.gnuais.conf. There should be an example to use in the source archive called gnuais.conf-example");
+		hlog(LOG_ERR, "No configuration file found! Running with the default configuration. You should create a file ~/.gnuais/config. There should be an example to use in the source archive called gnuais.conf-example");
 	}
 	else {
 		while (fgets(line, CFGLINE_LEN, fp) != NULL) {
