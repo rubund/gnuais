@@ -322,7 +322,8 @@ int read_config(void)
 		logdir = hstrdup(log_dir);	
 	}
 	else if(!logdir) { /* Using current directory as default if not given neither in config file or command line */
-		hlog(LOG_WARNING, "Config: logdir not defined. Using . as log directory");
+		if(log_dest == L_FILE)
+			hlog(LOG_WARNING, "Config: logdir not defined. Using . as log directory");
 		logdir = hstrdup(".");
 	}
 
