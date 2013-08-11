@@ -84,6 +84,8 @@ static GdkPixmap *pixmap = NULL;
 GdkPixbuf *map;
 ship *ships[MAXSHIPS];
 int numberofships = 0;
+int socket_fd;
+pthread_t thre;
 
 char mapfilename[100] = "map.png";
 
@@ -374,7 +376,7 @@ void *threaden(void *args)
 	int m = 0;
 
 	struct sockaddr_un address;
-	int socket_fd, nbytes;
+	int nbytes;
 	char buffer[256];
 
 	socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
@@ -395,8 +397,7 @@ void *threaden(void *args)
 	}
 	
 
-	while (1) {
-		nbytes = read(socket_fd, buffer, 256);
+	while (nbytes = read(socket_fd, buffer, 256)) {
 		buffer[nbytes] = 0;
 		printf("Message from server: %s\n",buffer);
 	//	usleep(500000);
@@ -457,6 +458,7 @@ void *threaden(void *args)
 		configure_event(widget, NULL);	// redraw map    
 		gdk_threads_leave();
 	}
+	printf("Done thread");
 }
 
 static gboolean configure_event(GtkWidget * widget,
@@ -606,7 +608,6 @@ static gboolean button_press_event(GtkWidget * widget,
 int main(int argc, char **argv)
 {
 	srand(time(0));
-	pthread_t thre;
 	char cbrfilename[100];
 
 	GtkWidget *window;
@@ -789,6 +790,11 @@ int main(int argc, char **argv)
 	gtk_main();
 	gdk_threads_leave();
 
+	shutdown(socket_fd,2);
+	if ((tmp = pthread_join(thre, NULL))) {
+		printf("pthread_join of threaden failed: %s\n", strerror(tmp));
+		return;
+	}
 	return 0;
 
 }

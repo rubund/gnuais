@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
+#include <signal.h>
 
 #include "ipc.h"
 #include "hlog.h"
@@ -60,7 +61,12 @@ int gnuais_ipc_startthread(){
 }
 
 void gnuais_ipc_deinit(){
-	close(socket_fd);
+	int ret;
+	shutdown(socket_fd,2);
+	if ((ret = pthread_join(ipc_th, NULL))) {
+		hlog(LOG_CRIT, "pthread_join of gnuais_ipc_socketlistener failed: %s", strerror(ret));
+		return;
+	}
 	unlink("/tmp/gnuais.socket");
 }
 
