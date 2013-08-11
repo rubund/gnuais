@@ -41,6 +41,7 @@
 #define DBG(x)
 #define MAXSHIPS 1000
 
+int changemap(GtkWidget * drawing_area, char *filename);
 
 typedef struct {
 	GtkWidget *drawing;
@@ -106,7 +107,6 @@ unsigned int pickone(char *r_buffer, int pos, int len)
 
 void type1(char *r_buffer, int lengde, shipdata * data)
 {
-	int i, j;
 	unsigned int mmsi = pickone(r_buffer, 8, 30);
 	int longitude = pickone(r_buffer, 61, 28);
 	if (((longitude >> 27) & 1) == 1)
@@ -135,14 +135,13 @@ void type1(char *r_buffer, int lengde, shipdata * data)
 
 void type4(char *r_buffer, int lengde, shipdata * data)
 {
-	int i, j;
 	unsigned int mmsi = pickone(r_buffer, 8, 30);
-	unsigned int year = pickone(r_buffer, 40, 12);
-	unsigned int month = pickone(r_buffer, 52, 4);
-	unsigned int day = pickone(r_buffer, 56, 5);
-	unsigned int hour = pickone(r_buffer, 61, 5);
-	unsigned int minute = pickone(r_buffer, 66, 6);
-	unsigned int second = pickone(r_buffer, 72, 6);
+	//unsigned int year = pickone(r_buffer, 40, 12);
+	//unsigned int month = pickone(r_buffer, 52, 4);
+	//unsigned int day = pickone(r_buffer, 56, 5);
+	//unsigned int hour = pickone(r_buffer, 61, 5);
+	//unsigned int minute = pickone(r_buffer, 66, 6);
+	//unsigned int second = pickone(r_buffer, 72, 6);
 	int longitude = pickone(r_buffer, 79, 28);
 	if (((longitude >> 27) & 1) == 1)
 		longitude |= 0xF0000000;
@@ -158,7 +157,7 @@ void type4(char *r_buffer, int lengde, shipdata * data)
 
 void type5(char *r_buffer, int lengde, shipdata * data)
 {
-	int i, j;
+	int i;
 	unsigned int mmsi = pickone(r_buffer, 8, 30);
 	int start = 112;
 	char name[21];
@@ -219,7 +218,6 @@ void aisdecode(char *nmea, shipdata * data)
 
 
 	int lengde = i;
-	int j;
 
 	unsigned char type = pickone(r_buffer, 0, 6);
 	printf("(%d) ", type);
@@ -356,24 +354,22 @@ void updateship(int mmsi, double longitude, double latitude, float heading,
 void *threaden(void *args)
 {
 	threadwidgets *t = (threadwidgets *) args;
-	int x, y, i;
-	float theta;
-	shipdata shipd;
+	//int x, y, i;
+	//float theta;
+	//shipdata shipd;
 	GtkWidget *widget = GTK_WIDGET(t->drawing);
-	GtkWidget *nmeatext = GTK_WIDGET(t->textframe);
+	//GtkWidget *nmeatext = GTK_WIDGET(t->textframe);
 	//int fd = initserial("/tmp/gnuaispipe");
-	char nmeabuffer[201];
-	int lettersread;
-	int previoussentence = 0;
-	char aisline[500];
-	char tmp = 0;
-	int j, k;
-	int sentences;
-	int sentencenumb;
-	int start;
-	int kommas;
-	int r = 0;
-	int m = 0;
+	//char nmeabuffer[201];
+	//int lettersread;
+	//int previoussentence = 0;
+	//char aisline[500];
+	//char tmp = 0;
+	//int j, k;
+	//int sentences;
+	//int sentencenumb;
+	//int start;
+	//int kommas;
 
 	struct sockaddr_un address;
 	int nbytes;
@@ -382,7 +378,7 @@ void *threaden(void *args)
 	socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
 	if(socket_fd < 0) {
 		printf("socket() failed\n");
-		return;
+		return NULL;
 	}
 
 	memset(&address, 0, sizeof(struct sockaddr_un));
@@ -393,11 +389,11 @@ void *threaden(void *args)
 
 	if(connect(socket_fd,(struct sockaddr *) &address, sizeof(struct sockaddr_un)) != 0){
 		printf("connect() failed\n");
-		return;
+		return NULL;
 	}
 	
 
-	while (nbytes = read(socket_fd, buffer, 256)) {
+	while ((nbytes = read(socket_fd, buffer, 256)) != 0) {
 		buffer[nbytes] = 0;
 		printf("Message from server: %s\n",buffer);
 	//	usleep(500000);
@@ -459,6 +455,7 @@ void *threaden(void *args)
 		gdk_threads_leave();
 	}
 	printf("Done thread");
+	return NULL;
 }
 
 static gboolean configure_event(GtkWidget * widget,
@@ -466,9 +463,9 @@ static gboolean configure_event(GtkWidget * widget,
 {
 	if (pixmap)
 		g_object_unref(pixmap);
-	guchar *pixels;
-	pixels = gdk_pixbuf_get_pixels(map);
-	int rowstride = gdk_pixbuf_get_rowstride(map);
+	//guchar *pixels;
+	//pixels = gdk_pixbuf_get_pixels(map);
+	//int rowstride = gdk_pixbuf_get_rowstride(map);
 	pixmap = gdk_pixmap_new(widget->window,
 				widget->allocation.width,
 				widget->allocation.height, -1);
@@ -548,6 +545,7 @@ void drawboats(GtkWidget * drawing_area)
 int changemap(GtkWidget * drawing_area, char *filename)
 {
 	char cbrfilename[100];
+	int ret;
 	map = gdk_pixbuf_new_from_file(filename, 0);
 	if (!map) {
 		printf
@@ -574,16 +572,21 @@ int changemap(GtkWidget * drawing_area, char *filename)
 		mapcoords.botrightlon = 1;
 		mapcoords.botrightlat = 0;
 	} else {
-		fscanf(cbrfile, "%lf", &mapcoords.topleftlon);
-		fscanf(cbrfile, "%lf", &mapcoords.topleftlat);
-		fscanf(cbrfile, "%lf", &mapcoords.botrightlon);
-		fscanf(cbrfile, "%lf", &mapcoords.botrightlat);
+		ret = fscanf(cbrfile, "%lf", &mapcoords.topleftlon);
+		if(ret == 0) return -1;
+		ret = fscanf(cbrfile, "%lf", &mapcoords.topleftlat);
+		if(ret == 0) return -1;
+		ret = fscanf(cbrfile, "%lf", &mapcoords.botrightlon);
+		if(ret == 0) return -1;
+		ret = fscanf(cbrfile, "%lf", &mapcoords.botrightlat);
+		if(ret == 0) return -1;
 		fclose(cbrfile);
 	}
 
 	gtk_widget_set_size_request(GTK_WIDGET(drawing_area),
 				    mapcoords.mapwidth,
 				    mapcoords.mapheight);
+	return 0;
 }
 
 static gboolean expose_event(GtkWidget * widget, GdkEventExpose * event)
@@ -608,14 +611,13 @@ static gboolean button_press_event(GtkWidget * widget,
 int main(int argc, char **argv)
 {
 	srand(time(0));
-	char cbrfilename[100];
+	//char cbrfilename[100];
 
 	GtkWidget *window;
-	GtkWidget *button, *button2;
+	GtkWidget *button;
 	GtkWidget *hbox;
 	GtkWidget *vbox;
 	GtkWidget *drawing_area;
-	GtkWidget *scrolled_window;
 	GtkWidget *notebook;
 	GtkWidget *overviewframe;
 	GtkWidget *nmeaframe;
@@ -682,8 +684,6 @@ int main(int argc, char **argv)
 	g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(destroy),
 			 NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(window), 0);
-
-	button2 = gtk_button_new_with_label("Tull");
 
 	drawing_area = gtk_drawing_area_new();
 	//gtk_widget_set_size_request(GTK_WIDGET(drawing_area),
@@ -793,7 +793,7 @@ int main(int argc, char **argv)
 	shutdown(socket_fd,2);
 	if ((tmp = pthread_join(thre, NULL))) {
 		printf("pthread_join of threaden failed: %s\n", strerror(tmp));
-		return;
+		return -1;
 	}
 	return 0;
 
