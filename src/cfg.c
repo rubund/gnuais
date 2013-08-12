@@ -455,7 +455,7 @@ void parse_cmdline(int argc, char *argv[])
 			break;
 		case '?':
 		case 'h':
-			fprintf(stderr, "%s", VERSTR);
+			fprintf(stderr, "%s\n", VERSTR);
 			failed = 1;
 	}
 	}
@@ -466,7 +466,7 @@ void parse_cmdline(int argc, char *argv[])
 	}
 	
 	if (failed) {
-		fputs(HELPS, stderr);
+		fprintf(stderr," %s",HELPS);
 		exit(failed);
 	}
 }
