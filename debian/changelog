@@ -1,8 +1,10 @@
-gnuais (0.2.8) unstable; urgency=low
+gnuais (0.2.8) precise; urgency=low
 
   * Various optimisation fixes 
   * Only write pid to file when forking to background
+  * Saving configuration file to home folder
   * Improved support for creating deb package
+  * OpenStreetMap added to gnuaisgui (not plotting any vessels yet)
 
  -- Ruben Undheim <ruben.undheim@gmail.com>  Wed, 07 Aug 2013 21:37:22 +0200
 
