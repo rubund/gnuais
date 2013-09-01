@@ -1,3 +1,10 @@
+gnuais (0.2.9a-ubuntu1) UNRELEASED; urgency=low
+
+  * Default config file location changed to ~/.config/gnuais/config
+  * 
+
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Sun, 01 Sep 2013 20:09:25 +0200
+
 gnuais (0.2.8) precise; urgency=low
 
   * Various optimisation fixes 
