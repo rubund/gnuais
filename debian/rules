@@ -11,3 +11,8 @@
 
 %:
 	dh  $@
+
+.PHONY: override_dh_strip
+override_dh_strip:
+	dh_strip -pgnuais --dbg-package=gnuais-dbg
+	dh_strip -pgnuaisgui --dbg-package=gnuaisgui-dbg
