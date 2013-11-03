@@ -54,6 +54,10 @@ void closedown(int sig)
 {
 	done = 1;
 }
+void brokenconnection(int sig)
+{
+	hlog(LOG_DEBUG,"There is a broken connection\n");
+}
 
 int main(int argc, char *argv[])
 {
@@ -107,6 +111,7 @@ int main(int argc, char *argv[])
 	
 	
 	signal(SIGINT, closedown);
+	signal(SIGPIPE, brokenconnection);
 	
 	/* initialize position cache for timed JSON AIS transmission */
 	if (uplink_config) {
