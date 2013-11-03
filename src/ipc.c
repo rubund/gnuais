@@ -119,7 +119,7 @@ struct ipc_state_t* gnuais_ipc_init(){
 }
 
 int ipc_write(struct ipc_state_t *ipc, char *buffer, int buflength){
-	printf("IPC buffer: %s\n",buffer);
+	hlog(LOG_DEBUG,"IPC buffer: %s\n",buffer);
 	int nbytes=0;
 	int i;
 	pthread_mutex_lock(&ipc_mut);
