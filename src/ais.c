@@ -54,6 +54,10 @@ void closedown(int sig)
 {
 	done = 1;
 }
+void brokenconnection(int sig)
+{
+	hlog(LOG_DEBUG,"There is a broken connection\n");
+}
 
 int main(int argc, char *argv[])
 {
@@ -67,6 +71,7 @@ int main(int argc, char *argv[])
 	int buffer_l;
 	int buffer_read;
 	struct serial_state_t *serial = NULL;
+	struct ipc_state_t *ipc = NULL;
 	struct receiver *rx_a = NULL;
 	struct receiver *rx_b = NULL;
 #ifdef HAVE_PULSEAUDIO
@@ -106,6 +111,7 @@ int main(int argc, char *argv[])
 	
 	
 	signal(SIGINT, closedown);
+	signal(SIGPIPE, brokenconnection);
 	
 	/* initialize position cache for timed JSON AIS transmission */
 	if (uplink_config) {
@@ -120,17 +126,23 @@ int main(int argc, char *argv[])
 	/* initialize serial port for NMEA output */
 	if (serial_port)
 		serial = serial_init();
+
+	/* initialize Unix domain socket for communication with gnuaisgui */
+	ipc = gnuais_ipc_init();
+	if(ipc == 0){
+		hlog(LOG_ERR, "Could not open Unix Domain Socket");
+	}
 	
 	/* initialize the AIS decoders */
 	if (sound_channels != SOUND_CHANNELS_MONO) {
 		hlog(LOG_DEBUG, "Initializing demodulator A");
-		rx_a = init_receiver('A', 2, 0);
+		rx_a = init_receiver('A', 2, 0,ipc);
 		hlog(LOG_DEBUG, "Initializing demodulator B");
-		rx_b = init_receiver('B', 2, 1);
+		rx_b = init_receiver('B', 2, 1,ipc);
 		channels = 2;
 	} else {
 		hlog(LOG_DEBUG, "Initializing demodulator A");
-		rx_a = init_receiver('A', 1, 0);
+		rx_a = init_receiver('A', 1, 0,ipc);
 		channels = 1;
 	}
 #ifdef HAVE_PULSEAUDIO
@@ -194,10 +206,6 @@ int main(int argc, char *argv[])
 			hlog(LOG_DEBUG, "Deleting data older than %d seconds", mysql_oldlimit);
 	}
 #endif
-
-	if(gnuais_ipc_init() != 0){
-		hlog(LOG_ERR, "Could not open Unix Domain Socket");
-	}
 	
 	hlog(LOG_NOTICE, "Started");
 	
@@ -258,7 +266,7 @@ int main(int argc, char *argv[])
 	
 	hfree(buffer);
 
-	gnuais_ipc_deinit();
+	gnuais_ipc_deinit(ipc);
 	
 	if (serial)
 		serial_close(serial);

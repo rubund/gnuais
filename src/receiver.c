@@ -33,6 +33,7 @@
 #include "cfg.h"
 #include "hmalloc.h"
 #include "filter.h"
+#include "ipc.h"
 
 
 static float coeffs[]={
@@ -48,7 +49,7 @@ static float coeffs[]={
 #define COEFFS_L 36 
 
 
-struct receiver *init_receiver(char name, int num_ch, int ch_ofs)
+struct receiver *init_receiver(char name, int num_ch, int ch_ofs, struct ipc_state_t *ipc)
 {
 	struct receiver *rx;
 
@@ -58,7 +59,7 @@ struct receiver *init_receiver(char name, int num_ch, int ch_ofs)
 	rx->filter = filter_init(COEFFS_L, coeffs);
 
 	rx->decoder = hmalloc(sizeof(struct demod_state_t));
-	protodec_initialize(rx->decoder, NULL, name);
+	protodec_initialize(rx->decoder, NULL, ipc, name);
 
 	rx->name = name;
 	rx->lastbit = 0;

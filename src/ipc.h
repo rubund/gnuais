@@ -22,7 +22,17 @@
 #ifndef INC_GNUAISIPC_H
 #define INC_GNUAISIPC_H
 
-int gnuais_ipc_init();
-void gnuais_ipc_deinit();
+
+#define IPCBUFFER_LEN 255
+#define MAX_CLIENT_SOCKETS 20
+
+struct ipc_state_t {
+	int numclientsockets;
+    int clientsocket[MAX_CLIENT_SOCKETS];
+};
+
+struct ipc_state_t* gnuais_ipc_init();
+void gnuais_ipc_deinit(struct ipc_state_t *);
+int ipc_write(struct ipc_state_t *ipc, char *buffer, int buflength);
 
 #endif

@@ -22,7 +22,7 @@ pkg_check_modules(OSMGPSMAP osmgpsmap)
 #endif (NOT OSMGPSMAP_FOUND)
 
 if (GTK2_FOUND AND GTHREAD_FOUND AND OSMGPSMAP_FOUND)
-	add_executable(gnuaisgui gui.c) 
+	add_executable(gnuaisgui gui.c osm-gps-map-ais.c) 
 
 	target_link_libraries(gnuaisgui ${GTK2_LIBRARIES})
 	target_link_libraries(gnuaisgui ${GTHREAD_LIBRARIES})

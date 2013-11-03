@@ -35,6 +35,7 @@
 #include "cfg.h"
 #include "hlog.h"
 #include "cache.h"
+#include "ipc.h"
 
 #ifdef DMALLOC
 #include <dmalloc.h>
@@ -49,12 +50,13 @@
 
 #define SERBUFFER_LEN	100
 
-void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, char chanid)
+void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, struct ipc_state_t *ipc, char chanid)
 {
 	memset(d, 0, sizeof(struct demod_state_t));
 
 	d->chanid = chanid;
 	d->serial = serial;
+	d->ipc    = ipc;
 	
 	d->receivedframes = 0;
 	d->lostframes = 0;
@@ -68,6 +70,7 @@ void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial,
 	d->rbuffer = hmalloc(DEMOD_BUFFER_LEN);
 	
 	d->serbuffer = hmalloc(SERBUFFER_LEN);
+	d->ipcbuffer = hmalloc(IPCBUFFER_LEN);
 	d->nmea = hmalloc(SERBUFFER_LEN);
 }
 
@@ -76,6 +79,7 @@ void protodec_deinit(struct demod_state_t *d)
 	hfree(d->buffer);
 	hfree(d->rbuffer);
 	hfree(d->serbuffer);
+	hfree(d->ipcbuffer);
 	hfree(d->nmea);
 }
 
@@ -772,6 +776,7 @@ void protodec_generate_nmea(struct demod_state_t *d, int bufferlen, int fillbits
 	unsigned char sentences, sentencenum, nmeachk;
 	char nchk[NCHK_LEN];
 	int serbuffer_l;
+	int ipcbuffer_l;
 	
 	//6bits to nmea-ascii. One sentence len max 82char
 	//inc. head + tail.This makes inside datamax 62char multipart, 62 single
@@ -868,6 +873,9 @@ void protodec_generate_nmea(struct demod_state_t *d, int bufferlen, int fillbits
 		serbuffer_l = snprintf(d->serbuffer, SERBUFFER_LEN, "!%s\r\n", d->nmea);
 		if (d->serial)
 			serial_write(d->serial, d->serbuffer, serbuffer_l);
+		ipcbuffer_l = snprintf(d->ipcbuffer, IPCBUFFER_LEN, "!%s", d->nmea);
+		if (d->ipc)
+			ipc_write(d->ipc, d->ipcbuffer, ipcbuffer_l);
 		NMEA_DBG(printf("NMEA: End of nmea->ascii-loop with sentences:%d sentencenum:%d\n",
 			sentences, sentencenum));
 		if (my)
