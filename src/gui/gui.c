@@ -36,12 +36,15 @@
 #include <fcntl.h>		/* File control definitions */
 #include <errno.h>		/* Error number definitions */
 #include <termios.h>		/* POSIX terminal control definitions */
+#include "osm-gps-map-ais.h"
 
 #define UNIX_PATH_MAX 100
 #define DBG(x)
-#define MAXSHIPS 1000
 
 int changemap(GtkWidget * drawing_area, char *filename);
+
+extern ship *ships[];
+extern int numberofships;
 
 typedef struct {
 	GtkWidget *drawing;
@@ -59,15 +62,6 @@ typedef struct {
 mapcoord mapcoords;
 
 typedef struct {
-	int mmsi;
-	double longitude;
-	double latitude;
-	float heading;
-	float course;
-	int type;
-} ship;
-
-typedef struct {
 	int type;
 	int mmsi;
 	double latitude;
@@ -83,15 +77,14 @@ void drawboats(GtkWidget * drawing_area);
 
 static GdkPixmap *pixmap = NULL;
 GdkPixbuf *map;
-ship *ships[MAXSHIPS];
-int numberofships = 0;
 int socket_fd;
 pthread_t thre;
 
 char mapfilename[100] = "map.png";
+char running;
 
 
-G_LOCK_DEFINE_STATIC(updatemap);
+G_LOCK_DEFINE(updatemap);
 
 
 unsigned int pickone(char *r_buffer, int pos, int len)
@@ -356,14 +349,14 @@ void *threaden(void *args)
 	threadwidgets *t = (threadwidgets *) args;
 	//int x, y, i;
 	//float theta;
-	//shipdata shipd;
+	shipdata shipd;
 	GtkWidget *widget = GTK_WIDGET(t->drawing);
 	//GtkWidget *nmeatext = GTK_WIDGET(t->textframe);
 	//int fd = initserial("/tmp/gnuaispipe");
 	//char nmeabuffer[201];
 	//int lettersread;
-	//int previoussentence = 0;
-	//char aisline[500];
+	int previoussentence = 0;
+	char aisline[500];
 	//char tmp = 0;
 	//int j, k;
 	//int sentences;
@@ -373,7 +366,7 @@ void *threaden(void *args)
 
 	struct sockaddr_un address;
 	int nbytes;
-	char buffer[256];
+	char nmeabuffer[256];
 
 	socket_fd = socket(PF_UNIX, SOCK_STREAM, 0);
 	if(socket_fd < 0) {
@@ -391,67 +384,82 @@ void *threaden(void *args)
 		printf("connect() failed\n");
 		return NULL;
 	}
+	//fcntl(socket_fd, F_SETFL, O_NONBLOCK);
 	
 
-	while ((nbytes = read(socket_fd, buffer, 256)) != 0) {
-		buffer[nbytes] = 0;
-		printf("Message from server: %s\n",buffer);
+	while ((nbytes = read(socket_fd, nmeabuffer, 256)) != 0) {
+		//sleep(2);
+		//nbytes = read(socket_fd, buffer, 256);
+		if(nbytes == -1) nmeabuffer[0] = 0;
+		else nmeabuffer[nbytes] = 0;
+		if(nbytes > 0){
+			printf("Message from server: %s\n",nmeabuffer);
+			//vessels[0].longitude = 10;
+			//vessels[0].latitude  = 0;
 	//	usleep(500000);
-	//	m = 0;
+		int m,r,j;
+		int kommas,k,start,lettersread;
+		int sentences,sentencenumb;
+		m = 0;
+		r = nbytes;
 	//	r = read(fd, nmeabuffer, 200);
 	//	nmeabuffer[r] = 0;
 	//	DBG(printf("<---- lest   %s  -------->\n", nmeabuffer));
 	//	tmp = 0;
 
-	//	while (nmeabuffer[m++] != '!') {
-	//		if (m > (r - 1)) {
-	//			break;
-	//		}
-	//	}
-	//	if (m > (r - 1))
-	//		continue;
-	//	m--;
+		while (nmeabuffer[m++] != '!') {
+			if (m > (r - 1)) {
+				break;
+			}
+		}
+		if (m > (r - 1))
+			continue;
+		m--;
 
-	//	if (nmeabuffer[m] != '!' || nmeabuffer[m + 1] != 'A' || nmeabuffer[m + 5] != 'M') {
-	//		continue;
-	//	}
-	//	kommas = 0;
-	//	for (k = 0; k < 20; k++) {
-	//		if (nmeabuffer[k + m] == ',')
-	//			kommas++;
-	//		if (kommas == 5)
-	//			break;
-	//	}
-	//	start = k + 1;
-	//	sentences = nmeabuffer[m + 7] - 0x30;
-	//	sentencenumb = nmeabuffer[m + 9] - 0x30;
-	//	if ((sentencenumb > 1)
-	//	    && ((previoussentence) != (sentencenumb - 1)))
-	//		continue;
-	//	if (sentencenumb == 1)
-	//		lettersread = 0;
-	//	for (j = 0; j < (r - start - m); j++) {
-	//		if (nmeabuffer[m + j + start] == ',')
-	//			break;
-	//		aisline[lettersread] = nmeabuffer[m + j + start];
-	//		lettersread++;
-	//	}
+		if (nmeabuffer[m] != '!' || nmeabuffer[m + 1] != 'A' || nmeabuffer[m + 5] != 'M') {
+			continue;
+		}
+		kommas = 0;
+		for (k = 0; k < 20; k++) {
+			if (nmeabuffer[k + m] == ',')
+				kommas++;
+			if (kommas == 5)
+				break;
+		}
+		start = k + 1;
+		sentences = nmeabuffer[m + 7] - 0x30;
+		sentencenumb = nmeabuffer[m + 9] - 0x30;
+		if ((sentencenumb > 1)
+		    && ((previoussentence) != (sentencenumb - 1)))
+			continue;
+		if (sentencenumb == 1)
+			lettersread = 0;
+		for (j = 0; j < (r - start - m); j++) {
+			if (nmeabuffer[m + j + start] == ',')
+				break;
+			aisline[lettersread] = nmeabuffer[m + j + start];
+			lettersread++;
+		}
 
-	//	if (sentencenumb >= sentences) {
-	//		aisline[lettersread] = 0;
-	//		aisdecode(aisline, &shipd);
-	//	}
+		if (sentencenumb >= sentences) {
+			aisline[lettersread] = 0;
+			aisdecode(aisline, &shipd);
+		}
 
-	//	previoussentence = sentencenumb;
-	//	if (shipd.type != 1 && shipd.type != 2 && shipd.type != 3
-	//	    && shipd.type != 4)
-	//		continue;
+		previoussentence = sentencenumb;
+		if (shipd.type != 1 && shipd.type != 2 && shipd.type != 3
+		    && shipd.type != 4)
+			continue;
 
-	//	updateship(shipd.mmsi, shipd.longitude, shipd.latitude,
-	//		   shipd.heading, shipd.course, shipd.type);
+		updateship(shipd.mmsi, shipd.longitude, shipd.latitude,
+			   shipd.heading, shipd.course, shipd.type);
+		}
 
 		gdk_threads_enter();
-		configure_event(widget, NULL);	// redraw map    
+		//configure_event(widget, NULL);	// redraw map    
+		//osm_gps_map_configure(widget,NULL);
+		gtk_widget_queue_resize(widget);
+		gtk_widget_queue_draw(widget);
 		gdk_threads_leave();
 	}
 	printf("Done thread");
@@ -630,6 +638,8 @@ int main(int argc, char **argv)
 	GtkWidget *frame;
 	GtkWidget *vboxmenu;
 	GtkWidget *osmmap;
+    OsmGpsMapLayer *osd;
+	running = 1;
 
 
 
@@ -689,13 +699,13 @@ int main(int argc, char **argv)
 	//gtk_widget_set_size_request(GTK_WIDGET(drawing_area),
 	//			    mapcoords.mapwidth,
 	//			    mapcoords.mapheight);
-	g_signal_connect(G_OBJECT(drawing_area), "expose_event",
-			 G_CALLBACK(expose_event), NULL);
-	g_signal_connect(G_OBJECT(drawing_area), "configure_event",
-			 G_CALLBACK(configure_event), NULL);
-	g_signal_connect(G_OBJECT(drawing_area), "button_press_event",
-			 G_CALLBACK(button_press_event), NULL);
-	gtk_widget_set_events(drawing_area, GDK_BUTTON_PRESS_MASK);
+	//g_signal_connect(G_OBJECT(drawing_area), "expose_event",
+	//		 G_CALLBACK(expose_event), NULL);
+	//g_signal_connect(G_OBJECT(drawing_area), "configure_event",
+	//		 G_CALLBACK(configure_event), NULL);
+	//g_signal_connect(G_OBJECT(drawing_area), "button_press_event",
+	//		 G_CALLBACK(button_press_event), NULL);
+	//gtk_widget_set_events(drawing_area, GDK_BUTTON_PRESS_MASK);
 
 	//scrolled_window = gtk_scrolled_window_new(NULL, NULL);
 	//gtk_container_set_border_width(GTK_CONTAINER(scrolled_window), 10);
@@ -760,9 +770,33 @@ int main(int argc, char **argv)
 
 	vboxmenu = gtk_vbox_new(0, 0);
 	gtk_container_add(GTK_CONTAINER(frame), vboxmenu);
-	gtk_box_pack_start(GTK_BOX(vboxmenu), button, 0, 1, 0);
+	//gtk_box_pack_start(GTK_BOX(vboxmenu), button, 0, 1, 0);
 
 	gtk_container_add(GTK_CONTAINER(mapframe), osmmap);
+
+    //osd = g_object_new (OSM_TYPE_GPS_MAP_OSD,
+    //                    "show-scale",TRUE,
+    //                    "show-coordinates",TRUE,
+    //                    "show-crosshair",TRUE,
+    //                    "show-dpad",TRUE,
+    //                    "show-zoom",TRUE,
+    //                    "show-gps-in-dpad",TRUE,
+    //                    "show-gps-in-zoom",FALSE,
+    //                    "dpad-radius", 30,
+    //                    NULL);
+	//osd  = osm_gps_map_osd_new();
+	osd  = osm_gps_map_ais_new();
+    osm_gps_map_layer_add(OSM_GPS_MAP(osmmap), osd);
+    //osm_gps_map_layer_add(OSM_GPS_MAP(osmmap), button);
+	//osm_gps_map_layer_draw (osd, OSM_GPS_MAP(osmmap), button);
+	//g_signal_connect(G_OBJECT(osd), "configure_event",
+	//		 G_CALLBACK(configure_event), NULL);
+//	g_signal_connect(G_OBJECT(osd), "expose_event",
+//			 G_CALLBACK(expose_event), NULL);
+//	g_signal_connect(G_OBJECT(osd), "button_press_event",
+//			 G_CALLBACK(button_press_event), NULL);
+	//gtk_widget_set_events(osd, GDK_BUTTON_PRESS_MASK);
+	//drawboats(osmmap);
 
 	gtk_widget_show(osmmap);
 	gtk_widget_show(mapframe);
@@ -783,13 +817,14 @@ int main(int argc, char **argv)
 	gtk_widget_show(hbox);
 	gtk_widget_show(window);
 
-	twidgets->drawing = drawing_area;
+	twidgets->drawing = osmmap;//drawing_area;
 	twidgets->textframe = NULL;
 	pthread_create(&thre, NULL, threaden, twidgets);
 
 	gtk_main();
 	gdk_threads_leave();
 
+	running = 0;
 	shutdown(socket_fd,2);
 	if ((tmp = pthread_join(thre, NULL))) {
 		printf("pthread_join of threaden failed: %s\n", strerror(tmp));
