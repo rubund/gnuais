@@ -1,4 +1,10 @@
-gnuais (0.2.9a-ubuntu1) UNRELEASED; urgency=low
+gnuais (0.2.9b-ubuntu1~saucy) saucy; urgency=low
+
+  * gnuaisgui can now plot vessels on the OSM map 
+
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Sun, 03 Nov 2013 16:50:25 +0100
+
+gnuais (0.2.9a-ubuntu1) unstable; urgency=low
 
   * Default config file location changed to ~/.config/gnuais/config
   * 

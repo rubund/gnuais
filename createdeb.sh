@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PACKAGENAME=gnuais
-VERSION=0.2.9a
+VERSION=0.2.9b
 rm -rf createdeb/
 mkdir createdeb
 mkdir createdeb/$PACKAGENAME-$VERSION
