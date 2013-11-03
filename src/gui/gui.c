@@ -71,8 +71,8 @@ typedef struct {
 	float heading;
 } shipdata;
 
-static gboolean configure_event(GtkWidget * widget,
-				GdkEventConfigure * event);
+//static gboolean configure_event(GtkWidget * widget,
+//				GdkEventConfigure * event);
 void drawboats(GtkWidget * drawing_area);
 
 static GdkPixmap *pixmap = NULL;
@@ -354,7 +354,7 @@ void *threaden(void *args)
 	//GtkWidget *nmeatext = GTK_WIDGET(t->textframe);
 	//int fd = initserial("/tmp/gnuaispipe");
 	//char nmeabuffer[201];
-	//int lettersread;
+	int lettersread = 0;
 	int previoussentence = 0;
 	char aisline[500];
 	//char tmp = 0;
@@ -398,7 +398,7 @@ void *threaden(void *args)
 			//vessels[0].latitude  = 0;
 	//	usleep(500000);
 		int m,r,j;
-		int kommas,k,start,lettersread;
+		int kommas,k,start;
 		int sentences,sentencenumb;
 		m = 0;
 		r = nbytes;
@@ -466,30 +466,30 @@ void *threaden(void *args)
 	return NULL;
 }
 
-static gboolean configure_event(GtkWidget * widget,
-				GdkEventConfigure * event)
-{
-	if (pixmap)
-		g_object_unref(pixmap);
-	//guchar *pixels;
-	//pixels = gdk_pixbuf_get_pixels(map);
-	//int rowstride = gdk_pixbuf_get_rowstride(map);
-	pixmap = gdk_pixmap_new(widget->window,
-				widget->allocation.width,
-				widget->allocation.height, -1);
-
-	gdk_draw_rectangle(pixmap, widget->style->white_gc, TRUE, 0, 0,
-			   widget->allocation.width,
-			   widget->allocation.height);
-
-	//gdk_draw_rgb_image(pixmap, widget->style->fg_gc[GTK_STATE_NORMAL],
-	//		   0, 0, mapcoords.mapwidth, mapcoords.mapheight,
-	//		   GDK_RGB_DITHER_NORMAL, pixels, rowstride);
-
-	drawboats(widget);
-
-	return TRUE;
-}
+//static gboolean configure_event(GtkWidget * widget,
+//				GdkEventConfigure * event)
+//{
+//	if (pixmap)
+//		g_object_unref(pixmap);
+//	//guchar *pixels;
+//	//pixels = gdk_pixbuf_get_pixels(map);
+//	//int rowstride = gdk_pixbuf_get_rowstride(map);
+//	pixmap = gdk_pixmap_new(widget->window,
+//				widget->allocation.width,
+//				widget->allocation.height, -1);
+//
+//	gdk_draw_rectangle(pixmap, widget->style->white_gc, TRUE, 0, 0,
+//			   widget->allocation.width,
+//			   widget->allocation.height);
+//
+//	//gdk_draw_rgb_image(pixmap, widget->style->fg_gc[GTK_STATE_NORMAL],
+//	//		   0, 0, mapcoords.mapwidth, mapcoords.mapheight,
+//	//		   GDK_RGB_DITHER_NORMAL, pixels, rowstride);
+//
+//	drawboats(widget);
+//
+//	return TRUE;
+//}
 
 void drawboats(GtkWidget * drawing_area)
 {
@@ -597,24 +597,24 @@ int changemap(GtkWidget * drawing_area, char *filename)
 	return 0;
 }
 
-static gboolean expose_event(GtkWidget * widget, GdkEventExpose * event)
-{
-	gdk_draw_drawable(widget->window,
-			  widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
-			  pixmap, event->area.x, event->area.y,
-			  event->area.x, event->area.y, event->area.width,
-			  event->area.height);
+//static gboolean expose_event(GtkWidget * widget, GdkEventExpose * event)
+//{
+//	gdk_draw_drawable(widget->window,
+//			  widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
+//			  pixmap, event->area.x, event->area.y,
+//			  event->area.x, event->area.y, event->area.width,
+//			  event->area.height);
+//
+//	return FALSE;
+//}
 
-	return FALSE;
-}
-
-static gboolean button_press_event(GtkWidget * widget,
-				   GdkEventButton * event)
-{
-	if (event->button == 1 && pixmap != NULL) {
-	}
-	return TRUE;
-}
+//static gboolean button_press_event(GtkWidget * widget,
+//				   GdkEventButton * event)
+//{
+//	if (event->button == 1 && pixmap != NULL) {
+//	}
+//	return TRUE;
+//}
 
 int main(int argc, char **argv)
 {
@@ -785,7 +785,7 @@ int main(int argc, char **argv)
     //                    "dpad-radius", 30,
     //                    NULL);
 	//osd  = osm_gps_map_osd_new();
-	osd  = osm_gps_map_ais_new();
+	osd  = OSM_GPS_MAP_LAYER(osm_gps_map_ais_new());
     osm_gps_map_layer_add(OSM_GPS_MAP(osmmap), osd);
     //osm_gps_map_layer_add(OSM_GPS_MAP(osmmap), button);
 	//osm_gps_map_layer_draw (osd, OSM_GPS_MAP(osmmap), button);

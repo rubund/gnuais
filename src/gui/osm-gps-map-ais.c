@@ -442,12 +442,12 @@ osm_gps_map_ais_render (OsmGpsMapLayer *osd,
 {
 	printf("Rendering\n");
     OsmGpsMapAis *self;
-    OsmGpsMapAisPrivate *priv;
+    //OsmGpsMapAisPrivate *priv;
 
     g_return_if_fail(OSM_IS_GPS_MAP_AIS(osd));
 
     self = OSM_GPS_MAP_AIS(osd);
-    priv = self->priv;
+    //priv = self->priv;
 
 	coordinates_render(self, map);
 
@@ -461,13 +461,13 @@ osm_gps_map_ais_draw (OsmGpsMapLayer *osd,
 	printf("Drawing\n");
     cairo_t *cr;
     OsmGpsMapAis *self;
-    OsmGpsMapAisPrivate *priv;
+    //OsmGpsMapAisPrivate *priv;
     GtkAllocation allocation;
 
     g_return_if_fail(OSM_IS_GPS_MAP_AIS(osd));
 
     self = OSM_GPS_MAP_AIS(osd);
-    priv = self->priv;
+    //priv = self->priv;
 
     gtk_widget_get_allocation(GTK_WIDGET(map), &allocation);
     cr = gdk_cairo_create(drawable);
@@ -601,6 +601,8 @@ int draw_one_boat(cairo_t *cr, int x, int y, float theta){
 	cairo_line_to(cr, punkter2[2].x,punkter2[2].y);
 	cairo_line_to(cr, punkter2[3].x,punkter2[3].y);
 	cairo_fill(cr);
+
+	return 0;
 }
 
 static void
@@ -650,7 +652,7 @@ coordinates_render(OsmGpsMapAis *self, OsmGpsMap *map)
 static void
 coordinates_draw(OsmGpsMapAis *self, GtkAllocation *allocation, cairo_t *cr)
 {
-    OsmGpsMapAisPrivate *priv = self->priv;
+    //OsmGpsMapAisPrivate *priv = self->priv;
     OsdCoordinates_t *coordinates = self->priv->coordinates;
 
     cairo_set_source_surface(cr, coordinates->surface, 0, 0);
