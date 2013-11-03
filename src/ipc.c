@@ -42,8 +42,7 @@ static pthread_t ipc_th;
 pthread_mutex_t ipc_mut = PTHREAD_MUTEX_INITIALIZER;
 
 static void gnuais_ipc_socketlistener(void *asdf){
-	int connection_fd, nbytes;
-	char buffer[IPCBUFFER_LEN];
+	int connection_fd;
 	struct ipc_state_t *ipc;
 	ipc = (struct ipc_state_t *)asdf;
 	socklen_t address_length;
@@ -121,12 +120,15 @@ struct ipc_state_t* gnuais_ipc_init(){
 
 int ipc_write(struct ipc_state_t *ipc, char *buffer, int buflength){
 	printf("IPC buffer: %s\n",buffer);
-	int nbytes;
+	int nbytes=0;
 	int i;
 	pthread_mutex_lock(&ipc_mut);
 	for(i=0;i<(ipc->numclientsockets);i++) {
 		nbytes = write(ipc->clientsocket[i], buffer, buflength);
+		if(nbytes == 0){
+			hlog(LOG_INFO,"One gnuaisgui client is disconnected\n");
+		}
 	}
 	pthread_mutex_unlock(&ipc_mut);
-
+	return 0;
 }
