@@ -1,2 +1,2 @@
-?package(gnuais):needs="text" section="Applications/Science/Geoscience"\
+?package(gnuais):needs="text" section="Applications/Amateur Radio"\
   title="gnuais" command="/usr/bin/gnuais"

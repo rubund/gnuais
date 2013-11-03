@@ -1,2 +1,2 @@
-?package(gnuaisgui):needs="X11" section="Applications/Science/Geoscience"\
+?package(gnuaisgui):needs="X11" section="Applications/Amateur Radio"\
   title="gnuaisgui" command="/usr/bin/gnuaisgui"
