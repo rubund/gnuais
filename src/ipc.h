@@ -1,6 +1,6 @@
 
 /*
- *	protodec.c
+ *	ipc.h
  *
  *	(c) Ruben Undheim 2013
  *
