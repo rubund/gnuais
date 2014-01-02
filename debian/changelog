@@ -1,3 +1,10 @@
+gnuais (0.3.0-ubuntu1~raring) raring; urgency=low
+
+  * fixed missing serial output
+  * control overlay on map in gnuaisgui
+
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Thu, 02 Jan 2014 23:11:25 +0100
+
 gnuais (0.2.9b-ubuntu1~saucy) saucy; urgency=low
 
   * gnuaisgui can now plot vessels on the OSM map 
