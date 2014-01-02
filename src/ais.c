@@ -136,13 +136,13 @@ int main(int argc, char *argv[])
 	/* initialize the AIS decoders */
 	if (sound_channels != SOUND_CHANNELS_MONO) {
 		hlog(LOG_DEBUG, "Initializing demodulator A");
-		rx_a = init_receiver('A', 2, 0,ipc);
+		rx_a = init_receiver('A', 2, 0,serial,ipc);
 		hlog(LOG_DEBUG, "Initializing demodulator B");
-		rx_b = init_receiver('B', 2, 1,ipc);
+		rx_b = init_receiver('B', 2, 1,serial,ipc);
 		channels = 2;
 	} else {
 		hlog(LOG_DEBUG, "Initializing demodulator A");
-		rx_a = init_receiver('A', 1, 0,ipc);
+		rx_a = init_receiver('A', 1, 0,serial,ipc);
 		channels = 1;
 	}
 #ifdef HAVE_PULSEAUDIO
