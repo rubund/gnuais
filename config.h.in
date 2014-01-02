@@ -12,4 +12,4 @@
 #define PACKAGE "gnuais"
 
 /* Version number of package */
-#define VERSION "0.2.9b"
+#define VERSION "0.3.0"
