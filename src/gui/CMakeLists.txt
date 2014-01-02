@@ -6,7 +6,7 @@ find_package(PkgConfig)
 
 pkg_check_modules(GTK2 gtk+-2.0)
 pkg_check_modules(GTHREAD gthread-2.0)
-pkg_check_modules(OSMGPSMAP osmgpsmap)
+pkg_check_modules(OSMGPSMAP osmgpsmap>=0.7.3)
 
 
 #if (NOT GTK2_FOUND)

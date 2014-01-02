@@ -639,6 +639,7 @@ int main(int argc, char **argv)
 	GtkWidget *vboxmenu;
 	GtkWidget *osmmap;
     OsmGpsMapLayer *osd;
+    OsmGpsMapLayer *aisoverlay;
 	running = 1;
 
 
@@ -774,18 +775,20 @@ int main(int argc, char **argv)
 
 	gtk_container_add(GTK_CONTAINER(mapframe), osmmap);
 
-    //osd = g_object_new (OSM_TYPE_GPS_MAP_OSD,
-    //                    "show-scale",TRUE,
-    //                    "show-coordinates",TRUE,
-    //                    "show-crosshair",TRUE,
-    //                    "show-dpad",TRUE,
-    //                    "show-zoom",TRUE,
-    //                    "show-gps-in-dpad",TRUE,
-    //                    "show-gps-in-zoom",FALSE,
-    //                    "dpad-radius", 30,
-    //                    NULL);
+    osd = g_object_new (OSM_TYPE_GPS_MAP_OSD,
+                        "show-scale",TRUE,
+                        "show-coordinates",TRUE,
+                        "show-crosshair",FALSE,
+                        "show-dpad",TRUE,
+                        "show-zoom",TRUE,
+                        "show-gps-in-dpad",FALSE,
+                        "show-gps-in-zoom",FALSE,
+                        "dpad-radius", 30,
+                        NULL);
 	//osd  = osm_gps_map_osd_new();
-	osd  = OSM_GPS_MAP_LAYER(osm_gps_map_ais_new());
+	aisoverlay  = OSM_GPS_MAP_LAYER(osm_gps_map_ais_new());
+    osm_gps_map_layer_add(OSM_GPS_MAP(osmmap), aisoverlay);
+
     osm_gps_map_layer_add(OSM_GPS_MAP(osmmap), osd);
     //osm_gps_map_layer_add(OSM_GPS_MAP(osmmap), button);
 	//osm_gps_map_layer_draw (osd, OSM_GPS_MAP(osmmap), button);
