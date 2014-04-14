@@ -1,4 +1,4 @@
-gnuais (0.3.0-ubuntu1~raring) raring; urgency=low
+gnuais (0.3.0) unstable; urgency=low
 
   * fixed missing serial output
   * control overlay on map in gnuaisgui
