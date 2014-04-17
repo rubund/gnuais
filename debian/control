@@ -19,7 +19,7 @@ Package: gnuais-dbg
 Architecture: any
 Section: debug
 Depends: gnuais (= ${binary:Version}), ${misc:Depends}
-Description: GNU Automatic Identification System receiver
+Description: GNU Automatic Identification System receiver (debug symbols)
  A tool for demodulating and decoding AIS messages using the line input of the sound card.
  AIS messages are transmitted by marine vessels and contain their position, velocity and other
  interesting information. The messages may be saved to an mysql-database, forwarded as NMEA
@@ -37,7 +37,7 @@ Package: gnuaisgui-dbg
 Architecture: any
 Section: debug
 Depends: gnuaisgui (= ${binary:Version}), ${misc:Depends}
-Description: GUI for GNU Automatic Identification System receiver
+Description: GUI for GNU Automatic Identification System receiver (debug symbols)
  This GUI plots the vessels that are received by gnuais.
  .
  This package contains the debugging symbols for gnuaisgui.
