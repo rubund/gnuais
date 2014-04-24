@@ -4,6 +4,12 @@
  */
 
 /*
+ * The code in this file is taken from the zmailer project for
+ * which the license is stated to be: "pick any you like" of
+ * ARTISTIC, BSD and GPL-2/LPGL-2.
+ */
+
+/*
  *
  * CRC32 code extracted out from  symbol.c  into its own file
  * by Matti Aarnio <mea@nic.funet.fi> 9-Sept-1999

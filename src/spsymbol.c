@@ -4,6 +4,12 @@
  */
 
 /*
+ * The code in this file is taken from the zmailer project for
+ * which the license is stated to be: "pick any you like" of
+ * ARTISTIC, BSD and GPL-2/LPGL-2.
+ */
+
+/*
  * Symbol routine: it maps an arbitrary string into a unique key
  * that can be used as an index into various tables.
  */

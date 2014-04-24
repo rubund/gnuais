@@ -1,8 +1,8 @@
 
 /*
- *	This piece is probably not GPL'd but in the public domain
- *	instead, or something. Got it from ZMailer's sources, which
- *	are.
+ * The code in this file is taken from the zmailer project for
+ * which the license is stated to be: "pick any you like" of
+ * ARTISTIC, BSD and GPL-2/LPGL-2.
  */
 
 /*
