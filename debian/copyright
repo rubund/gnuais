@@ -25,7 +25,7 @@ License: GPL-2+
 
 Files: src/crc32.c src/splay.c src/spsymbol.c
 Copyright: 1988 Rayan S. Zachariassen
-License: ARTISTIC, BSD or GPL-2/LGPL-2. (pick any you like)
+License: Artistic or BSD or GPL-2+/LGPL-2+. (pick any you like)
  On Debian systems, the complete text of the ARTISTIC 
  License can be found in "/usr/share/common-licenses/Artistic".
  .
