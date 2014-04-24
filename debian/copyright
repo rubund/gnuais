@@ -32,7 +32,7 @@ License: ARTISTIC, BSD or GPL-2/LGPL-2. (pick any you like)
  On Debian systems, the complete text of the GNU General
  Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
  .
- On Debian systems, the complete text of the GNU General
+ On Debian systems, the complete text of the GNU Library General
  Public License version 2 can be found in "/usr/share/common-licenses/LGPL-2".
 
 Files: debian/*
