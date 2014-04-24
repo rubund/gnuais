@@ -1,3 +1,5 @@
+0.3.0:
+    GUI is working (using OpenStreetMap). Various other fixes
 0.2.7:
     Added pulseaudio support
 0.2.6:

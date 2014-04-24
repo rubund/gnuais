@@ -8,7 +8,7 @@ To install, run these commands:
     make install    (as root)
 
 
-The developmend files for ALSA (libasound) are required. It is also nice
+The development files for ALSA (libasound) are required. It is also nice
 to have the development files for mysql and curl since these will enable some
-extra features.
+extra features. For the GUI to be built, gtk2.0 and osmgpsmap are also required.
 
