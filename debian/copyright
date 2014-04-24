@@ -3,9 +3,10 @@ Upstream-Name: gnuais
 Source: https://github.com/rubund/gnuais/ 
 
 Files: *
-Copyright: 2012 Ruben Undheim <ruben.undheim@gmail.com>
-           2012 Heikki Hannikainen <hessu@hes.iki.fi>
-License: GPL-2.0+
+Copyright: 2008 Ruben Undheim <ruben.undheim@gmail.com>
+           2008 Heikki Hannikainen <hessu@hes.iki.fi>
+           2008 Tomi Manninen <tomi.manninen@hut.fi>
+License: GPL-2+
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or
@@ -22,3 +23,33 @@ License: GPL-2.0+
  On Debian systems, the complete text of the GNU General
  Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
 
+Files: src/crc32.c src/splay.c src/spsymbol.c
+Copyright: 1988 Rayan S. Zachariassen
+License: ARTISTIC, BSD or GPL-2/LGPL-2. (pick any you like)
+ On Debian systems, the complete text of the ARTISTIC 
+ License can be found in "/usr/share/common-licenses/Artistic".
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 2 can be found in "/usr/share/common-licenses/LGPL-2".
+
+Files: debian/*
+Copyright: 2013 Ruben Undheim <ruben.undheim@gmail.com>
+License: GPL-2+
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <http://www.gnu.org/licenses/>
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
