@@ -627,14 +627,14 @@ int main(int argc, char **argv)
 	GtkWidget *vbox;
 	GtkWidget *drawing_area;
 	GtkWidget *notebook;
-	GtkWidget *overviewframe;
+	//GtkWidget *overviewframe;
 	GtkWidget *nmeaframe;
-	GtkWidget *settingsframe;
+	//GtkWidget *settingsframe;
 	GtkWidget *mapframe;
 	GtkWidget *label;
-	GtkWidget *label2;
+	//GtkWidget *label2;
 	GtkWidget *label3;
-	GtkWidget *label4;
+	//GtkWidget *label4;
 	GtkWidget *frame;
 	GtkWidget *vboxmenu;
 	GtkWidget *osmmap;
@@ -730,33 +730,33 @@ int main(int argc, char **argv)
 	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(hello),
 			 (void *) drawing_area);
 
-	overviewframe = gtk_frame_new("Listings");
+	//overviewframe = gtk_frame_new("Listings");
 
 	nmeaframe = gtk_frame_new("NMEA Sentences");
 
-	settingsframe = gtk_frame_new(NULL);
+	//settingsframe = gtk_frame_new(NULL);
 
 	mapframe = gtk_frame_new(NULL);
 
 	label = gtk_label_new("Map");
 
-	label2 = gtk_label_new("Overview");
+	//label2 = gtk_label_new("Overview");
 
 	label3 = gtk_label_new("Raw data");
 
-	label4 = gtk_label_new("Settings");
+	//label4 = gtk_label_new("Settings");
 
 	gtk_container_set_border_width(GTK_CONTAINER(mapframe), 4);
 	notebook = gtk_notebook_new();
 	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(notebook), GTK_POS_TOP);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), mapframe,
 				 label);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), overviewframe,
-				 label2);
+	//gtk_notebook_append_page(GTK_NOTEBOOK(notebook), overviewframe,
+	//			 label2);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), nmeaframe,
 				 label3);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), settingsframe,
-				 label4);
+	//gtk_notebook_append_page(GTK_NOTEBOOK(notebook), settingsframe,
+	//			 label4);
 
 	frame = gtk_frame_new(NULL);
 	gtk_widget_set_size_request(GTK_WIDGET(frame), 100, 20);
@@ -808,13 +808,13 @@ int main(int argc, char **argv)
 	gtk_widget_show(drawing_area);
 	gtk_widget_show(vbox);
 	gtk_widget_show(notebook);
-	gtk_widget_show(overviewframe);
+	//gtk_widget_show(overviewframe);
 	gtk_widget_show(nmeaframe);
-	gtk_widget_show(settingsframe);
+	//gtk_widget_show(settingsframe);
 	gtk_widget_show(label);
-	gtk_widget_show(label2);
+	//gtk_widget_show(label2);
 	gtk_widget_show(label3);
-	gtk_widget_show(label4);
+	//gtk_widget_show(label4);
 	//gtk_widget_show(scrolled_window);
 	gtk_widget_show(vboxmenu);
 	gtk_widget_show(hbox);
