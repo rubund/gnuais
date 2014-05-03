@@ -31,7 +31,7 @@ Description: GNU Automatic Identification System receiver (debug symbols)
 
 Package: gnuaisgui
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, gnuais
+Depends: gnuais (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: GUI for GNU Automatic Identification System receiver
  This GUI plots the vessels that are received by gnuais.
 
