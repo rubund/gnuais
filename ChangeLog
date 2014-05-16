@@ -1,3 +1,6 @@
+0.3.1:
+    Updated copyright information for files
+    Workaround for tiles not working in gnuaisgui
 0.3.0:
     GUI is working (using OpenStreetMap). Various other fixes
 0.2.7:
