@@ -717,7 +717,12 @@ int main(int argc, char **argv)
 	//gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW
 	//				      (scrolled_window),
 	//				      drawing_area);
-	osmmap = osm_gps_map_new ();
+	// FIXME: This is a workaround because of debian bug: #745860
+	//osmmap = osm_gps_map_new ();
+    osmmap = g_object_new (OSM_TYPE_GPS_MAP,
+                        "map-source",OSM_GPS_MAP_SOURCE_OSM_PUBLIC_TRANSPORT,
+                        NULL);
+	// <-- End workaround
 	int tmp;
 	tmp = osm_gps_map_source_is_valid(OSM_GPS_MAP_SOURCE_OPENSTREETMAP);
 
