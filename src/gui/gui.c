@@ -245,19 +245,14 @@ void destroy(GtkWidget * Widget, gpointer data)
 	gtk_main_quit();
 }
 
-void hello(GtkWidget * widget, gpointer data)
+void restore(GtkWidget * widget, gpointer data)
 {
-	GtkWidget *drawing_area = GTK_WIDGET(data);
-	static int teller = 0;
-	g_print("Changes map\n");
-	if (teller % 3 == 0)
-		changemap(drawing_area, "waterford2.png");
-	else if (teller % 3 == 1)
-		changemap(drawing_area, "waterford.png");
-	else
-		changemap(drawing_area, "map.png");
-
-	teller++;
+	GtkWidget *osmmap = GTK_WIDGET(data);
+	osm_gps_map_set_center_and_zoom(osmmap,63,10,12);
+}
+void save(GtkWidget * widget, gpointer data)
+{
+	GtkWidget *osmmap = GTK_WIDGET(data);
 }
 
 int initserial(const char *dev)
@@ -623,6 +618,7 @@ int main(int argc, char **argv)
 
 	GtkWidget *window;
 	GtkWidget *button;
+	GtkWidget *button2;
 	GtkWidget *hbox;
 	GtkWidget *vbox;
 	GtkWidget *drawing_area;
@@ -720,7 +716,7 @@ int main(int argc, char **argv)
 	// FIXME: This is a workaround because of debian bug: #745860
 	//osmmap = osm_gps_map_new ();
     osmmap = g_object_new (OSM_TYPE_GPS_MAP,
-                        "map-source",OSM_GPS_MAP_SOURCE_OSM_PUBLIC_TRANSPORT,
+       //                 "map-source",OSM_GPS_MAP_SOURCE_OSM_PUBLIC_TRANSPORT,
                         //"repo-uri","http://localhost/osm_tiles/#Z/#X/#Y.png",
                         NULL);
 	// <-- End workaround
@@ -732,9 +728,14 @@ int main(int argc, char **argv)
 	//				      (scrolled_window),
 	//				      osmmap);
 
-	button = gtk_button_new_with_label("Change map");
-	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(hello),
-			 (void *) drawing_area);
+	button = gtk_button_new_with_label("Home");
+	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(restore),
+			 (void *) osmmap);
+
+	button2 = gtk_button_new_with_label("Set as home");
+	g_signal_connect(G_OBJECT(button2), "clicked", G_CALLBACK(save),
+			 (void *) osmmap);
+
 
 	//overviewframe = gtk_frame_new("Listings");
 
@@ -777,7 +778,8 @@ int main(int argc, char **argv)
 
 	vboxmenu = gtk_vbox_new(0, 0);
 	gtk_container_add(GTK_CONTAINER(frame), vboxmenu);
-	//gtk_box_pack_start(GTK_BOX(vboxmenu), button, 0, 1, 0);
+	gtk_box_pack_start(GTK_BOX(vboxmenu), button, 0, 1, 0);
+	gtk_box_pack_start(GTK_BOX(vboxmenu), button2, 0, 1, 0);
 
 	gtk_container_add(GTK_CONTAINER(mapframe), osmmap);
 
@@ -810,6 +812,7 @@ int main(int argc, char **argv)
 	gtk_widget_show(osmmap);
 	gtk_widget_show(mapframe);
 	gtk_widget_show(button);
+	gtk_widget_show(button2);
 	gtk_widget_show(frame);
 	gtk_widget_show(drawing_area);
 	gtk_widget_show(vbox);
