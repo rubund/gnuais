@@ -1,0 +1,17 @@
+--- gnuais-0.3.1.orig/src/ais.c
++++ gnuais-0.3.1/src/ais.c
+@@ -77,6 +77,14 @@ int main(int argc, char *argv[])
+ #ifdef HAVE_PULSEAUDIO
+ 	pa_simple *pa_dev = NULL;
+ #endif
++	printf("\n\n\n\n\n");
++	printf("##################################################################################\n");
++	printf("You are using an old PPA to provide gnuais and will therefore not get updates.\nPlease update by running:\n");
++	printf("  sudo add-apt-repository ppa:saltmakrell/gnuais\n");
++	printf("and\n");
++	printf("  sudo add-apt-repository -r ppa:saltmakrell/ppa\n");
++	printf("##################################################################################\n");
++	printf("\n\n\n\n\n");
+ 	
+ 	/* command line */
+ 	parse_cmdline(argc, argv);
