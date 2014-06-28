@@ -1,3 +1,9 @@
+gnuais (0.3.1-2ubuntu1) unstable; urgency=low
+
+  * Back to using osm as map source since osm-gps-map has been patched
+
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Sat, 28 Jun 2014 12:37:55 +0200
+
 gnuais (0.3.1-2) unstable; urgency=low
 
   * Temporary version bump for new PPA
