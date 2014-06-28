@@ -1,3 +1,9 @@
+gnuais (0.3.1-2) unstable; urgency=low
+
+  * Temporary version bump for new PPA
+
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Thu, 26 May 2014 22:37:22 +0200
+
 gnuais (0.3.1-1) unstable; urgency=low
 
   * Updated copyright information for files
