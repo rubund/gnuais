@@ -720,7 +720,6 @@ int main(int argc, char **argv)
 	// FIXME: This is a workaround because of debian bug: #745860
 	//osmmap = osm_gps_map_new ();
     osmmap = g_object_new (OSM_TYPE_GPS_MAP,
-                        "map-source",OSM_GPS_MAP_SOURCE_OSM_PUBLIC_TRANSPORT,
                         NULL);
 	// <-- End workaround
 	int tmp;
