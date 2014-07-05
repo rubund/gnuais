@@ -647,7 +647,6 @@ int main(int argc, char **argv)
 	threadwidgets *twidgets =
 	    (threadwidgets *) malloc(sizeof(threadwidgets));
 
-	g_type_init();
 	//map = gdk_pixbuf_new_from_file(mapfilename, 0);
 	//if (!map) {
 	//	printf
@@ -679,7 +678,6 @@ int main(int argc, char **argv)
 	//	fscanf(cbrfile, "%lf", &mapcoords.botrightlat);
 	//	fclose(cbrfile);
 	//}
-	g_thread_init(NULL);
 	gdk_threads_init();
 	gdk_threads_enter();
 
@@ -765,15 +763,15 @@ int main(int argc, char **argv)
 	frame = gtk_frame_new(NULL);
 	gtk_widget_set_size_request(GTK_WIDGET(frame), 100, 20);
 	;
-	hbox = gtk_hbox_new(0, 0);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), frame, 0, 0, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), notebook, 1, 1, 0);
 
-	vbox = gtk_vbox_new(1, 0);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);   // before: gtk_vbox_new(1,0);
 	gtk_container_add(GTK_CONTAINER(window), vbox);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, 1, 1, 0);
 
-	vboxmenu = gtk_vbox_new(0, 0);
+	vboxmenu = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0); // before: gtk_vbox_new(0,0);
 	gtk_container_add(GTK_CONTAINER(frame), vboxmenu);
 	//gtk_box_pack_start(GTK_BOX(vboxmenu), button, 0, 1, 0);
 
