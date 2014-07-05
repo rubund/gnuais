@@ -1,0 +1,39 @@
+--- gnuais-0.3.1.orig/src/gui/CMakeLists.txt
++++ gnuais-0.3.1/src/gui/CMakeLists.txt
+@@ -6,7 +6,8 @@ find_package(PkgConfig)
+ 
+ pkg_check_modules(GTK3 gtk+-3.0)
+ pkg_check_modules(GTHREAD gthread-2.0)
+-pkg_check_modules(OSMGPSMAP osmgpsmap-1.0>=1.0.2)
++FIND_PATH(OSMGPSMAP_INCLUDE_DIR osmgpsmap-1.0/osm-gps-map.h)
++MESSAGE("-- Checking for osmgpsmap-1.0")
+ 
+ 
+ #if (NOT GTK3_FOUND)
+@@ -21,21 +22,21 @@ pkg_check_modules(OSMGPSMAP osmgpsmap-1.
+ #	MESSAGE(FATAL_ERROR "libosmgpsmap-dev is required")
+ #endif (NOT OSMGPSMAP_FOUND)
+ 
+-if (GTK3_FOUND AND GTHREAD_FOUND AND OSMGPSMAP_FOUND)
++if (GTK3_FOUND AND GTHREAD_FOUND AND OSMGPSMAP_INCLUDE_DIR)
+ 	add_executable(gnuaisgui gui.c osm-gps-map-ais.c) 
+ 
+ 	target_link_libraries(gnuaisgui ${GTK3_LIBRARIES})
+ 	target_link_libraries(gnuaisgui ${GTHREAD_LIBRARIES})
+-	target_link_libraries(gnuaisgui ${OSMGPSMAP_LIBRARIES})
++	target_link_libraries(gnuaisgui osmgpsmap-1.0)
+ 	target_link_libraries(gnuaisgui m)
+ 
+ 	target_link_libraries(gnuaisgui pthread)
+ 
+-	include_directories(${GTK3_INCLUDE_DIRS} ${OSMGPSMAP_INCLUDE_DIRS})
++	include_directories(${GTK3_INCLUDE_DIRS} ${OSMGPSMAP_INCLUDE_DIR}/osmgpsmap-1.0)
+ 
+ 	install(TARGETS gnuaisgui DESTINATION bin)
+-else (GTK3_FOUND AND GTHREAD_FOUND AND OSMGPSMAP_FOUND)
++else (GTK3_FOUND AND GTHREAD_FOUND AND OSMGPSMAP_INCLUDE_DIR)
+ 	MESSAGE( "Missing one more packages for building gui. Skipping")
+-endif(GTK3_FOUND AND GTHREAD_FOUND AND OSMGPSMAP_FOUND)
++endif(GTK3_FOUND AND GTHREAD_FOUND AND OSMGPSMAP_INCLUDE_DIR)
+ 
+ 
