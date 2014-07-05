@@ -1,8 +1,9 @@
-gnuais (0.3.1-2ubuntu1) unstable; urgency=low
+gnuais (0.3.2-1) unstable; urgency=low
 
-  * Back to using osm as map source since osm-gps-map has been patched
+  * New upstream release
+  * Now building with osm-gps-map > 1.0 and GTK 3
 
- -- Ruben Undheim <ruben.undheim@gmail.com>  Sat, 28 Jun 2014 12:37:55 +0200
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Sat, 05 Jul 2014 13:19:33 +0200
 
 gnuais (0.3.1-2) unstable; urgency=low
 
