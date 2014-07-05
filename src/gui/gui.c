@@ -75,7 +75,7 @@ typedef struct {
 //				GdkEventConfigure * event);
 void drawboats(GtkWidget * drawing_area);
 
-static GdkPixmap *pixmap = NULL;
+//static GdkPixmap *pixmap = NULL;
 GdkPixbuf *map;
 int socket_fd;
 pthread_t thre;
@@ -245,14 +245,19 @@ void destroy(GtkWidget * Widget, gpointer data)
 	gtk_main_quit();
 }
 
-void restore(GtkWidget * widget, gpointer data)
+void hello(GtkWidget * widget, gpointer data)
 {
-	GtkWidget *osmmap = GTK_WIDGET(data);
-	osm_gps_map_set_center_and_zoom(osmmap,63,10,12);
-}
-void save(GtkWidget * widget, gpointer data)
-{
-	GtkWidget *osmmap = GTK_WIDGET(data);
+	GtkWidget *drawing_area = GTK_WIDGET(data);
+	static int teller = 0;
+	g_print("Changes map\n");
+	if (teller % 3 == 0)
+		changemap(drawing_area, "waterford2.png");
+	else if (teller % 3 == 1)
+		changemap(drawing_area, "waterford.png");
+	else
+		changemap(drawing_area, "map.png");
+
+	teller++;
 }
 
 int initserial(const char *dev)
@@ -488,61 +493,61 @@ void *threaden(void *args)
 
 void drawboats(GtkWidget * drawing_area)
 {
-	int i;
-	GdkPoint p;
-	int x;
-	int y;
-	float theta;
-
-	G_LOCK(updatemap);
-
-	for (i = 0; i < numberofships; i++) {
-
-		findPixel(ships[i]->longitude, ships[i]->latitude, &p);
-		x = p.x;
-		y = p.y;
-		if (ships[i]->heading != 511)
-			theta = ships[i]->heading * M_PI / 180;
-		else
-			theta = ships[i]->course * M_PI / 180;
-
-		printf("x:%d y:%d\n", x, y);
-		if (x == -1 || y == -1)
-			continue;
-
-		GdkPoint punkter[3];
-		GdkPoint punkter2[4];
-		if (ships[i]->type != 4) {
-			punkter[0].x = x - 6 * cos(theta) + 18 * sin(theta);
-			punkter[0].y = y - 6 * sin(theta) - 18 * cos(theta);
-			punkter[1].x = x + 0 * cos(theta) + 29 * sin(theta);
-			punkter[1].y = y + 0 * sin(theta) - 29 * cos(theta);
-			punkter[2].x = x + 5 * cos(theta) + 18 * sin(theta);
-			punkter[2].y = y + 5 * sin(theta) - 18 * cos(theta);
-
-			punkter2[0].x = x - 5 * cos(theta) + 20 * sin(theta);
-			punkter2[0].y = y - 5 * sin(theta) - 20 * cos(theta);
-			punkter2[1].x = x + 5 * cos(theta) + 20 * sin(theta);
-			punkter2[1].y = y + 5 * sin(theta) - 20 * cos(theta);
-			punkter2[2].x = x + 5 * cos(theta) - 10 * sin(theta);
-			punkter2[2].y = y + 5 * sin(theta) + 10 * cos(theta);
-			punkter2[3].x = x - 5 * cos(theta) - 10 * sin(theta);
-			punkter2[3].y = y - 5 * sin(theta) + 10 * cos(theta);
-			gdk_draw_polygon(pixmap, drawing_area->style->black_gc, TRUE, punkter, 3);	//fg_gc[GTK_STATE_NORMAL]
-			gdk_draw_polygon(pixmap, drawing_area->style->black_gc, TRUE, punkter2, 4);	//fg_gc[GTK_STATE_NORMAL
-		} else {
-			gdk_draw_rectangle(pixmap,
-					   drawing_area->style->black_gc,
-					   TRUE, x - 10, y - 10, 20, 20);
-		}
-	}
-	
-	gtk_widget_queue_draw_area(drawing_area, 0, 0,
-				   drawing_area->allocation.width,
-				   drawing_area->allocation.height);
-
-	G_UNLOCK(updatemap);
-
+//	int i;
+//	GdkPoint p;
+//	int x;
+//	int y;
+//	float theta;
+//
+//	G_LOCK(updatemap);
+//
+//	for (i = 0; i < numberofships; i++) {
+//
+//		findPixel(ships[i]->longitude, ships[i]->latitude, &p);
+//		x = p.x;
+//		y = p.y;
+//		if (ships[i]->heading != 511)
+//			theta = ships[i]->heading * M_PI / 180;
+//		else
+//			theta = ships[i]->course * M_PI / 180;
+//
+//		printf("x:%d y:%d\n", x, y);
+//		if (x == -1 || y == -1)
+//			continue;
+//
+//		GdkPoint punkter[3];
+//		GdkPoint punkter2[4];
+//		if (ships[i]->type != 4) {
+//			punkter[0].x = x - 6 * cos(theta) + 18 * sin(theta);
+//			punkter[0].y = y - 6 * sin(theta) - 18 * cos(theta);
+//			punkter[1].x = x + 0 * cos(theta) + 29 * sin(theta);
+//			punkter[1].y = y + 0 * sin(theta) - 29 * cos(theta);
+//			punkter[2].x = x + 5 * cos(theta) + 18 * sin(theta);
+//			punkter[2].y = y + 5 * sin(theta) - 18 * cos(theta);
+//
+//			punkter2[0].x = x - 5 * cos(theta) + 20 * sin(theta);
+//			punkter2[0].y = y - 5 * sin(theta) - 20 * cos(theta);
+//			punkter2[1].x = x + 5 * cos(theta) + 20 * sin(theta);
+//			punkter2[1].y = y + 5 * sin(theta) - 20 * cos(theta);
+//			punkter2[2].x = x + 5 * cos(theta) - 10 * sin(theta);
+//			punkter2[2].y = y + 5 * sin(theta) + 10 * cos(theta);
+//			punkter2[3].x = x - 5 * cos(theta) - 10 * sin(theta);
+//			punkter2[3].y = y - 5 * sin(theta) + 10 * cos(theta);
+//			gdk_draw_polygon(pixmap, drawing_area->style->black_gc, TRUE, punkter, 3);	//fg_gc[GTK_STATE_NORMAL]
+//			gdk_draw_polygon(pixmap, drawing_area->style->black_gc, TRUE, punkter2, 4);	//fg_gc[GTK_STATE_NORMAL
+//		} else {
+//			gdk_draw_rectangle(pixmap,
+//					   drawing_area->style->black_gc,
+//					   TRUE, x - 10, y - 10, 20, 20);
+//		}
+//	}
+//	
+//	gtk_widget_queue_draw_area(drawing_area, 0, 0,
+//				   drawing_area->allocation.width,
+//				   drawing_area->allocation.height);
+//
+//	G_UNLOCK(updatemap);
+//
 }
 
 int changemap(GtkWidget * drawing_area, char *filename)
@@ -618,7 +623,6 @@ int main(int argc, char **argv)
 
 	GtkWidget *window;
 	GtkWidget *button;
-	GtkWidget *button2;
 	GtkWidget *hbox;
 	GtkWidget *vbox;
 	GtkWidget *drawing_area;
@@ -717,7 +721,6 @@ int main(int argc, char **argv)
 	//osmmap = osm_gps_map_new ();
     osmmap = g_object_new (OSM_TYPE_GPS_MAP,
                         "map-source",OSM_GPS_MAP_SOURCE_OSM_PUBLIC_TRANSPORT,
-                        //"repo-uri","http://localhost/osm_tiles/#Z/#X/#Y.png",
                         NULL);
 	// <-- End workaround
 	int tmp;
@@ -728,14 +731,9 @@ int main(int argc, char **argv)
 	//				      (scrolled_window),
 	//				      osmmap);
 
-	button = gtk_button_new_with_label("Home");
-	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(restore),
-			 (void *) osmmap);
-
-	button2 = gtk_button_new_with_label("Set as home");
-	g_signal_connect(G_OBJECT(button2), "clicked", G_CALLBACK(save),
-			 (void *) osmmap);
-
+	button = gtk_button_new_with_label("Change map");
+	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(hello),
+			 (void *) drawing_area);
 
 	//overviewframe = gtk_frame_new("Listings");
 
@@ -778,8 +776,7 @@ int main(int argc, char **argv)
 
 	vboxmenu = gtk_vbox_new(0, 0);
 	gtk_container_add(GTK_CONTAINER(frame), vboxmenu);
-	gtk_box_pack_start(GTK_BOX(vboxmenu), button, 0, 1, 0);
-	gtk_box_pack_start(GTK_BOX(vboxmenu), button2, 0, 1, 0);
+	//gtk_box_pack_start(GTK_BOX(vboxmenu), button, 0, 1, 0);
 
 	gtk_container_add(GTK_CONTAINER(mapframe), osmmap);
 
@@ -812,7 +809,6 @@ int main(int argc, char **argv)
 	gtk_widget_show(osmmap);
 	gtk_widget_show(mapframe);
 	gtk_widget_show(button);
-	gtk_widget_show(button2);
 	gtk_widget_show(frame);
 	gtk_widget_show(drawing_area);
 	gtk_widget_show(vbox);

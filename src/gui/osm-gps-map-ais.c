@@ -99,7 +99,7 @@ struct _OsmGpsMapAisPrivate
 };
 
 static void                 osm_gps_map_ais_render       (OsmGpsMapLayer *osd, OsmGpsMap *map);
-static void                 osm_gps_map_ais_draw         (OsmGpsMapLayer *osd, OsmGpsMap *map, GdkDrawable *drawable);
+static void                 osm_gps_map_ais_draw         (OsmGpsMapLayer *osd, OsmGpsMap *map, cairo_t *cr);
 static gboolean             osm_gps_map_ais_busy         (OsmGpsMapLayer *osd);
 static gboolean             osm_gps_map_ais_button_press (OsmGpsMapLayer *osd, OsmGpsMap *map, GdkEventButton *event);
 
@@ -456,10 +456,9 @@ osm_gps_map_ais_render (OsmGpsMapLayer *osd,
 static void
 osm_gps_map_ais_draw (OsmGpsMapLayer *osd,
                               OsmGpsMap *map,
-                              GdkDrawable *drawable)
+                              cairo_t *cr)
 {
 	printf("Drawing\n");
-    cairo_t *cr;
     OsmGpsMapAis *self;
     //OsmGpsMapAisPrivate *priv;
     GtkAllocation allocation;
@@ -470,11 +469,9 @@ osm_gps_map_ais_draw (OsmGpsMapLayer *osd,
     //priv = self->priv;
 
     gtk_widget_get_allocation(GTK_WIDGET(map), &allocation);
-    cr = gdk_cairo_create(drawable);
 
 	coordinates_draw(self, &allocation, cr);
 
-    cairo_destroy(cr);
 }
 
 static gboolean
