@@ -2,7 +2,7 @@ Source: gnuais
 Section: hamradio
 Priority: optional
 Maintainer: Ruben Undheim <ruben.undheim@gmail.com>
-Build-Depends: debhelper (>= 9), cmake, libasound2-dev, libmysqlclient-dev, libpulse-dev, libcurl4-openssl-dev, libgtk3.0-dev, libosmgpsmap-1.0-dev (>= 1.0.2), libsoup2.4-dev
+Build-Depends: debhelper (>= 9), cmake, libasound2-dev, libmysqlclient-dev, libpulse-dev, libcurl4-openssl-dev, libgtk-3-dev, libosmgpsmap-1.0-dev (>= 1.0.2), libsoup2.4-dev
 Standards-Version: 3.9.5
 Homepage: http://gnuais.sourceforge.net/ 
 
