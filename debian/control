@@ -19,6 +19,7 @@ Description: GNU Automatic Identification System receiver
 Package: gnuais-dbg
 Architecture: any
 Section: debug
+Priority: extra
 Depends: gnuais (= ${binary:Version}), ${misc:Depends}
 Description: GNU Automatic Identification System receiver (debug symbols)
  A tool for demodulating and decoding AIS messages using the line input of the
@@ -33,13 +34,19 @@ Package: gnuaisgui
 Architecture: any
 Depends: gnuais (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: GUI for GNU Automatic Identification System receiver
- This GUI plots the vessels that are received by gnuais.
+ This GUI plots the vessels that are received by gnuais in an OpenStreetMap
+ GUI. 
+ .
+ gnuais must be running in the background for gnuaisgui to be 
+ functional.
 
 Package: gnuaisgui-dbg
 Architecture: any
 Section: debug
+Priority: extra
 Depends: gnuaisgui (= ${binary:Version}), ${misc:Depends}
 Description: GUI for GNU Automatic Identification System receiver (debug symbols)
- This GUI plots the vessels that are received by gnuais.
+ This GUI plots the vessels that are received by gnuais in an OpenStreetMap
+ GUI.
  .
  This package contains the debugging symbols for gnuaisgui.
