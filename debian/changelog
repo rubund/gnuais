@@ -3,7 +3,7 @@ gnuais (0.3.2-1) unstable; urgency=low
   * New upstream release
   * Now building with osm-gps-map > 1.0 and GTK 3
 
- -- Ruben Undheim <ruben.undheim@gmail.com>  Sat, 05 Jul 2014 13:19:33 +0200
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Fri, 22 Aug 2014 23:20:10 +0200
 
 gnuais (0.3.1-2) unstable; urgency=low
 
