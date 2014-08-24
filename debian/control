@@ -22,11 +22,11 @@ Section: debug
 Priority: extra
 Depends: gnuais (= ${binary:Version}), ${misc:Depends}
 Description: debug symbols for gnuais
- A tool for demodulating and decoding AIS messages using the line input of the
- sound card. AIS messages are transmitted by marine vessels and contain their
- position, velocity and other interesting information. The messages may be
- saved to a mysql-database, forwarded as NMEA packets or uploaded to an AIS web
- service. 
+ A tool for demodulating and decoding Automatic Identification System messages
+ using the line input of the sound card. AIS messages are transmitted by
+ marine vessels and contain their position, velocity and other interesting
+ information. The messages may be saved to a mysql-database, forwarded as NMEA
+ packets or uploaded to an AIS web service.
  .
  This package contains the debugging symbols for gnuais.
 
