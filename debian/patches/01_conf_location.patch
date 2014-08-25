@@ -1,0 +1,31 @@
+Index: gnuais-0.3.2/src/cfgfile.c
+===================================================================
+--- gnuais-0.3.2.orig/src/cfgfile.c
++++ gnuais-0.3.2/src/cfgfile.c
+@@ -362,22 +362,22 @@ int read_cfgfile(char *f, struct cfgcmd
+ 			tmp_file = fopen("/etc/gnuais.conf","r");	
+ 			ret = 0;
+ 			if(tmp_file == NULL){
+-				tmp_file = fopen("/usr/local/share/doc/gnuais/gnuais.conf-example","r");	
++				tmp_file = fopen("/usr/local/share/doc/gnuais/examples/gnuais.conf-example","r");	
+ 				if(tmp_file == NULL){
+-					tmp_file = fopen("/usr/share/doc/gnuais/gnuais.conf-example","r");	
++					tmp_file = fopen("/usr/share/doc/gnuais/examples/gnuais.conf-example","r");	
+ 					if(tmp_file == NULL){
+ 						hlog(LOG_ERR,"No gnuais.conf-example found to be copied to ~/.config/gnuais/config");
+ 					}
+ 					else {
+ 						hlog(LOG_NOTICE, "Using gnuais.conf-example as a starting point for ~/.config/gnuais/config...");
+-						ret = cpfile(conf_home_folder,"/usr/share/doc/gnuais/gnuais.conf-example");
++						ret = cpfile(conf_home_folder,"/usr/share/doc/gnuais/examples/gnuais.conf-example");
+ 						if(ret == -1) hlog(LOG_ERR, "Could not copy configuration file to the home folder");
+ 						else hlog(LOG_NOTICE, "DONE creating configuration file (~/.config/gnuais/config). You should edit this file manually!");
+ 					}
+ 				}
+ 				else {
+ 					hlog(LOG_NOTICE, "Using gnuais.conf-example as a starting point for ~/.config/gnuais/config...");
+-					ret = cpfile(conf_home_folder,"/usr/local/share/doc/gnuais/gnuais.conf-example");
++					ret = cpfile(conf_home_folder,"/usr/local/share/doc/gnuais/examples/gnuais.conf-example");
+ 					if(ret == -1) hlog(LOG_ERR, "Could not copy configuration file to the home folder");
+ 					else hlog(LOG_NOTICE, "DONE creating configuration file (~/.config/gnuais/config). You should edit this file manually!");
+ 				}
