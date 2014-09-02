@@ -1,6 +1,7 @@
 Description: In debian, the gnuais.conf-example is installed in
-  /usr/share/doc/gnuais/examples/. This patches updates the references to that
-  file in the source code.
+  /usr/share/doc/gnuais/examples/. Since gnuais will copy this file into
+  ~/.config/gnuais/config the first time it runs, this patch is needed.
+  It basically just updates the references to that file in the source code.
 Forwarded: doesn't make sense upstream
 Author: Ruben Undheim <ruben.undheim@gmail.com>
 Index: gnuais-0.3.2/src/cfgfile.c
