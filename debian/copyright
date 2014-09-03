@@ -9,16 +9,27 @@ Copyright: 1996 Thomas Sailer <sailer@ife.ee.ethz.ch>
            2008-2013 Ruben Undheim <ruben.undheim@gmail.com>
 License: GPL-2+
 
-Files: src/gui/osm-utils.h src/gui/osm-gps-map-ais.c src/gui/osm-gpsmap-ais.h
-       src/gui/private.h
-Copyright: 2008 Marcus Bauer <marcus.bauer@gmail.com>
-           2009 Everaldo Canuto <everaldo.canuto@gmail.com>
-           2009-2010 John Stowers <john.stowers@gmail.com>
+Files: src/gui/osd-utils.h src/gui/osm-gps-map-ais.c src/gui/osm-gpsmap-ais.h
+Copyright: 2010 John Stowers <john.stowers@gmail.com>
 License: GPL-2
 
-Files: src/crc32.c src/splay.c src/spsymbol.c
+Files: src/gui/private.h
+Copyright: 2008 Marcus Bauer <marcus.bauer@gmail.com>
+           2009 John Stowers <john.stowers@gmail.com>
+           2009 Everaldo Canuto <everaldo.canuto@gmail.com>
+License: GPL-2
+
+Files: src/crc32.c
 Copyright: 1988 Rayan S. Zachariassen
-           1988 David Brower
+           1999 Matti Aarnio
+License: Artistic or BSD or GPL-2 or LGPL-2
+
+Files: src/splay.c
+Copyright: 1988 David Brower
+License: Artistic or BSD or GPL-2 or LGPL-2
+
+Files: src/spsymbol.c
+Copyright: 1988 Rayan S. Zachariassen
 License: Artistic or BSD or GPL-2 or LGPL-2
 
 Files: debian/*
