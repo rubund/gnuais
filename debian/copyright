@@ -21,11 +21,11 @@ License: GPL-2
 
 Files: src/crc32.c
 Copyright: 1988 Rayan S. Zachariassen
-           1999 Matti Aarnio
+           1999 Matti Aarnio <mea@nic.funet.fi>
 License: Artistic or BSD or GPL-2 or LGPL-2
 
 Files: src/splay.c
-Copyright: 1988 David Brower
+Copyright: 1988 David Brower <daveb@rtech.uucp>
 License: Artistic or BSD or GPL-2 or LGPL-2
 
 Files: src/spsymbol.c
