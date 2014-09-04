@@ -1,2 +1,3 @@
 version=3
+opts="pgpsigurlmangle=s/\/gnuais\/archive\/(\d\S+)\.tar\.(bz2|gz|xz)$/\/gnuais\/releases\/download\/\1\/\1\.tar\.\2\.asc/" \
 https://github.com/rubund/gnuais/releases /rubund/gnuais/archive/(\d\S+)\.tar\.(?:bz2|gz|xz)
