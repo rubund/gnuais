@@ -9,7 +9,7 @@ Copyright: 1996 Thomas Sailer <sailer@ife.ee.ethz.ch>
            2008-2013 Ruben Undheim <ruben.undheim@gmail.com>
 License: GPL-2+
 
-Files: src/gui/osd-utils.h src/gui/osm-gps-map-ais.c src/gui/osm-gpsmap-ais.h
+Files: src/gui/osd-utils.h src/gui/osm-gps-map-ais.c src/gui/osm-gps-map-ais.h
 Copyright: 2010 John Stowers <john.stowers@gmail.com>
 License: GPL-2
 
