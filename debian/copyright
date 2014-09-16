@@ -22,15 +22,15 @@ License: GPL-2
 Files: src/crc32.c
 Copyright: 1988 Rayan S. Zachariassen
            1999 Matti Aarnio <mea@nic.funet.fi>
-License: Artistic or BSD or GPL-2 or LGPL-2
+License: Artistic or BSD-3-clause or GPL-2 or LGPL-2
 
 Files: src/splay.c
 Copyright: 1988 David Brower <daveb@rtech.uucp>
-License: Artistic or BSD or GPL-2 or LGPL-2
+License: Artistic or BSD-3-clause or GPL-2 or LGPL-2
 
 Files: src/spsymbol.c
 Copyright: 1988 Rayan S. Zachariassen
-License: Artistic or BSD or GPL-2 or LGPL-2
+License: Artistic or BSD-3-clause or GPL-2 or LGPL-2
 
 Files: debian/*
 Copyright: 2014 Ruben Undheim <ruben.undheim@gmail.com>
@@ -84,7 +84,7 @@ License: Artistic
  can be found in "/usr/share/common-licenses/Artistic".
 
 
-License: BSD
+License: BSD-3-clause
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions
  are met:
