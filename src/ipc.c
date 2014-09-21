@@ -46,15 +46,15 @@ static void gnuais_ipc_socketlistener(void *asdf){
 	struct ipc_state_t *ipc;
 	ipc = (struct ipc_state_t *)asdf;
 	socklen_t address_length;
-	hlog(LOG_INFO,"IPC thread started");
+	hlog(LOG_NOTICE,"Listening for connections from gnuais GUI");
 	while(((connection_fd = accept(socket_fd, (struct sockaddr *) &address, &address_length)) > - 1) && ipc->numclientsockets < (MAX_CLIENT_SOCKETS - 2)){
 		pthread_mutex_lock(&ipc_mut);
 		ipc->clientsocket[ipc->numclientsockets] = connection_fd;
 		ipc->numclientsockets++;
 		pthread_mutex_unlock(&ipc_mut);
-		hlog(LOG_INFO,"numclientsockets: %d\n",ipc->numclientsockets);
+		hlog(LOG_NOTICE,"Gnuais GUI has connected (%d)\n",ipc->numclientsockets);
 	}
-	hlog(LOG_INFO,"Done in IPC thread");
+	hlog(LOG_NOTICE,"Stopped listening for connections from gnuais GUI");
 }
 
 
