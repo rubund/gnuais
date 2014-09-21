@@ -21,7 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
+#include <time.h>
 #ifdef HAVE_MYSQL
 #include <mysql/mysql.h>
 #endif
@@ -37,21 +37,21 @@ struct mysql_state_t {
 extern struct mysql_state_t *myout_init();
 
 extern int myout_ais_position(struct mysql_state_t *my,
-	int tid, int mmsi, float lat, float lon,
+	time_t tid, int mmsi, float lat, float lon,
 	float hdg, float course, float sog);
 
 extern int myout_ais_basestation(struct mysql_state_t *my,
-	int tid, int mmsi, float lat, float lon);
+	time_t tid, int mmsi, float lat, float lon);
 
 extern int myout_ais_vesseldata(struct mysql_state_t *my,
-	int tid, int mmsi, char *name, char *destination,
+	time_t tid, int mmsi, char *name, char *destination,
 	float draught, int A, int B, int C, int D);
 
 extern int myout_ais_vesselname(struct mysql_state_t *my,
-	int tid, int mmsi, const char *name, const char *destination);
+	time_t tid, int mmsi, const char *name, const char *destination);
 	
 extern int myout_ais_vesseldatab(struct mysql_state_t *my,
-	int tid, int mmsi, int A, int B, int C, int D);
+	time_t tid, int mmsi, int A, int B, int C, int D);
 
-extern int myout_nmea(struct mysql_state_t *my, int tid, char *nmea);
+extern int myout_nmea(struct mysql_state_t *my, time_t tid, char *nmea);
 
