@@ -139,10 +139,10 @@ void receiver_run(struct receiver *rx, short *buf, int len)
 	level_distance = time(NULL) - rx->last_levellog;
 	
 	if (level > 95.0 && (level_distance >= 30 || level_distance >= sound_levellog)) {
-		hlog(LOG_NOTICE, "Level on ch %d too high: %.0f %%", rx->ch_ofs, level);
+		hlog(LOG_NOTICE, "Level on ch %c too high: %.0f %%", rx->decoder->chanid, level);
 		time(&rx->last_levellog);
 	} else if (sound_levellog != 0 && level_distance >= sound_levellog) {
-		hlog(LOG_INFO, "Level on ch %d: %.0f %%", rx->ch_ofs, level);
+		hlog(LOG_INFO, "Level on ch %c: %.0f %%", rx->decoder->chanid, level);
 		time(&rx->last_levellog);
 	}
 }
