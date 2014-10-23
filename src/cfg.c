@@ -35,6 +35,7 @@
 #include "hmalloc.h"
 #include "hlog.h"
 #include "cfgfile.h"
+#include "range.h"
 
 #ifdef DMALLOC
 #include <dmalloc.h>
@@ -58,6 +59,7 @@ char *myemail;
 
 float mylat = -200.0;
 float mylng = -200.0;
+int have_my_loc;
 
 char *sound_device;
 char *sound_in_file;
@@ -357,6 +359,12 @@ int read_config(void)
 		if (sound_device != def_sound_device)
 			hfree(sound_device);
 		sound_device = NULL;
+	}
+	
+	have_my_loc = (mylat > -90 && mylat < 90 && mylng > -180 && mylng < 180);
+	if (have_my_loc) {
+		mylat = lat2rad(mylat);
+		mylng = lon2rad(mylng);
 	}
 	
 	/* put in the new uplink config */
