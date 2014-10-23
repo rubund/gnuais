@@ -254,7 +254,10 @@ int main(int argc, char *argv[])
 				last_stats = now;
 			} else if (now - last_stats >= stats_interval) {
 				last_stats = now;
-				log_range();
+				if (rx_a)
+					log_range(rx_a->decoder);
+				if (rx_b)
+					log_range(rx_b->decoder);
 			}
 		}
 	}

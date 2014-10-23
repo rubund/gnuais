@@ -397,7 +397,7 @@ void protodec_pos(struct demod_state_t *d, int bufferlen, time_t received_t, uns
 			(float) sog / 10.0);
 	
 	if (have_my_loc)
-		update_range((float) latitude / 600000.0, (float) longitude / 600000.0);
+		update_range(d, (float) latitude / 600000.0, (float) longitude / 600000.0);
 }
 
 void protodec_4(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
@@ -439,7 +439,7 @@ void protodec_4(struct demod_state_t *d, int bufferlen, time_t received_t, unsig
 			0, 0.0, 0, 0.0);
 	
 	if (have_my_loc)
-		update_range((float) latitude / 600000.0, (float) longitude / 600000.0);
+		update_range(d, (float) latitude / 600000.0, (float) longitude / 600000.0);
 }
 
 void protodec_5(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
@@ -626,7 +626,7 @@ void protodec_18(struct demod_state_t *d, int bufferlen, time_t received_t, unsi
 		(float) sog / 10.0);
 	
 	if (have_my_loc)
-		update_range((float) latitude / 600000.0, (float) longitude / 600000.0);
+		update_range(d, (float) latitude / 600000.0, (float) longitude / 600000.0);
 }
 
 void protodec_19(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
