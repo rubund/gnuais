@@ -60,6 +60,8 @@ struct demod_state_t {
 	int lostframes2;
 	unsigned char seqnr;
 	
+	float best_range;
+	
 	struct serial_state_t *serial;
 	struct ipc_state_t *ipc;
 	
