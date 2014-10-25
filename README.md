@@ -14,11 +14,11 @@ Make new database (if needed) with command:
   mysqladmin create <databasename>
 
 You can also use any existing database adding table 'ais':
-  mysql <databasename>  < create_table.sql
+  mysql <databasename>  < create\_table.sql
   
 Or if you have specified username and password for your database:
-  mysql -u <username> -p <databasename>  < create_table.sql
+  mysql -u <username> -p <databasename>  < create\_table.sql
   
  
 
-The file create_table.sql can be found in this folder.
+The file create\_table.sql can be found in this folder.
