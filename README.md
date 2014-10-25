@@ -1,11 +1,9 @@
 
 The first time GNU AIS is started, a configuration file is created in ~/.config/gnuais/config.
 An alternative configuration file can be specified with the command line argument -c <filename>.
+If an alternative configuration file is specified the first time you run gnuais, the file ~/.config/gnuais/config
+will not be generated.
 It is explained in ~/.config/gnuais/config how you will have to edit it in order to fullfill your wishes.
-
-(Note: For backwards compatibility, if there is a configuration file in /etc/gnuais.conf, no local
-configuration file will be created in ~/.config/gnuais/config. /etc/gnuais.conf will override
-user settings.)
 
 You will also have to create a table in the database if the mysql option is desired:
 
