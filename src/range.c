@@ -31,6 +31,13 @@ static float maidenhead_km_distance(float lat1, float lon1, float lat2, float lo
 
 void update_range(struct demod_state_t *d, float lat, float lon)
 {
+	// ignore bad GPS fixes, sent commonly by some AIS stations
+	if (lat > 89.0 || lat < -89.0 || lon > 180.01 || lon < -180.01)
+		return;
+	
+	if (lat < 0.001 && lat > -0.001 && lon < 0.001 && lon > -0.001)
+		return;
+	
 	float distance = maidenhead_km_distance(mylat, mylng, lat2rad(lat), lon2rad(lon));
 	
 	if (distance > d->best_range)
