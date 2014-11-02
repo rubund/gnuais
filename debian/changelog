@@ -1,3 +1,9 @@
+gnuais (0.3.3-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Sun, 02 Nov 2014 15:58:55 +0100
+
 gnuais (0.3.2-1) unstable; urgency=low
 
   * Initial release (Closes: #744790)
