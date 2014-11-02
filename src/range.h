@@ -1,5 +1,8 @@
+
 /*
- *	(c) Tomi Manninen <tomi.manninen@hut.fi>
+ *	range.h
+ *
+ *	(c) Heikki Hannikainen 2014
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -14,32 +17,17 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *	
  */
 
-#ifndef CFGFILE_H
-#define CFGFILE_H
+#ifndef RANGE_H
+#define RANGE_H
 
-#define CFGLINE_LEN	102400
+#include "protodec.h"
 
-struct cfgcmd {
-	char	*name;
-	int	(*function)	(void *dest, int argc, char **argv);
-	void	*dest;
-};
+extern float lat2rad(float lat);
+extern float lon2rad(float lon);
 
-extern int parse_args(char *argv[], char *cmd);
-extern char *argstr(int arg, int argc, char **argv);
-
-extern int read_cfgfile(char *f, struct cfgcmd *cmds);
-
-extern int do_string(char **dest, int argc, char **argv);
-extern int do_int(int *dest, int argc, char **argv);
-extern int do_float(float *dest, int argc, char **argv);
-extern int do_toggle(int *dest, int argc, char **argv);
-
-extern long long hatoll(char *s);
-extern char *strlwr(char *s);
+extern void update_range(struct demod_state_t *d, float lat, float lon);
+extern void log_range(struct demod_state_t *rx);
 
 #endif
-

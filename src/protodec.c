@@ -35,6 +35,7 @@
 #include "cfg.h"
 #include "hlog.h"
 #include "cache.h"
+#include "range.h"
 #include "ipc.h"
 
 #ifdef DMALLOC
@@ -394,6 +395,9 @@ void protodec_pos(struct demod_state_t *d, int bufferlen, time_t received_t, uns
 			(float) course / 10.0,
 			rateofturn,
 			(float) sog / 10.0);
+	
+	if (have_my_loc)
+		update_range(d, (float) latitude / 600000.0, (float) longitude / 600000.0);
 }
 
 void protodec_4(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
@@ -433,6 +437,9 @@ void protodec_4(struct demod_state_t *d, int bufferlen, time_t received_t, unsig
 			(float) latitude / 600000.0,
 			(float) longitude / 600000.0,
 			0, 0.0, 0, 0.0);
+	
+	if (have_my_loc)
+		update_range(d, (float) latitude / 600000.0, (float) longitude / 600000.0);
 }
 
 void protodec_5(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)
@@ -617,6 +624,9 @@ void protodec_18(struct demod_state_t *d, int bufferlen, time_t received_t, unsi
 		(float) course / 10.0,
 		rateofturn,
 		(float) sog / 10.0);
+	
+	if (have_my_loc)
+		update_range(d, (float) latitude / 600000.0, (float) longitude / 600000.0);
 }
 
 void protodec_19(struct demod_state_t *d, int bufferlen, time_t received_t, unsigned long mmsi)

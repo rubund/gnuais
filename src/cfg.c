@@ -35,6 +35,7 @@
 #include "hmalloc.h"
 #include "hlog.h"
 #include "cfgfile.h"
+#include "range.h"
 
 #ifdef DMALLOC
 #include <dmalloc.h>
@@ -55,6 +56,10 @@ char *logname = def_logname;	/* syslog entries use this program name */
 
 char *mycall;
 char *myemail;
+
+float mylat = -200.0;
+float mylng = -200.0;
+int have_my_loc;
 
 char *sound_device;
 char *sound_in_file;
@@ -97,6 +102,8 @@ static struct cfgcmd cfg_cmds[] = {
 	{ "logdir",		_CFUNC_ do_string,	&logdir			},
 	{ "mycall",		_CFUNC_ do_string,	&mycall			},
 	{ "myemail",		_CFUNC_ do_string,	&myemail		},
+	{ "latitude",		_CFUNC_ do_float,	&mylat			},
+	{ "longitude",		_CFUNC_ do_float,	&mylng			},
 	{ "statsinterval",	_CFUNC_ do_interval,	&stats_interval		},
 	{ "expiryinterval",	_CFUNC_ do_interval,	&expiry_interval	},
 	{ "uplink",		_CFUNC_ do_uplink,	&new_uplink_config	},
@@ -352,6 +359,12 @@ int read_config(void)
 		if (sound_device != def_sound_device)
 			hfree(sound_device);
 		sound_device = NULL;
+	}
+	
+	have_my_loc = (mylat > -90 && mylat < 90 && mylng > -180 && mylng < 180);
+	if (have_my_loc) {
+		mylat = lat2rad(mylat);
+		mylng = lon2rad(mylng);
 	}
 	
 	/* put in the new uplink config */

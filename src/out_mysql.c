@@ -95,14 +95,14 @@ static int myout_reconnect(struct mysql_state_t *my)
 	return myout_connect(my);
 }
 
-static int myout_delete_from(struct mysql_state_t *my, int now, char *table)
+static int myout_delete_from(struct mysql_state_t *my, time_t now, char *table)
 {
 	char q[MAX_SQL_LEN];
 	int qrows;
 	const char *e;
 	
 	snprintf(q, MAX_SQL_LEN,
-		"DELETE FROM %s WHERE time < %d", table, now - mysql_oldlimit);
+		"DELETE FROM %s WHERE time < %ld", table, now - ((time_t)mysql_oldlimit));
 	
 	if (mysql_query(&my->conn, q)) {
 		e = mysql_error(&my->conn);
@@ -117,7 +117,7 @@ static int myout_delete_from(struct mysql_state_t *my, int now, char *table)
 	return qrows;
 }
 
-static int myout_delete_old(struct mysql_state_t *my, int now)
+static int myout_delete_old(struct mysql_state_t *my, time_t now)
 {
 	int rows;
 	
@@ -171,7 +171,7 @@ static int myout_update_or_insert(struct mysql_state_t *my, char *upd, char *ins
 
 #endif
 
-int myout_ais_position(struct mysql_state_t *my, int tid, int mmsi, float lat, float lon, float hdg, float course, float sog)
+int myout_ais_position(struct mysql_state_t *my, time_t tid, int mmsi, float lat, float lon, float hdg, float course, float sog)
 {
 #ifdef HAVE_MYSQL
 	char ins[MAX_SQL_LEN], upd[MAX_SQL_LEN];
@@ -183,10 +183,10 @@ int myout_ais_position(struct mysql_state_t *my, int tid, int mmsi, float lat, f
 	}
 	
 	snprintf(ins, MAX_SQL_LEN,
-		"INSERT INTO ais_position (time,mmsi,latitude,longitude,heading,course,speed) VALUES (%d,%d,%.7f,%.7f,%.5f,%f,%f)",
+		"INSERT INTO ais_position (time,mmsi,latitude,longitude,heading,course,speed) VALUES (%ld,%d,%.7f,%.7f,%.5f,%f,%f)",
 		tid, mmsi, lat, lon, hdg, course, sog);
 	snprintf(upd, MAX_SQL_LEN,
-		"UPDATE ais_position SET time=%d, latitude=%.7f, longitude=%.7f, heading=%f, course=%.5f, speed=%f WHERE mmsi=%d",
+		"UPDATE ais_position SET time=%ld, latitude=%.7f, longitude=%.7f, heading=%f, course=%.5f, speed=%f WHERE mmsi=%d",
 		tid, lat, lon, hdg, course, sog, mmsi);
 	
 	return myout_update_or_insert(my, upd, ins);
@@ -195,16 +195,16 @@ int myout_ais_position(struct mysql_state_t *my, int tid, int mmsi, float lat, f
 #endif
 }
 
-int myout_ais_basestation(struct mysql_state_t *my, int tid, int mmsi, float lat, float lon)
+int myout_ais_basestation(struct mysql_state_t *my, time_t tid, int mmsi, float lat, float lon)
 {
 #ifdef HAVE_MYSQL
 	char ins[MAX_SQL_LEN], upd[MAX_SQL_LEN];
 	
 	snprintf(ins, MAX_SQL_LEN,
-		"INSERT INTO ais_basestation (time,mmsi,latitude,longitude) VALUES (%d,%d,%.7f,%.7f)",
+		"INSERT INTO ais_basestation (time,mmsi,latitude,longitude) VALUES (%ld,%d,%.7f,%.7f)",
 		tid, mmsi, lat, lon);
 	snprintf(upd, MAX_SQL_LEN,
-		"UPDATE ais_basestation SET time=%d, latitude=%.7f, longitude=%.7f WHERE mmsi=%d",
+		"UPDATE ais_basestation SET time=%ld, latitude=%.7f, longitude=%.7f WHERE mmsi=%d",
 		tid, lat, lon, mmsi);
 	
 	return myout_update_or_insert(my, upd, ins);
@@ -214,18 +214,18 @@ int myout_ais_basestation(struct mysql_state_t *my, int tid, int mmsi, float lat
 }
 
 int myout_ais_vesseldata(struct mysql_state_t *my,
-	int tid, int mmsi, char *name, char *destination,
+	time_t tid, int mmsi, char *name, char *destination,
 	float draught, int A, int B, int C, int D)
 {
 #ifdef HAVE_MYSQL
 	char ins[MAX_SQL_LEN], upd[MAX_SQL_LEN];
 	
 	snprintf(ins, MAX_SQL_LEN,
-		"INSERT INTO ais_vesseldata (time,mmsi,name,destination,draught,A,B,C,D) VALUES (%d,%d,\"%s\",\"%s\",%f,%d,%d,%d,%d)",
+		"INSERT INTO ais_vesseldata (time,mmsi,name,destination,draught,A,B,C,D) VALUES (%ld,%d,\"%s\",\"%s\",%f,%d,%d,%d,%d)",
 		tid, mmsi, name, destination, draught, A, B, C, D);
 	
 	snprintf(upd, MAX_SQL_LEN,
-		"UPDATE ais_vesseldata SET time=%d, name=\"%s\", destination=\"%s\", A=%d, B=%d, C=%d, D=%d, draught=%f WHERE mmsi=%d",
+		"UPDATE ais_vesseldata SET time=%ld, name=\"%s\", destination=\"%s\", A=%d, B=%d, C=%d, D=%d, draught=%f WHERE mmsi=%d",
 		tid, name, destination, A, B, C, D, draught, mmsi);
 		
 	return myout_update_or_insert(my, upd, ins);
@@ -235,17 +235,17 @@ int myout_ais_vesseldata(struct mysql_state_t *my,
 }
 
 int myout_ais_vesseldatab(struct mysql_state_t *my,
-	int tid, int mmsi, int A, int B, int C, int D)
+	time_t tid, int mmsi, int A, int B, int C, int D)
 {
 #ifdef HAVE_MYSQL
 	char ins[MAX_SQL_LEN], upd[MAX_SQL_LEN];
 	
 	snprintf(ins, MAX_SQL_LEN,
-		"INSERT INTO ais_vesseldata (time,mmsi,A,B,C,D) VALUES (%d,%d,%d,%d,%d,%d)",
+		"INSERT INTO ais_vesseldata (time,mmsi,A,B,C,D) VALUES (%ld,%d,%d,%d,%d,%d)",
 		tid, mmsi, A, B, C, D);
 	
 	snprintf(upd, MAX_SQL_LEN,
-		"UPDATE ais_vesseldata SET time=%d, A=%d, B=%d, C=%d, D=%d WHERE mmsi=%d",
+		"UPDATE ais_vesseldata SET time=%ld, A=%d, B=%d, C=%d, D=%d WHERE mmsi=%d",
 		tid, A, B, C, D, mmsi);
 		
 	return myout_update_or_insert(my, upd, ins);
@@ -255,17 +255,17 @@ int myout_ais_vesseldatab(struct mysql_state_t *my,
 }
 
 int myout_ais_vesselname(struct mysql_state_t *my,
-	int tid, int mmsi, const char *name, const char *destination)
+	time_t tid, int mmsi, const char *name, const char *destination)
 {
 #ifdef HAVE_MYSQL
 	char ins[MAX_SQL_LEN], upd[MAX_SQL_LEN];
 	
 	snprintf(ins, MAX_SQL_LEN,
-		"INSERT INTO ais_vesseldata (time,mmsi,name,destination) VALUES (%d,%d,\"%s\",\"%s\")",
+		"INSERT INTO ais_vesseldata (time,mmsi,name,destination) VALUES (%ld,%d,\"%s\",\"%s\")",
 		tid, mmsi, name, destination);
 	
 	snprintf(upd, MAX_SQL_LEN,
-		"UPDATE ais_vesseldata SET time=%d, name=\"%s\", destination=\"%s\" WHERE mmsi=%d",
+		"UPDATE ais_vesseldata SET time=%ld, name=\"%s\", destination=\"%s\" WHERE mmsi=%d",
 		tid, name, destination, mmsi);
 		
 	return myout_update_or_insert(my, upd, ins);
@@ -275,7 +275,7 @@ int myout_ais_vesselname(struct mysql_state_t *my,
 }
 
 
-int myout_nmea(struct mysql_state_t *my, int tid, char *nmea)
+int myout_nmea(struct mysql_state_t *my, time_t tid, char *nmea)
 {
 #ifdef HAVE_MYSQL
 	char q[MAX_SQL_LEN];
@@ -283,7 +283,7 @@ int myout_nmea(struct mysql_state_t *my, int tid, char *nmea)
 	const char *e;
 	
 	snprintf(q, MAX_SQL_LEN,
-		"INSERT INTO ais_nmea (time, message) VALUES (%d,\"!%s\")",
+		"INSERT INTO ais_nmea (time, message) VALUES (%ld,\"!%s\")",
 		tid, nmea);
 		
 	if (mysql_query(&my->conn, q)) {

@@ -41,7 +41,6 @@
 #define UNIX_PATH_MAX 100
 #define DBG(x)
 
-int changemap(GtkWidget * drawing_area, char *filename);
 
 extern ship *ships[];
 extern int numberofships;
@@ -71,9 +70,6 @@ typedef struct {
 	float heading;
 } shipdata;
 
-//static gboolean configure_event(GtkWidget * widget,
-//				GdkEventConfigure * event);
-void drawboats(GtkWidget * drawing_area);
 
 //static GdkPixmap *pixmap = NULL;
 GdkPixbuf *map;
@@ -247,17 +243,6 @@ void destroy(GtkWidget * Widget, gpointer data)
 
 void hello(GtkWidget * widget, gpointer data)
 {
-	GtkWidget *drawing_area = GTK_WIDGET(data);
-	static int teller = 0;
-	g_print("Changes map\n");
-	if (teller % 3 == 0)
-		changemap(drawing_area, "waterford2.png");
-	else if (teller % 3 == 1)
-		changemap(drawing_area, "waterford.png");
-	else
-		changemap(drawing_area, "map.png");
-
-	teller++;
 }
 
 int initserial(const char *dev)
@@ -466,136 +451,6 @@ void *threaden(void *args)
 	return NULL;
 }
 
-//static gboolean configure_event(GtkWidget * widget,
-//				GdkEventConfigure * event)
-//{
-//	if (pixmap)
-//		g_object_unref(pixmap);
-//	//guchar *pixels;
-//	//pixels = gdk_pixbuf_get_pixels(map);
-//	//int rowstride = gdk_pixbuf_get_rowstride(map);
-//	pixmap = gdk_pixmap_new(widget->window,
-//				widget->allocation.width,
-//				widget->allocation.height, -1);
-//
-//	gdk_draw_rectangle(pixmap, widget->style->white_gc, TRUE, 0, 0,
-//			   widget->allocation.width,
-//			   widget->allocation.height);
-//
-//	//gdk_draw_rgb_image(pixmap, widget->style->fg_gc[GTK_STATE_NORMAL],
-//	//		   0, 0, mapcoords.mapwidth, mapcoords.mapheight,
-//	//		   GDK_RGB_DITHER_NORMAL, pixels, rowstride);
-//
-//	drawboats(widget);
-//
-//	return TRUE;
-//}
-
-void drawboats(GtkWidget * drawing_area)
-{
-//	int i;
-//	GdkPoint p;
-//	int x;
-//	int y;
-//	float theta;
-//
-//	G_LOCK(updatemap);
-//
-//	for (i = 0; i < numberofships; i++) {
-//
-//		findPixel(ships[i]->longitude, ships[i]->latitude, &p);
-//		x = p.x;
-//		y = p.y;
-//		if (ships[i]->heading != 511)
-//			theta = ships[i]->heading * M_PI / 180;
-//		else
-//			theta = ships[i]->course * M_PI / 180;
-//
-//		printf("x:%d y:%d\n", x, y);
-//		if (x == -1 || y == -1)
-//			continue;
-//
-//		GdkPoint punkter[3];
-//		GdkPoint punkter2[4];
-//		if (ships[i]->type != 4) {
-//			punkter[0].x = x - 6 * cos(theta) + 18 * sin(theta);
-//			punkter[0].y = y - 6 * sin(theta) - 18 * cos(theta);
-//			punkter[1].x = x + 0 * cos(theta) + 29 * sin(theta);
-//			punkter[1].y = y + 0 * sin(theta) - 29 * cos(theta);
-//			punkter[2].x = x + 5 * cos(theta) + 18 * sin(theta);
-//			punkter[2].y = y + 5 * sin(theta) - 18 * cos(theta);
-//
-//			punkter2[0].x = x - 5 * cos(theta) + 20 * sin(theta);
-//			punkter2[0].y = y - 5 * sin(theta) - 20 * cos(theta);
-//			punkter2[1].x = x + 5 * cos(theta) + 20 * sin(theta);
-//			punkter2[1].y = y + 5 * sin(theta) - 20 * cos(theta);
-//			punkter2[2].x = x + 5 * cos(theta) - 10 * sin(theta);
-//			punkter2[2].y = y + 5 * sin(theta) + 10 * cos(theta);
-//			punkter2[3].x = x - 5 * cos(theta) - 10 * sin(theta);
-//			punkter2[3].y = y - 5 * sin(theta) + 10 * cos(theta);
-//			gdk_draw_polygon(pixmap, drawing_area->style->black_gc, TRUE, punkter, 3);	//fg_gc[GTK_STATE_NORMAL]
-//			gdk_draw_polygon(pixmap, drawing_area->style->black_gc, TRUE, punkter2, 4);	//fg_gc[GTK_STATE_NORMAL
-//		} else {
-//			gdk_draw_rectangle(pixmap,
-//					   drawing_area->style->black_gc,
-//					   TRUE, x - 10, y - 10, 20, 20);
-//		}
-//	}
-//	
-//	gtk_widget_queue_draw_area(drawing_area, 0, 0,
-//				   drawing_area->allocation.width,
-//				   drawing_area->allocation.height);
-//
-//	G_UNLOCK(updatemap);
-//
-}
-
-int changemap(GtkWidget * drawing_area, char *filename)
-{
-	char cbrfilename[100];
-	int ret;
-	map = gdk_pixbuf_new_from_file(filename, 0);
-	if (!map) {
-		printf
-		    ("Can't open mapfile. Please stay in a directory with a image file called map.png\n");
-		return 0;
-	}
-	strcpy(mapfilename, filename);
-	mapcoords.mapwidth = gdk_pixbuf_get_width(map);
-	mapcoords.mapheight = gdk_pixbuf_get_height(map);
-
-	int strl = strlen(filename);
-	strncpy(cbrfilename, mapfilename, strl - 3);
-	cbrfilename[strl - 3] = 'c';
-	cbrfilename[strl - 2] = 'b';
-	cbrfilename[strl - 1] = 'r';
-	cbrfilename[strl] = 0;
-	FILE *cbrfile = fopen(cbrfilename, "r");
-	if (cbrfile == NULL) {
-		printf
-		    ("Could not find calibrate file for map!!! You should make a file called %s in the same folder as the map.\n",
-		     cbrfilename);
-		mapcoords.topleftlon = 0;
-		mapcoords.topleftlat = 1;
-		mapcoords.botrightlon = 1;
-		mapcoords.botrightlat = 0;
-	} else {
-		ret = fscanf(cbrfile, "%lf", &mapcoords.topleftlon);
-		if(ret == 0) return -1;
-		ret = fscanf(cbrfile, "%lf", &mapcoords.topleftlat);
-		if(ret == 0) return -1;
-		ret = fscanf(cbrfile, "%lf", &mapcoords.botrightlon);
-		if(ret == 0) return -1;
-		ret = fscanf(cbrfile, "%lf", &mapcoords.botrightlat);
-		if(ret == 0) return -1;
-		fclose(cbrfile);
-	}
-
-	gtk_widget_set_size_request(GTK_WIDGET(drawing_area),
-				    mapcoords.mapwidth,
-				    mapcoords.mapheight);
-	return 0;
-}
 
 //static gboolean expose_event(GtkWidget * widget, GdkEventExpose * event)
 //{
@@ -647,39 +502,6 @@ int main(int argc, char **argv)
 	threadwidgets *twidgets =
 	    (threadwidgets *) malloc(sizeof(threadwidgets));
 
-	g_type_init();
-	//map = gdk_pixbuf_new_from_file(mapfilename, 0);
-	//if (!map) {
-	//	printf
-	//	    ("Can't open mapfile. Please stay in a directory with a image file called map.png\n");
-	//	exit(-1);
-	//}
-	//mapcoords.mapwidth = gdk_pixbuf_get_width(map);
-	//mapcoords.mapheight = gdk_pixbuf_get_height(map);
-
-	//int strl = strlen(mapfilename);
-	//strncpy(cbrfilename, mapfilename, strl - 3);
-	//cbrfilename[strl - 3] = 'c';
-	//cbrfilename[strl - 2] = 'b';
-	//cbrfilename[strl - 1] = 'r';
-	//cbrfilename[strl] = 0;
-	//FILE *cbrfile = fopen(cbrfilename, "r");
-	//if (cbrfile == NULL) {
-	//	printf
-	//	    ("Could not find calibrate file for map!!! You should make a file called %s in the same folder as the map.\n",
-	//	     cbrfilename);
-	//	mapcoords.topleftlon = 0;
-	//	mapcoords.topleftlat = 1;
-	//	mapcoords.botrightlon = 1;
-	//	mapcoords.botrightlat = 0;
-	//} else {
-	//	fscanf(cbrfile, "%lf", &mapcoords.topleftlon);
-	//	fscanf(cbrfile, "%lf", &mapcoords.topleftlat);
-	//	fscanf(cbrfile, "%lf", &mapcoords.botrightlon);
-	//	fscanf(cbrfile, "%lf", &mapcoords.botrightlat);
-	//	fclose(cbrfile);
-	//}
-	g_thread_init(NULL);
 	gdk_threads_init();
 	gdk_threads_enter();
 
@@ -717,7 +539,6 @@ int main(int argc, char **argv)
 	//gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW
 	//				      (scrolled_window),
 	//				      drawing_area);
-	// FIXME: This is a workaround because of debian bug: #745860
 	//osmmap = osm_gps_map_new ();
     osmmap = g_object_new (OSM_TYPE_GPS_MAP,
                         NULL);
@@ -765,15 +586,15 @@ int main(int argc, char **argv)
 	frame = gtk_frame_new(NULL);
 	gtk_widget_set_size_request(GTK_WIDGET(frame), 100, 20);
 	;
-	hbox = gtk_hbox_new(0, 0);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), frame, 0, 0, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), notebook, 1, 1, 0);
 
-	vbox = gtk_vbox_new(1, 0);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);   // before: gtk_vbox_new(1,0);
 	gtk_container_add(GTK_CONTAINER(window), vbox);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, 1, 1, 0);
 
-	vboxmenu = gtk_vbox_new(0, 0);
+	vboxmenu = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0); // before: gtk_vbox_new(0,0);
 	gtk_container_add(GTK_CONTAINER(frame), vboxmenu);
 	//gtk_box_pack_start(GTK_BOX(vboxmenu), button, 0, 1, 0);
 
@@ -803,7 +624,6 @@ int main(int argc, char **argv)
 //	g_signal_connect(G_OBJECT(osd), "button_press_event",
 //			 G_CALLBACK(button_press_event), NULL);
 	//gtk_widget_set_events(osd, GDK_BUTTON_PRESS_MASK);
-	//drawboats(osmmap);
 
 	gtk_widget_show(osmmap);
 	gtk_widget_show(mapframe);

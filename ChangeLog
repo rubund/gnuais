@@ -1,3 +1,7 @@
+0.3.3:
+    Able to print receiver statistics (range)
+    Cleaned up some code
+    Better console output messages
 0.3.2:
     Building with osm-gps-map > 1.0 and GTK 3
 0.3.1:

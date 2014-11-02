@@ -149,6 +149,14 @@ int do_int(int *dest, int argc, char **argv)
 	return 0;
 }
 
+int do_float(float *dest, int argc, char **argv)
+{
+	if (argc < 2)
+		return -1;
+	*dest = atof(argv[1]);
+	return 0;
+}
+
 int do_toggle(int *dest, int argc, char **argv)
 {
 	if (argc < 2)
@@ -339,11 +347,6 @@ int read_cfgfile(char *f, struct cfgcmd *cmds)
 	char *conf_home_folder;
 	char *conf_home_folder_name;
 
-	tmp_file = fopen("/etc/gnuais.conf","r");	
-	if(tmp_file != NULL){
-		hlog(LOG_WARNING, "gnuais does not use the configuration file /etc/gnuais.conf anymore. It is now in your home directory as .config/gnuais/config. /etc/gnuais.conf should be deleted to avoid confusion");
-		fclose(tmp_file);
-	}
 	fp = fopen(f, "r");
     if(fp == NULL){
 		conf_home_folder_name = hstrdup(getenv("HOME"));	

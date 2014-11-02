@@ -38,6 +38,7 @@
 #include "out_mysql.h"
 #include "out_json.h"
 #include "cache.h"
+#include "range.h"
 #include "ipc.h"
 #ifdef HAVE_PULSEAUDIO
 #include "pulseaudio.h"
@@ -77,6 +78,7 @@ int main(int argc, char *argv[])
 #ifdef HAVE_PULSEAUDIO
 	pa_simple *pa_dev = NULL;
 #endif
+	time_t last_stats = time(NULL);
 	
 	/* command line */
 	parse_cmdline(argc, argv);
@@ -243,6 +245,20 @@ int main(int argc, char *argv[])
 		    || sound_channels == SOUND_CHANNELS_LEFT) {	
 			/* ch b/1/left */
 			receiver_run(rx_b, buffer, buffer_read);
+		}
+		
+		if (stats_interval) {
+			time_t now = time(NULL);
+			if (last_stats > now) {
+				// clock jumped backwards
+				last_stats = now;
+			} else if (now - last_stats >= stats_interval) {
+				last_stats = now;
+				if (rx_a)
+					log_range(rx_a->decoder);
+				if (rx_b)
+					log_range(rx_b->decoder);
+			}
 		}
 	}
 	
