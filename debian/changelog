@@ -1,9 +1,13 @@
 gnuais (0.3.3-1) unstable; urgency=medium
 
   * New upstream release
+    - Patch 02_cflags.patch fixed upstream, so removed
   * Updated standards-version to 3.9.6
+  * Added d/signing-key.asc and modified d/watch to enable GPG check for uscan
+  * Some small updates in d/copyright
+  * Enabled hardening=+all
 
- -- Ruben Undheim <ruben.undheim@gmail.com>  Sun, 02 Nov 2014 15:58:55 +0100
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Thu, 13 Nov 2014 18:12:22 +0100
 
 gnuais (0.3.2-1) unstable; urgency=low
 
