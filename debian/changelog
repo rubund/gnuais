@@ -1,3 +1,10 @@
+gnuais (0.3.3-2) unstable; urgency=low
+
+  * Uploaded to unstable
+  * Added debian/gbp.conf to automatically enable build with pristine-tar
+
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Sat, 23 May 2015 11:37:10 +0200
+
 gnuais (0.3.3-1) experimental; urgency=medium
 
   * New upstream release
