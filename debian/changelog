@@ -1,4 +1,4 @@
-gnuais (0.3.3-1) unstable; urgency=medium
+gnuais (0.3.3-1) experimental; urgency=medium
 
   * New upstream release
     - Patch 02_cflags.patch fixed upstream, so removed
