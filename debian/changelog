@@ -1,3 +1,10 @@
+gnuais (0.3.3-3) unstable; urgency=low
+
+  * debian/gnuais.1:
+    - Fixed typo in man page
+
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Tue, 23 Jun 2015 19:52:48 +0200
+
 gnuais (0.3.3-2) unstable; urgency=low
 
   * Uploaded to unstable
