@@ -1,0 +1,28 @@
+Description: With the new C standard (c11), it fails if
+ "extern inline" is defined in a header file included in multiple
+ source files. Add "__attribute__ ((gnu_inline))" to tell it to
+ use the old interpretation of inline.
+Author: Ruben Undheim <ruben.undheim@gmail.com>
+
+Index: gnuais/src/filter-i386.h
+===================================================================
+--- gnuais.orig/src/filter-i386.h	2015-12-24 09:50:53.165709440 +0100
++++ gnuais/src/filter-i386.h	2015-12-24 09:51:17.681468317 +0100
+@@ -32,7 +32,7 @@
+ 
+ #include <stdio.h>
+ 
+-extern inline float __mac_g(const float *a, const float *b,
++__attribute__ ((gnu_inline)) extern inline float __mac_g(const float *a, const float *b,
+ 			    unsigned int size)
+ {
+ 	float sum = 0;
+@@ -43,7 +43,7 @@
+ 	return sum;
+ }
+ 
+-extern inline float __mac_c(const float *a, const float *b,
++__attribute__ ((gnu_inline)) extern inline float __mac_c(const float *a, const float *b,
+ 			    unsigned int size)
+ {
+ 	float f;

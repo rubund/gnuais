@@ -1,3 +1,11 @@
+gnuais (0.3.3-5) unstable; urgency=medium
+
+  * Added debian/patches/02_fix_inline_functions.patch:
+    - Add "__attribute__ ((gnu_inline))" to "extern inline" functions
+      to fix FTBFS on i386.
+
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Wed, 23 Dec 2015 11:53:53 +0100
+
 gnuais (0.3.3-4) unstable; urgency=medium
 
   * Fixed build-dependency (Closes: #808091)
