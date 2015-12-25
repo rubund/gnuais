@@ -32,6 +32,9 @@
 
 #include <stdio.h>
 
+#ifdef __GNUC_STDC_INLINE__
+__attribute__ ((gnu_inline))
+#endif
 extern inline float __mac_g(const float *a, const float *b,
 			    unsigned int size)
 {
@@ -43,6 +46,9 @@ extern inline float __mac_g(const float *a, const float *b,
 	return sum;
 }
 
+#ifdef __GNUC_STDC_INLINE__
+__attribute__ ((gnu_inline))
+#endif
 extern inline float __mac_c(const float *a, const float *b,
 			    unsigned int size)
 {
