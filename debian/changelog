@@ -1,3 +1,12 @@
+gnuais (0.3.3-6) unstable; urgency=medium
+
+  * Changed build-dependency from libmysqlclient-dev to
+    default-libmysqlclient-dev. (Closes: #845849)
+  * Standards version to 3.9.8 - no changes
+  * Use secure URL for Vcs-Git.
+
+ -- Ruben Undheim <ruben.undheim@gmail.com>  Sat, 03 Dec 2016 12:49:47 +0100
+
 gnuais (0.3.3-5) unstable; urgency=medium
 
   * Added debian/patches/02_fix_inline_functions.patch:
