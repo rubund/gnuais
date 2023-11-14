@@ -1,4 +1,3 @@
-
 /*
  *	out_mysql.h
  *
@@ -20,6 +19,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#ifndef OUT_MYSQL_H
+#define OUT_MYSQL_H
 
 #include <time.h>
 #ifdef HAVE_MYSQL
@@ -32,7 +33,9 @@ struct mysql_state_t {
 	int connected;
 	int inserts;
 #endif
-} *my;
+};
+
+extern struct mysql_state_t *my;
 
 extern struct mysql_state_t *myout_init();
 
@@ -55,3 +58,4 @@ extern int myout_ais_vesseldatab(struct mysql_state_t *my,
 
 extern int myout_nmea(struct mysql_state_t *my, time_t tid, char *nmea);
 
+#endif /* OUT_MYSQL_H */
