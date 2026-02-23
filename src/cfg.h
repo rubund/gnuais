@@ -93,6 +93,16 @@ struct uplink_config_t {
 
 extern struct uplink_config_t *uplink_config;
 
+struct udp_config_t {
+	struct udp_config_t *next;
+	struct udp_config_t **prevp;
+
+	char *host;
+	char *port;
+};
+
+extern struct udp_config_t *udp_config;
+
 extern int read_config(void);
 extern void free_config(void);
 

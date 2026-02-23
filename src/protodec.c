@@ -31,6 +31,7 @@
 #include "protodec.h"
 #include "ais.h"
 #include "out_mysql.h"
+#include "out_udp.h"
 #include "hmalloc.h"
 #include "cfg.h"
 #include "hlog.h"
@@ -51,13 +52,14 @@
 
 #define SERBUFFER_LEN	100
 
-void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, struct ipc_state_t *ipc, char chanid)
+void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, struct ipc_state_t *ipc, struct udp_state_t *udp, char chanid)
 {
 	memset(d, 0, sizeof(struct demod_state_t));
 
 	d->chanid = chanid;
 	d->serial = serial;
 	d->ipc    = ipc;
+	d->udp    = udp;
 	
 	d->receivedframes = 0;
 	d->lostframes = 0;
@@ -883,6 +885,8 @@ void protodec_generate_nmea(struct demod_state_t *d, int bufferlen, int fillbits
 		serbuffer_l = snprintf(d->serbuffer, SERBUFFER_LEN, "!%s\r\n", d->nmea);
 		if (d->serial)
 			serial_write(d->serial, d->serbuffer, serbuffer_l);
+		if (d->udp)
+			udpout_nmea(d->udp, d->serbuffer, serbuffer_l);
 		ipcbuffer_l = snprintf(d->ipcbuffer, IPCBUFFER_LEN, "!%s", d->nmea);
 		if (d->ipc)
 			ipc_write(d->ipc, d->ipcbuffer, ipcbuffer_l);

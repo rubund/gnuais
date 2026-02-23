@@ -68,5 +68,13 @@ SoundLevelLog 1
 # AIS receiver connected to a serial port.
 #serial_port /dev/ttyS0
 
+# UDP export of NMEA sentences - each decoded NMEA sentence will be sent
+# as a UDP packet to the configured host:port. Multiple destinations can
+# be configured by repeating the nmeaudp directive. Hostnames, IPv4 and
+# IPv6 addresses are supported. IPv6 addresses must be enclosed in
+# brackets: [::1]:10110
+#nmeaudp 127.0.0.1:10110
+#nmeaudp [::1]:10110
+
 # Use test file as input instead of the audio device input
 #SoundInFile ../testmessages/gnuais-stereo-2rx.raw

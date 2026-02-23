@@ -27,6 +27,8 @@
 
 #include "serial.h"
 
+struct udp_state_t;
+
 #define ST_SKURR 1
 #define ST_PREAMBLE 2
 #define ST_STARTSIGN 3
@@ -64,13 +66,14 @@ struct demod_state_t {
 	
 	struct serial_state_t *serial;
 	struct ipc_state_t *ipc;
-	
+	struct udp_state_t *udp;
+
 	char *serbuffer;
 	char *ipcbuffer;
 	char *nmea;
 };
 
-void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, struct ipc_state_t *ipc, char chanid);
+void protodec_initialize(struct demod_state_t *d, struct serial_state_t *serial, struct ipc_state_t *ipc, struct udp_state_t *udp, char chanid);
 void protodec_reset(struct demod_state_t *d);
 void protodec_getdata(int bufferlengde, struct demod_state_t *d);
 void protodec_decode(char *in, int count, struct demod_state_t *d);

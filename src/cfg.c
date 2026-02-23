@@ -79,6 +79,9 @@ char *serial_port;
 struct uplink_config_t *uplink_config;
 struct uplink_config_t *new_uplink_config;
 
+struct udp_config_t *udp_config;
+struct udp_config_t *new_udp_config;
+
 int fork_a_daemon;	/* fork a daemon */
 int stats_interval;
 int expiry_interval;
@@ -89,6 +92,7 @@ int verbose;
 
 int do_interval(int *dest, int argc, char **argv);
 int do_uplink(struct uplink_config_t **lq, int argc, char **argv);
+int do_nmeaudp(struct udp_config_t **lq, int argc, char **argv);
 int do_skip_type(int *dest, int argc, char **argv);
 int do_sound_ch(int *dest, int argc, char **argv);
 
@@ -107,6 +111,7 @@ static struct cfgcmd cfg_cmds[] = {
 	{ "statsinterval",	_CFUNC_ do_interval,	&stats_interval		},
 	{ "expiryinterval",	_CFUNC_ do_interval,	&expiry_interval	},
 	{ "uplink",		_CFUNC_ do_uplink,	&new_uplink_config	},
+	{ "nmeaudp",		_CFUNC_ do_nmeaudp,	&new_udp_config		},
 
 	{ "mysql_host",		_CFUNC_ do_string,	&mysql_host		},
 	{ "mysql_db",		_CFUNC_ do_string,	&mysql_db		},
@@ -143,6 +148,95 @@ void free_uplink_config(struct uplink_config_t **lc)
 		hfree((void*)this->url);
 		hfree(this);
 	}
+}
+
+/*
+ *	Free a UDP config tree
+ */
+
+void free_udp_config(struct udp_config_t **lc)
+{
+	struct udp_config_t *this;
+
+	while (*lc) {
+		this = *lc;
+		*lc = this->next;
+		hfree(this->host);
+		hfree(this->port);
+		hfree(this);
+	}
+}
+
+/*
+ *	Parse a nmeaudp definition directive
+ *
+ *	nmeaudp host:port
+ *	nmeaudp [ipv6addr]:port
+ */
+
+int do_nmeaudp(struct udp_config_t **lq, int argc, char **argv)
+{
+	struct udp_config_t *l;
+	char *arg, *host, *port;
+	char *s;
+
+	if (argc < 2)
+		return -1;
+
+	if (argc > 2) {
+		hlog(LOG_ERR, "nmeaudp: Only one host:port allowed per nmeaudp directive, %d args given", argc - 1);
+		return -1;
+	}
+
+	arg = argv[1];
+
+	if (arg[0] == '[') {
+		/* [ipv6]:port format */
+		s = strchr(arg, ']');
+		if (!s) {
+			hlog(LOG_ERR, "nmeaudp: Missing closing bracket in '%s'", arg);
+			return -1;
+		}
+		host = hstrdup(arg + 1);
+		host[s - arg - 1] = '\0';
+		s++; /* skip ']' */
+		if (*s != ':') {
+			hlog(LOG_ERR, "nmeaudp: Missing port after bracket in '%s'", arg);
+			hfree(host);
+			return -1;
+		}
+		port = hstrdup(s + 1);
+	} else {
+		/* host:port format */
+		s = strrchr(arg, ':');
+		if (!s) {
+			hlog(LOG_ERR, "nmeaudp: Missing port in '%s'", arg);
+			return -1;
+		}
+		host = hstrdup(arg);
+		host[s - arg] = '\0';
+		port = hstrdup(s + 1);
+	}
+
+	if (!*host || !*port) {
+		hlog(LOG_ERR, "nmeaudp: Empty host or port in '%s'", arg);
+		hfree(host);
+		hfree(port);
+		return -1;
+	}
+
+	l = hmalloc(sizeof(*l));
+	memset(l, 0, sizeof(*l));
+	l->host = host;
+	l->port = port;
+
+	/* put in the list */
+	l->next = *lq;
+	if (l->next)
+		l->next->prevp = &l->next;
+	*lq = l;
+
+	return 0;
 }
 
 /*
@@ -374,6 +468,13 @@ int read_config(void)
 		uplink_config->prevp = &uplink_config;
 	new_uplink_config = NULL;
 
+	/* put in the new UDP config */
+	free_udp_config(&udp_config);
+	udp_config = new_udp_config;
+	if (udp_config)
+		udp_config->prevp = &udp_config;
+	new_udp_config = NULL;
+
 	if (failed)
 		return -1;
 	
@@ -417,6 +518,7 @@ void free_config(void)
 	hfree(myemail);
 	
 	free_uplink_config(&uplink_config);
+	free_udp_config(&udp_config);
 }
 
 /*

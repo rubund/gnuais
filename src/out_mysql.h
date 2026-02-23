@@ -32,7 +32,9 @@ struct mysql_state_t {
 	int connected;
 	int inserts;
 #endif
-} *my;
+};
+
+extern struct mysql_state_t *my;
 
 extern struct mysql_state_t *myout_init();
 

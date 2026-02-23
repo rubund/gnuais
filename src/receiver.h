@@ -45,7 +45,7 @@ struct receiver {
 	time_t last_levellog;
 };
 
-extern struct receiver *init_receiver(char name, int num_ch, int ch_ofs, struct serial_state_t *serial, struct ipc_state_t* ipc);
+extern struct receiver *init_receiver(char name, int num_ch, int ch_ofs, struct serial_state_t *serial, struct ipc_state_t *ipc, struct udp_state_t *udp);
 extern void free_receiver(struct receiver *rx);
 
 extern void receiver_run(struct receiver *rx, short *buf, int len);

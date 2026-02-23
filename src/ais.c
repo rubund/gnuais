@@ -37,6 +37,7 @@
 #include "cfg.h"
 #include "out_mysql.h"
 #include "out_json.h"
+#include "out_udp.h"
 #include "cache.h"
 #include "range.h"
 #include "ipc.h"
@@ -73,6 +74,7 @@ int main(int argc, char *argv[])
 	int buffer_read;
 	struct serial_state_t *serial = NULL;
 	struct ipc_state_t *ipc = NULL;
+	struct udp_state_t *udp = NULL;
 	struct receiver *rx_a = NULL;
 	struct receiver *rx_b = NULL;
 #ifdef HAVE_PULSEAUDIO
@@ -135,16 +137,20 @@ int main(int argc, char *argv[])
 		hlog(LOG_ERR, "Could not open Unix Domain Socket");
 	}
 	
+	/* initialize UDP NMEA output */
+	if (udp_config)
+		udp = udpout_init(udp_config);
+
 	/* initialize the AIS decoders */
 	if (sound_channels != SOUND_CHANNELS_MONO) {
 		hlog(LOG_DEBUG, "Initializing demodulator A");
-		rx_a = init_receiver('A', 2, 0,serial,ipc);
+		rx_a = init_receiver('A', 2, 0, serial, ipc, udp);
 		hlog(LOG_DEBUG, "Initializing demodulator B");
-		rx_b = init_receiver('B', 2, 1,serial,ipc);
+		rx_b = init_receiver('B', 2, 1, serial, ipc, udp);
 		channels = 2;
 	} else {
 		hlog(LOG_DEBUG, "Initializing demodulator A");
-		rx_a = init_receiver('A', 1, 0,serial,ipc);
+		rx_a = init_receiver('A', 1, 0, serial, ipc, udp);
 		channels = 1;
 	}
 #ifdef HAVE_PULSEAUDIO
@@ -286,7 +292,10 @@ int main(int argc, char *argv[])
 	
 	if (serial)
 		serial_close(serial);
-	
+
+	if (udp)
+		udpout_close(udp);
+
 	if (uplink_config)
 		jsonout_deinit();
 	
